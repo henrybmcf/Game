@@ -10,18 +10,20 @@ void setup()
 
   level = 1;
   setupPong();
+  ballStart = false;
 }
 
 int level;
 ArrayList<PongObjects> Pong = new ArrayList<PongObjects>();
 boolean[] keys = new boolean[512];
+boolean ballStart;
 
 void setupPong()
 {
   Pong.clear();
-  PongObjects playerPaddle = new PongPaddle(UP, DOWN, width - 70, height * 0.5f, 140);
+  PongObjects playerPaddle = new PongPaddle(UP, DOWN, width * 0.925f, height * 0.5f, 140);
   Pong.add(playerPaddle);
-  PongPaddle AIPaddle = new PongPaddle(0, 0, 70, height * 0.5f, 140);
+  PongPaddle AIPaddle = new PongPaddle(0, 0, width * 0.075f, height * 0.5f, 140);
   Pong.add(AIPaddle);
   PongObjects ball = new PongBall(width * 0.5f, height * 0.5f, 20);
   Pong.add(ball);
@@ -52,6 +54,9 @@ void draw()
 void keyPressed()
 {
   keys[keyCode] = true;
+  
+  if (keyCode == ' ')
+      ballStart = true;
 }
 
 void keyReleased()

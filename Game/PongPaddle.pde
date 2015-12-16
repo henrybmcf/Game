@@ -16,7 +16,8 @@ class PongPaddle extends PongObjects
   {
     pushMatrix();
     translate(pos.x, pos.y);
-    rect(0, 0, 10, paddleHeight);
+    rectMode(CORNERS);
+    rect(10, 0, 15, paddleHeight);
     popMatrix();
   }
   
