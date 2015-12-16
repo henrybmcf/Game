@@ -1,18 +1,27 @@
 class PongObjects
 {
-  PVector pos;
+  float paddleHeight;
+  PVector paddlePos;
+  PVector ballPos;
   float speed;
   PVector movePaddle;
   PVector moveBall;
-  float theta;
+  float ballSpeed;
+  
+  PongObjects()
+  {
+    this(width * 0.925f, height * 0.5f); 
+  }
 
   PongObjects(float startX, float startY)
   {
-    pos = new PVector(startX, startY);
-    speed = 5;
+    paddleHeight = 140;
+    paddlePos = new PVector(startX, startY - (paddleHeight * 0.5f));
+    ballPos = new PVector(startX, startY);
+    speed = 6;
     movePaddle = new PVector(0, speed);
-    moveBall = new PVector(0, 0);
-    this.theta = 1.0f;
+    ballSpeed = 5;
+    moveBall = new PVector(ballSpeed, ballSpeed);
   }
   
   void render()

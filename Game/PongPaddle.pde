@@ -2,12 +2,10 @@ class PongPaddle extends PongObjects
 {
   int up;
   int down;
-  float paddleHeight;
 
-  PongPaddle(int up, int down, float startX, float startY, float paddleHeight)
+  PongPaddle(int up, int down, float startX, float startY)
   {
-    super(startX, startY - (paddleHeight * 0.5f));
-    this.paddleHeight = paddleHeight;
+    super(startX, startY);
     this.up = up;
     this.down = down;
   }
@@ -15,20 +13,22 @@ class PongPaddle extends PongObjects
   void render()
   {
     pushMatrix();
-    translate(pos.x, pos.y);
-    rectMode(CORNERS);
-    rect(10, 0, 15, paddleHeight);
+    translate(paddlePos.x, paddlePos.y);
+    rect(0, 0, 5, paddleHeight);
     popMatrix();
   }
-  
+
   void update()
   {
     if (keys[up])
-      if (pos.y >= 0)
-        pos.sub(movePaddle);
-        
+      if (paddlePos.y >= 0)
+        paddlePos.sub(movePaddle);
+
     if (keys[down])
-      if (pos.y + paddleHeight <= height)
-        pos.add(movePaddle);
+      if (paddlePos.y + paddleHeight <= height)
+        paddlePos.add(movePaddle);
+
+    // Copy PVector position of paddle into PVector variable called pPos for use in PongBall sketch to determine if in range to bounce off or not
+    pPos = paddlePos;
   }
 }

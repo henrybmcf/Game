@@ -1,61 +1,52 @@
 class PongBall extends PongObjects
 {
+  float diameter;
   float radius;
-  
-  PongBall(float startX, float startY, float radius)
+
+  PongBall(float startX, float startY, float diameter)
   {
     super(startX, startY);
-    this.radius = radius;
-    moveBall.x = 3;
-    moveBall.y = 3;
+    this.diameter = diameter;
+    radius = diameter * 0.5f;
   }
 
   void render()
   {
     pushMatrix();
-    translate(pos.x, pos.y);
-    ellipse(0, 0, radius, radius);
+    translate(ballPos.x, ballPos.y);
+    ellipse(0, 0, diameter, diameter);
     popMatrix();
   }
-  
+
   void update()
   {
     // Do the angle bouncing calculations here
-    
-    //sin(theta);
-   //-cos(theta);
-    //moveBall.mult(speed);
-    
-    println(moveBall);
+
     if (ballStart)
-       pos.add(moveBall);
+      ballPos.add(moveBall);
     
-    if (pos.x > width * 0.925f && pos.y > mouseY - 70 && pos.y < mouseY + 70)
-        moveBall.x = -moveBall.x;
-    
-    else if (pos.x < width * 0.075f)
-    {
+    // If ball is within x and y coordinates of paddle, bounce it back
+    if (ballPos.x >= width * 0.925f - radius && ballPos.y > pPos.y && ballPos.y < pPos.y + paddleHeight)
       moveBall.x = -moveBall.x;
-    }
     
-    if (pos.y > height || pos.y < 0)
+    
+    if (ballPos.x < width * 0.01f + radius)
     {
-      println("Y");
-       moveBall.y = -moveBall.y;
+      //println(score);
+      score+=1;
+      moveBall.x = -moveBall.x;
+      println("Score: " + score);
+      
     }
-    
-    //println(theta);
-    //if (pos.x > width * 0.925f || pos.x < width * 0.075f)
-    //{
-    //  if (theta > PI + HALF_PI)
-    //  {
-    //    theta -= HALF_PI;
-    //  }
-    //}
-    //if (pos.y > height || pos.y < 0)
-    //{
-    //  theta += PI/6;
-    //}
+
+    if (ballPos.y > height - radius || ballPos.y < radius)
+      moveBall.y = -moveBall.y;
+
+    if (ballPos.x > width * 0.935f)
+    {
+      moveBall.x = abs(moveBall.x);
+      Pong.remove(this); 
+    }
+      
   }
-  
 }
