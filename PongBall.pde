@@ -20,23 +20,19 @@ class PongBall extends PongObjects
 
   void update()
   {
-    // Do the angle bouncing calculations here
+    // Do the bouncing calculations here
 
-    if (ballStart)
+    if (gameStart)
       ballPos.add(moveBall);
     
     // If ball is within x and y coordinates of paddle, bounce it back
     if (ballPos.x >= width * 0.925f - radius && ballPos.y > pPos.y && ballPos.y < pPos.y + paddleHeight)
       moveBall.x = -moveBall.x;
     
-    
     if (ballPos.x < width * 0.01f + radius)
     {
-      //println(score);
-      score+=1;
       moveBall.x = -moveBall.x;
-      println("Score: " + score);
-      
+      score+=1;
     }
 
     if (ballPos.y > height - radius || ballPos.y < radius)
@@ -47,6 +43,5 @@ class PongBall extends PongObjects
       moveBall.x = abs(moveBall.x);
       Pong.remove(this); 
     }
-      
   }
 }
