@@ -7,6 +7,9 @@ class PongObjects
   PVector movePaddle;
   PVector moveBall;
   float ballSpeed;
+  PVector moveBlockPad;
+  PVector blockPaddle;
+  PVector block;
   
   PongObjects()
   {
@@ -18,17 +21,21 @@ class PongObjects
     paddleHeight = 140;
     paddlePos = new PVector(startX, startY - (paddleHeight * 0.5f));
     ballPos = new PVector(startX, startY);
-    speed = 6;
+    speed = 10;
     movePaddle = new PVector(0, speed);
     ballSpeed = 5;
     moveBall = new PVector(ballSpeed, ballSpeed);
+    
+    moveBlockPad = new PVector(speed, 0);
+    blockPaddle = new PVector(startX - (paddleHeight * 0.5f), startY);
+    block = new PVector(startX, startY);  
   }
   
-  void render()
+  void render(int ID)
   {
   }
 
-  void update()
+  void update(int ID)
   {
   }
 }
