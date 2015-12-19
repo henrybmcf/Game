@@ -76,7 +76,7 @@ void setupPong()
   else if (level == 2)
   {
     Pong.clear();
-    playerPaddle = new PongPaddle(RIGHT, LEFT, width * 0.5f, height * 0.9f);
+    playerPaddle = new PongPaddle(RIGHT, LEFT, width * 0.5f, height * 0.925f);
     Pong.add(playerPaddle);
 
     for (int i = 4; i > 0; i--)
@@ -163,7 +163,7 @@ void draw()
     {
       PongObjects pong = Pong.get(i);
       pong.render(2);
-      pong.update(3);
+      pong.update(2);
     }
     break;
   }

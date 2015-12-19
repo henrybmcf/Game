@@ -58,16 +58,19 @@ class PongBall extends PongObjects
       if (gameStart)
         ballPos.add(moveBall);
       if (ballPos.x > width - radius || ballPos.x < radius)
-        moveBall.x = -moveBall.x; 
-      if (ballPos.x < width * 0.085f + radius && ballPos.y >= p2Pos.y && ballPos.y <= p2Pos.y + paddleHeight)
-       moveBall.x = -moveBall.x;
-      if (ballPos.y > height - radius || ballPos.y < radius)
-       moveBall.y = -moveBall.y;
-      if (ballPos.x > width * 0.935f)
-      {
-       Pong.remove(this);
-       if(Pong.size() < 3)
-         gameStart = false;
+        moveBall.x = -moveBall.x;
+      
+      //println(ballPos.x, pPos.x);
+      println(ballPos.y, height * 0.925f - radius);
+      if (ballPos.y < height * 0.925f - radius && ballPos.x >= pPos.x && ballPos.x <= pPos.x + paddleHeight)
+        moveBall.y = -moveBall.y;
+
+      //if (ballPos.x > width * 0.935f)
+      //{
+      // Pong.remove(this);
+      // if(Pong.size() < 3)
+      //   gameStart = false;
+      //}
       break;
     }
   }

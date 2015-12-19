@@ -27,7 +27,7 @@ class PongPaddle extends PongObjects
 
   void update(int ID)
   {
-    if (ID != 3)
+    if (ID != 2)
     {
       if (keys[up])
         if (paddlePos.y >= 0)
@@ -37,7 +37,7 @@ class PongPaddle extends PongObjects
         if (paddlePos.y + paddleHeight <= height)
           paddlePos.add(movePaddle);
     }
-    else if (ID == 3)
+    else if (ID == 2)
     {
       if (keys[up])
         if (blockPaddle.x + paddleHeight <= height)
@@ -54,6 +54,8 @@ class PongPaddle extends PongObjects
       pPos = paddlePos;
     if (ID == 1)
       p2Pos = paddlePos;
+    if (ID == 2)
+      pPos = blockPaddle;
 
 
     // Computer paddle (pending)
