@@ -8,8 +8,10 @@ class AsteroidObject
   float theta;
   float shipHeight;
   float shipWidth;
-  
+
   float radius;
+  
+  AudioPlayer sound;
 
   AsteroidObject()
   {

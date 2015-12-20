@@ -17,14 +17,24 @@ class Laser extends AsteroidObject
   void update()
   {
     moveShip.x = sin(theta);
-    moveShip.y = - cos(theta);
-      
+    moveShip.y = - cos(theta);  
     moveShip.mult(speed);
     position.add(moveShip);
     
     if (position.x < 0 || position.y < 0 || position.x > width || position.y > height)
+      lasers.remove(this);
+    
+    for (int i = 1; i < asteroids.size(); i++)
     {
-      asteroids.remove(this);
+      if (position.x > asteroids.get(i).position.x - asteroids.get(i).radius * 0.4f &&
+          position.x < asteroids.get(i).position.x + asteroids.get(i).radius * 0.4f &&
+          position.y > asteroids.get(i).position.y - asteroids.get(i).radius * 0.45f &&
+          position.y < asteroids.get(i).position.y + asteroids.get(i).radius * 0.45f)
+        {
+         
+         asteroids.remove(i);
+         lasers.remove(this);
+        }
     }
   }
 }

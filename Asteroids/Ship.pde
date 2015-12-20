@@ -8,6 +8,9 @@ class Ship extends AsteroidObject
   int laserTimeLimit;
   boolean thrust;
   int thrustFlicker;
+  
+  int explosionTimer;
+  int explosionRadius;
 
   Ship(int move, int left, int right, int fire, float startX, float startY)
   {
@@ -21,10 +24,14 @@ class Ship extends AsteroidObject
     laserTimer = 0;
     thrust = false;
     thrustFlicker = 2;
+    explosionTimer = 2;
+    
+    sound = minim.loadFile("shoot.wav");
   }
 
   void update()
   {
+    
     moveShip.x = sin(theta);
     moveShip.y = - cos(theta);
     moveShip.mult(speed);
@@ -42,12 +49,15 @@ class Ship extends AsteroidObject
 
     if (keys[fire] && laserTimer > laserTimeLimit)
     {
+      sound.play();
+      sound.rewind();
+      
       Laser laser = new Laser();
       laser.position.x = position.x;
       laser.position.y = position.y;
       laser.position.add(PVector.mult(moveShip, 6));
       laser.theta = theta;
-      asteroids.add(laser);     
+      lasers.add(laser);  
       laserTimer = 0;
     }
 
@@ -69,11 +79,17 @@ class Ship extends AsteroidObject
           position.y +- shipHeight > asteroids.get(i).position.y - asteroids.get(i).radius * 0.5f &&
           position.y +- shipHeight < asteroids.get(i).position.y + asteroids.get(i).radius * 0.5f)
       {
-         println("Boom");
+         gameStart = false;
+         if (explosionTimer > 1)
+         {
+           shipDeath(position, explosionRadius);
+           explosionRadius += 2;
+           explosionTimer = 0;
+         }
+         explosionTimer++;
       }
     }
   }
-
 
   // Draw the ship in the correct position and at the correct angle
   void render()

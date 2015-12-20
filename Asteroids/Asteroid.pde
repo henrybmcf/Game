@@ -12,7 +12,7 @@ class Asteroid extends AsteroidObject
   
   void update()
   {
-    //position.add(asteroidMove);
+    position.add(asteroidMove);
     if (position.x < 0)
      position.x = width;
     if (position.x > width)
