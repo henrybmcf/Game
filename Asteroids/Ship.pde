@@ -6,7 +6,7 @@ class Ship extends AsteroidObject
   int fire;
   int laserTimer;
   int laserTimeLimit;
-  boolean thrust;
+  //boolean thrust;
   int thrustFlicker;
   
   int explosionTimer;
@@ -22,14 +22,35 @@ class Ship extends AsteroidObject
     // Divide 60 by number of bullets to shoot per second
     laserTimeLimit = 60 / 6;
     laserTimer = 0;
-    thrust = false;
+    //thrust = false;
     thrustFlicker = 2;
     explosionTimer = 2;
   }
 
+  // Draw the ship in the correct position and at the correct angle
+  void render()
+  {
+    pushMatrix();
+    translate(position.x, position.y);
+    rotate(theta);
+    line(0, -shipHeight, -shipWidth, shipHeight);
+    line(0, -shipHeight, shipWidth, shipHeight);
+    line(-shipWidth * 0.75f, shipHeight * 0.7f, shipWidth * 0.75f, shipHeight * 0.7f);
+    if (thrust)
+    {
+      if (thrustFlicker > 2)
+      {
+        line(0, shipHeight * 1.3f, -shipWidth * 0.4f, shipHeight * 0.75f);
+        line(0, shipHeight * 1.3f, shipWidth * 0.4f, shipHeight * 0.75f);
+        thrustFlicker = 0;
+      }
+    }
+    popMatrix();
+    thrustFlicker++;
+  }
+  
   void update()
   {
-    
     moveShip.x = sin(theta);
     moveShip.y = - cos(theta);
     moveShip.mult(speed);
@@ -53,8 +74,7 @@ class Ship extends AsteroidObject
 
     if (keys[fire] && laserTimer > laserTimeLimit)
     {
-      laserSound.play();
-      
+      laserSound.play();   
       Laser laser = new Laser();
       laser.position.x = position.x;
       laser.position.y = position.y;
@@ -92,27 +112,5 @@ class Ship extends AsteroidObject
          explosionTimer++;
       }
     }
-  }
-
-  // Draw the ship in the correct position and at the correct angle
-  void render()
-  {
-    pushMatrix();
-    translate(position.x, position.y);
-    rotate(theta);
-    line(0, -shipHeight, -shipWidth, shipHeight);
-    line(0, -shipHeight, shipWidth, shipHeight);
-    line(-shipWidth * 0.75f, shipHeight * 0.7f, shipWidth * 0.75f, shipHeight * 0.7f);
-    if (thrust)
-    {
-      if (thrustFlicker > 2)
-      {
-        line(0, shipHeight * 1.3f, -shipWidth * 0.4f, shipHeight * 0.75f);
-        line(0, shipHeight * 1.3f, shipWidth * 0.4f, shipHeight * 0.75f);
-        thrustFlicker = 0;
-      }
-    }
-    popMatrix();
-    thrustFlicker++;
   }
 }

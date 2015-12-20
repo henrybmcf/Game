@@ -10,10 +10,6 @@ class AsteroidObject
   float shipWidth;
 
   float radius;
-  
-  //AudioPlayer laserSound;
-  //AudioPlayer thrustSound;
-  //AudioPlayer bigExplosionSound;
 
   AsteroidObject()
   {
