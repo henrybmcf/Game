@@ -1,9 +1,13 @@
-import ddf.minim.*;
-Minim minim;
+import processing.video.*;
+import processing.sound.*;
+
+Movie asteroidIntro;
+SoundFile laserSound;
+SoundFile thrustSound;
+SoundFile explosionSound;
 
 void setup()
 {
-  minim = new Minim(this);
   size(700, 600);
   smooth(8);
   for (int i = 0; i < 5; i++)
@@ -16,6 +20,11 @@ void setup()
   medAstRad = 50;
   largeAstRad = 80;
   setupAsteroidObject();
+  asteroidIntro = new Movie(this, "Asteroids.mov");
+  asteroidIntro.loop();
+  laserSound = new SoundFile(this, "shoot.wav");
+  thrustSound = new SoundFile(this, "thrust.wav");
+  explosionSound = new SoundFile(this, "expLarge.wav");
 }
 
 boolean[] keys = new boolean[512];
@@ -30,6 +39,11 @@ float smallAstRad;
 float medAstRad;
 float largeAstRad;
 PImage asteroid;
+
+void movieEvent(Movie m)
+{
+  m.read();
+}
 
 void setupAsteroidObject()
 {
@@ -82,6 +96,8 @@ void draw()
   switch (level)
   {
     case 0:
+      
+      image(asteroidIntro, 0, 0);
       textSize(40);
       textAlign(CENTER);
       text("ASTEROIDS", width * 0.5f, height * 0.3f);

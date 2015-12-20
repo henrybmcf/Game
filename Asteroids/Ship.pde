@@ -25,8 +25,6 @@ class Ship extends AsteroidObject
     thrust = false;
     thrustFlicker = 2;
     explosionTimer = 2;
-    
-    sound = minim.loadFile("shoot.wav");
   }
 
   void update()
@@ -43,14 +41,19 @@ class Ship extends AsteroidObject
     if (keys[right])
       theta += 0.1f;
     if (keys[move] || keys[left] || keys[right])
+    {
       thrust = true;
+      thrustSound.play();
+      thrustSound.amp(0.08);
+    }
     else
+    {
       thrust = false;
+    }
 
     if (keys[fire] && laserTimer > laserTimeLimit)
     {
-      sound.play();
-      sound.rewind();
+      laserSound.play();
       
       Laser laser = new Laser();
       laser.position.x = position.x;

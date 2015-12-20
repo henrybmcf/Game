@@ -10,7 +10,8 @@ class Laser extends AsteroidObject
     pushMatrix();
     translate(position.x, position.y);
     rotate(theta);
-    line(0, 0, 0, 15);
+    //line(0, 0, 0, 15);
+    ellipse(0, 0, 2, 2);
     popMatrix();    
   }
   
@@ -30,11 +31,11 @@ class Laser extends AsteroidObject
           position.x < asteroids.get(i).position.x + asteroids.get(i).radius * 0.4f &&
           position.y > asteroids.get(i).position.y - asteroids.get(i).radius * 0.45f &&
           position.y < asteroids.get(i).position.y + asteroids.get(i).radius * 0.45f)
-        {
-         
-         asteroids.remove(i);
-         lasers.remove(this);
-        }
+      {
+        explosionSound.play();
+        asteroids.remove(i);
+        lasers.remove(this);
+      }
     }
   }
 }
