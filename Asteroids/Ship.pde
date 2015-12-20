@@ -7,7 +7,7 @@ class Ship extends AsteroidObject
 
   //Ship()
   //{
-  //  super(width * 0.5f, height  * 0.5f, 0);
+  // super(width * 0.5f, height  * 0.5f, 0);
   //}
   
   Ship(int move, int left, int right, int fire, float startX, float startY)
@@ -23,22 +23,17 @@ class Ship extends AsteroidObject
   
   void update()
   {
-    forward.x = sin(theta);
-    forward.y = - cos(theta);
-    forward.mult(speed);
+    moveShip.x = sin(theta);
+    moveShip.y = - cos(theta);
+    moveShip.mult(speed);
     
     if (keys[move])
-    {
-      position.add(forward);
-    }      
+      position.add(moveShip);
     if (keys[left])
-    {
       theta -= 0.1f;
-    }
     if (keys[right])
-    {
       theta += 0.1f;
-    }      
+     
     //if (keys[fire] && elapsed > 12)
     //{
     //  Bullet bullet = new Bullet();
@@ -52,14 +47,14 @@ class Ship extends AsteroidObject
     //}
     
     if (position.x < 0)
-      position.x = width;
+     position.x = width;
     if (position.x > width)
-      position.x = 0;
+     position.x = 0;
     if (position.y < 0)
-      position.y = height;
+     position.y = height;
     if (position.y > height)
-      position.y = 0;
-      
+     position.y = 0; 
+    
     elapsed ++;
   }
   
@@ -67,11 +62,10 @@ class Ship extends AsteroidObject
   {
     pushMatrix();
     translate(position.x, position.y);
-    rotate(theta);   
-    line(- 25, 25, 0, - 25);
-    line(0, - 25, 25, 25);
-    line(25, 25, 0, 0);
-    line(- 25, 25, 0, 0);
+    rotate(theta);
+    line(0, -shipSize, -halfShip, shipSize);
+    line(0, -shipSize, halfShip, shipSize);
+    line(-halfShip * 0.75f, shipSize * 0.75f, halfShip * 0.75f, shipSize * 0.75f);   
     popMatrix();
   }   
 }

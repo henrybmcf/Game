@@ -1,28 +1,33 @@
 class AsteroidObject
 {
   PVector position;
-  PVector forward;
+  PVector moveShip;
+  float speed = 5.0f;
   PVector asteroidMove;
-  float speed = 15.0f;
+  float astSpeed = 1.5f;
   float theta;
+  float shipSize;
+  float halfShip;
   
-  //GameObject()
-  //{
-  //  this(width * 0.5f, height  * 0.5f, 50);
-  //}
+  AsteroidObject()
+  {
+   this(width * 0.5f, height  * 0.5f, 0);
+  }
 
-  AsteroidObject(float x, float y, int size)
+  AsteroidObject(float x, float y, float size)
   {
     position = new PVector(x, y);
-    forward = new PVector(0, -1);
+    moveShip = new PVector(0, -1);
     // Set astSpeed dependant on size
-    speed /= size;
+    astSpeed /= size;
     // Set random asteroids to go in opposite directions
     if (random(0, 1) > 0.5f)
-      speed = -speed; 
-    asteroidMove = new PVector(speed, random(-3, 3));
+      astSpeed = -astSpeed; 
+    asteroidMove = new PVector(astSpeed, random(-3, 3));
  
     this.theta = 0.0f;
+    this.shipSize = 20;
+    this.halfShip = shipSize * 0.5f;
   }  
 
   void render()
