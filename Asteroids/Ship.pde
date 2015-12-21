@@ -11,6 +11,8 @@ class Ship extends AsteroidObject
   
   int explosionTimer;
   int explosionRadius;
+  
+  boolean resistance;
 
   Ship(int move, int left, int right, int fire, float startX, float startY)
   {
@@ -25,6 +27,8 @@ class Ship extends AsteroidObject
     //thrust = false;
     thrustFlicker = 2;
     explosionTimer = 2;
+    
+    resistance = false;
   }
 
   // Draw the ship in the correct position and at the correct angle
@@ -54,9 +58,16 @@ class Ship extends AsteroidObject
     moveShip.x = sin(theta);
     moveShip.y = - cos(theta);
     moveShip.mult(speed);
+    
 
     if (keys[move])
+    {
+      //moveShip.mult(speed);
       position.add(moveShip);
+      println("Moving speed: " + speed);
+      speed = 4.0f;
+      resistance = true; 
+    }
     if (keys[left])
       theta -= 0.1f;
     if (keys[right])
@@ -70,6 +81,19 @@ class Ship extends AsteroidObject
     else
     {
       thrust = false;
+    }
+    
+    if (resistance && keys[move] == false)
+    {
+       println(speed);
+       speed = speed * 0.985;
+       position.add(moveShip);
+
+       if (speed < 0.04)
+       {
+         resistance = false;
+         //speed = 4.0f;
+       }
     }
 
     if (keys[fire] && laserTimer > laserTimeLimit)

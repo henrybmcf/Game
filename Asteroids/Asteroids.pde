@@ -48,26 +48,26 @@ void setupAsteroidObject()
   AsteroidObject ship = new Ship(UP, LEFT, RIGHT, ' ', width * 0.5f, height * 0.5f);
   asteroids.add(ship);
   
-  // Twice as many small asteroids as medium (4 * as many as large ), so when a medium asteroid is hit, it splits into two small
-  for (int i = 0; i < noAsteroids[level - 1] * 4; i++)
-  {
-    AsteroidObject asteroid = new Asteroid(smallAstRad, random(width), random(200), 3);
-    asteroids.add(asteroid);
-  }
+  //// Twice as many small asteroids as medium (4 * as many as large ), so when a medium asteroid is hit, it splits into two small
+  //for (int i = 0; i < noAsteroids[level - 1] * 4; i++)
+  //{
+  //  AsteroidObject asteroid = new Asteroid(smallAstRad, random(width), random(200), 3);
+  //  asteroids.add(asteroid);
+  //}
   
-  // Twice as many medium asteroids as large ones, so when a big asteroid is hit, it splits into two medium
-  for (int i = 0; i < noAsteroids[level - 1] * 2; i++)
-  {
-    AsteroidObject asteroid = new Asteroid(medAstRad, random(width), random(height, height - 200), 2);
-    asteroids.add(asteroid);
-  }
+  //// Twice as many medium asteroids as large ones, so when a big asteroid is hit, it splits into two medium
+  //for (int i = 0; i < noAsteroids[level - 1] * 2; i++)
+  //{
+  //  AsteroidObject asteroid = new Asteroid(medAstRad, random(width), random(height, height - 200), 2);
+  //  asteroids.add(asteroid);
+  //}
   
-  // For first level, 5 big asteroids, 6 for 2nd, 7 for 3rd and so on
-  for (int i = 0; i < noAsteroids[level - 1]; i++)
-  {
-    AsteroidObject asteroid = new Asteroid(largeAstRad, random(200), random(height), 1);
-    asteroids.add(asteroid);
-  }
+  //// For first level, 5 big asteroids, 6 for 2nd, 7 for 3rd and so on
+  //for (int i = 0; i < noAsteroids[level - 1]; i++)
+  //{
+  //  AsteroidObject asteroid = new Asteroid(largeAstRad, random(200), random(height), 1);
+  //  asteroids.add(asteroid);
+  //}
   println(asteroids.size());
 }
 
@@ -137,15 +137,15 @@ void draw()
     // println(asteroids.get(i).radius); 
     //}
     //println(asteroids.size() - noAsteroids[level - 2]);
-    for (int i = asteroids.size() - 1; i > asteroids.size() - 1 - noAsteroids[level - 2]; i--)
-    {
-      println(i);
-      println(asteroids.get(i).radius);
-      asteroids.get(i).render();
-      // Only update (move) asteroids if the game has started
-      if (gameStart)
-        asteroids.get(i).update();
-    }
+    //for (int i = asteroids.size() - 1; i > asteroids.size() - 1 - noAsteroids[level - 2]; i--)
+    //{
+    //  println(i);
+    //  println(asteroids.get(i).radius);
+    //  asteroids.get(i).render();
+    //  // Only update (move) asteroids if the game has started
+    //  if (gameStart)
+    //    asteroids.get(i).update();
+    //}
     for (int i = 0; i < lasers.size(); i++)
     {
       if (gameStart)
