@@ -8,8 +8,11 @@ class AsteroidObject
   float theta;
   float shipHeight;
   float shipWidth;
-
+  
   float radius;
+  
+  boolean colourSwap;
+  boolean thrustColour;
 
   AsteroidObject()
   {

@@ -10,6 +10,16 @@ class Laser extends AsteroidObject
     pushMatrix();
     translate(position.x, position.y);
     rotate(theta);
+    if (colourSwap)
+    {
+      stroke(255, 0, 0);
+      fill(255, 0, 0);
+    }
+    else
+    {
+      stroke(255, 255, 0);
+      fill(255, 255, 0);
+    }
     //line(0, 0, 0, 15);
     ellipse(0, 0, 2, 2);
     popMatrix();    

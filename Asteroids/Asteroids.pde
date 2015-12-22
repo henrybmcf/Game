@@ -150,6 +150,8 @@ void draw()
     {
       if (gameStart)
       {
+        if (i > 0)
+           lasers.get(i).colourSwap =! lasers.get(i - 1).colourSwap; 
         lasers.get(i).render();
         lasers.get(i).update();
       }

@@ -37,6 +37,7 @@ class Ship extends AsteroidObject
     pushMatrix();
     translate(position.x, position.y);
     rotate(theta);
+    stroke(0, 206, 209);
     line(0, -shipHeight, -shipWidth, shipHeight);
     line(0, -shipHeight, shipWidth, shipHeight);
     line(-shipWidth * 0.75f, shipHeight * 0.7f, shipWidth * 0.75f, shipHeight * 0.7f);
@@ -44,6 +45,11 @@ class Ship extends AsteroidObject
     {
       if (thrustFlicker > 2)
       {
+        thrustColour =! thrustColour;
+        if (thrustColour)
+          stroke(255, 0, 0);
+        else
+          stroke(255, 255, 0);
         line(0, shipHeight * 1.3f, -shipWidth * 0.4f, shipHeight * 0.75f);
         line(0, shipHeight * 1.3f, shipWidth * 0.4f, shipHeight * 0.75f);
         thrustFlicker = 0;
@@ -58,13 +64,10 @@ class Ship extends AsteroidObject
     moveShip.x = sin(theta);
     moveShip.y = - cos(theta);
     moveShip.mult(speed);
-    
-
+   
     if (keys[move])
     {
-      //moveShip.mult(speed);
       position.add(moveShip);
-      println("Moving speed: " + speed);
       speed = 4.0f;
       resistance = true; 
     }
@@ -85,7 +88,6 @@ class Ship extends AsteroidObject
     
     if (resistance && keys[move] == false)
     {
-       println(speed);
        speed = speed * 0.985;
        position.add(moveShip);
 
@@ -104,7 +106,7 @@ class Ship extends AsteroidObject
       laser.position.y = position.y;
       laser.position.add(PVector.mult(moveShip, 6));
       laser.theta = theta;
-      lasers.add(laser);  
+      lasers.add(laser);
       laserTimer = 0;
     }
 
