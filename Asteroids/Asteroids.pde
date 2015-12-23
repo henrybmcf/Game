@@ -15,8 +15,8 @@ void setup()
   countdown = 3;
   countdownTimer = 0;
   smallAstRad = 30;
-  medAstRad = 50;
-  largeAstRad = 80;
+  medAstRad = 60;
+  largeAstRad = 90;
   setupAsteroidObject();
   laserSound = new SoundFile(this, "shoot.wav");
   thrustSound = new SoundFile(this, "thrust.wav");
@@ -36,7 +36,9 @@ int countdownTimer;
 float smallAstRad;
 float medAstRad;
 float largeAstRad;
-PImage asteroid;
+PImage larAsteroid;
+PImage medAsteroid;
+PImage smallAsteroid;
 
 boolean thrust;
 int j, k;
@@ -62,13 +64,12 @@ void setupAsteroidObject()
   //  asteroids.add(asteroid);
   //}
   
-  //// For first level, 5 big asteroids, 6 for 2nd, 7 for 3rd and so on
-  //for (int i = 0; i < noAsteroids[level - 1]; i++)
-  //{
-  //  AsteroidObject asteroid = new Asteroid(largeAstRad, random(200), random(height), 1);
-  //  asteroids.add(asteroid);
-  //}
-  println(asteroids.size());
+  // For first level, 5 big asteroids, 6 for 2nd, 7 for 3rd and so on
+  for (int i = 0; i < noAsteroids[level - 1]; i++)
+  {
+    AsteroidObject asteroid = new Asteroid(random(200), random(height), 1);
+    asteroids.add(asteroid);
+  }
 }
 
 void mousePressed()
@@ -105,47 +106,43 @@ void draw()
     {
       fill(0, 255, 0);
       textSize(50);
-    } else
+    }
+    else
     {
       fill(255);
       textSize(40);
     }
     text("Start Game", width * 0.5f, height * 0.75f);
-    break;
+    //break;
   case 2:
-
-    if (countdown != 0)
-    {
-      text(countdown, width * 0.5f, height * 0.3f);
-      if (countdownTimer > 60)
-      {
-        countdown--;
-        countdownTimer = 0;
-      }
-    } else
-    {
+    // 3.. 2.. 1.. Countdown to game start
+    //if (countdown != 0)
+    //{
+    // text(countdown + "..", width * 0.5f, height * 0.3f);
+    // if (countdownTimer > 60)
+    // {
+    //   countdown--;
+    //   countdownTimer = 0;
+    // }
+    //}
+    //else
+    //{
       gameStart = true;
-    }
-    if (gameStart != true)
-      countdownTimer++;
+    //}
+    //if (gameStart != true)
+    // countdownTimer++;
     // Ship is the first element in list, therefore always render and update
-    asteroids.get(0).render();
     asteroids.get(0).update();
+    asteroids.get(0).render();
     
-    //for (int i = 1; i < asteroids.size(); i++)
-    //{
-    // println(asteroids.get(i).radius); 
-    //}
-    //println(asteroids.size() - noAsteroids[level - 2]);
-    //for (int i = asteroids.size() - 1; i > asteroids.size() - 1 - noAsteroids[level - 2]; i--)
-    //{
-    //  println(i);
-    //  println(asteroids.get(i).radius);
-    //  asteroids.get(i).render();
-    //  // Only update (move) asteroids if the game has started
-    //  if (gameStart)
-    //    asteroids.get(i).update();
-    //}
+    for (int i = 0; i < asteroids.size(); i++)
+    {
+      asteroids.get(i).render();
+      // Only update (move) asteroids if the game has started
+      if (gameStart)
+        asteroids.get(i).update();
+    }
+    
     for (int i = 0; i < lasers.size(); i++)
     {
       if (gameStart)
@@ -192,7 +189,8 @@ void shipDeath(PVector pos, int radius)
       lastY = y;
     }
     popMatrix();
-  } else
+  }
+  else
   {
     resetShip();
   }

@@ -22,7 +22,7 @@ class Ship extends AsteroidObject
     this.right = right;
     this.fire = fire;
     // Divide 60 by number of bullets to shoot per second
-    laserTimeLimit = 60 / 6;
+    laserTimeLimit = 60 / 3;
     laserTimer = 0;
     //thrust = false;
     thrustFlicker = 2;
@@ -45,6 +45,7 @@ class Ship extends AsteroidObject
     {
       if (thrustFlicker > 2)
       {
+        // Alternate colour of thruster flame between red and yellow
         thrustColour =! thrustColour;
         if (thrustColour)
           stroke(255, 0, 0);
@@ -68,13 +69,13 @@ class Ship extends AsteroidObject
     if (keys[move])
     {
       position.add(moveShip);
-      speed = 4.0f;
+      speed = 2.5f;
       resistance = true; 
     }
     if (keys[left])
-      theta -= 0.1f;
+      theta -= 0.05f;
     if (keys[right])
-      theta += 0.1f;
+      theta += 0.05f;
     if (keys[move] || keys[left] || keys[right])
     {
       thrust = true;
@@ -86,15 +87,15 @@ class Ship extends AsteroidObject
       thrust = false;
     }
     
+    // Simulate resistance like in original game
+    // Once not moving (move key not pressed), reduce speed until stop
     if (resistance && keys[move] == false)
     {
        speed = speed * 0.985;
        position.add(moveShip);
-
-       if (speed < 0.04)
+       if (speed < 0.02)
        {
          resistance = false;
-         //speed = 4.0f;
        }
     }
 
@@ -109,7 +110,6 @@ class Ship extends AsteroidObject
       lasers.add(laser);
       laserTimer = 0;
     }
-
     laserTimer++;
 
     if (position.x < 0)

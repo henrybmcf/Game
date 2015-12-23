@@ -10,17 +10,11 @@ class Laser extends AsteroidObject
     pushMatrix();
     translate(position.x, position.y);
     rotate(theta);
+    // Alternate colour of lasers between red and yellow
     if (colourSwap)
-    {
       stroke(255, 0, 0);
-      fill(255, 0, 0);
-    }
     else
-    {
       stroke(255, 255, 0);
-      fill(255, 255, 0);
-    }
-    //line(0, 0, 0, 15);
     ellipse(0, 0, 2, 2);
     popMatrix();    
   }
@@ -43,6 +37,23 @@ class Laser extends AsteroidObject
           position.y < asteroids.get(i).position.y + asteroids.get(i).radius * 0.45f)
       {
         explosionSound.play();
+        
+        if (asteroids.get(i).radius == 90)
+        {
+          //AsteroidObject asteroid = new Asteroid(random(width), random(height, height - 200), 2);
+          AsteroidObject asteroid = new Asteroid(asteroids.get(i).position.x, asteroids.get(i).position.y, 2);
+          asteroids.add(asteroid);
+          asteroid = new Asteroid(asteroids.get(i).position.x, asteroids.get(i).position.y, 2);
+          asteroids.add(asteroid);
+        }
+        else if (asteroids.get(i).radius == 45)
+        {
+          AsteroidObject asteroid = new Asteroid(asteroids.get(i).position.x, asteroids.get(i).position.y, 3);
+          asteroids.add(asteroid);
+          asteroid = new Asteroid(asteroids.get(i).position.x, asteroids.get(i).position.y, 3);
+          asteroids.add(asteroid);
+        }
+        
         asteroids.remove(i);
         lasers.remove(this);
       }
