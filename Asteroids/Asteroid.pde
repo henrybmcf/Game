@@ -22,13 +22,11 @@ class Asteroid extends AsteroidObject
     //this.astRad = radius;
     radius = largeAstRad/size;
     this.size = size;
-    println(radius);
   }
   
   void render()
   {
     pushMatrix();
-    
     if (size == 1)
     {
       translate(position.x - (largeAstRad * 0.65f), position.y - (largeAstRad * 0.5f));
@@ -44,16 +42,6 @@ class Asteroid extends AsteroidObject
       translate(position.x - (smallAstRad * 0.65f), position.y - (smallAstRad * 0.5f));
       image(smallAsteroid, 0, 0);
     }
-    //line(0, -radius * 0.65f, -radius * 0.45f, -radius);    
-    //line(-radius * 0.45f, -radius, -radius, -radius * 0.5f);    
-    //line(-radius, -radius * 0.5f, -radius, radius * 0.5f);    
-    //line(-radius, radius * 0.5f, -radius * 0.5f, radius);  
-    //line(-radius * 0.5f, radius, radius * 0.3f, radius);   
-    //line(radius * 0.3f, radius, radius, radius * 0.5f); 
-    //line(radius, radius * 0.5f, radius * 0.75f, 0);   
-    //line(radius * 0.75f, 0, radius, -radius * 0.5f); 
-    //line(radius, -radius * 0.5f, radius * 0.5f, -radius); 
-    //line(radius * 0.5f, -radius, 0, -radius * 0.65f);
     popMatrix();
   }
   

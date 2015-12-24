@@ -13,6 +13,8 @@ class Ship extends AsteroidObject
   int explosionRadius;
   
   boolean resistance;
+  
+  float expTheta;
 
   Ship(int move, int left, int right, int fire, float startX, float startY)
   {
@@ -27,8 +29,9 @@ class Ship extends AsteroidObject
     //thrust = false;
     thrustFlicker = 2;
     explosionTimer = 2;
-    
     resistance = false;
+    
+    expTheta = 0.0f;
   }
 
   // Draw the ship in the correct position and at the correct angle
@@ -62,6 +65,25 @@ class Ship extends AsteroidObject
   
   void update()
   {
+    if (exp)
+    {
+      if (explosionTimer > 1)
+      {
+        shipDeath(position, explosionRadius, expTheta);
+        if (explosionRadius < 40)
+          explosionRadius += 2;
+        else
+          explosionRadius = 0;
+        explosionTimer = 0;
+        if (random(1) > 0.5f)
+          expTheta += 2.5f;
+        else
+          expTheta -= 3.5f;
+        shipDeath(position, explosionRadius - 15, expTheta);
+      }
+      explosionTimer+=1;
+    }
+         
     moveShip.x = sin(theta);
     moveShip.y = - cos(theta);
     moveShip.mult(speed);
@@ -131,11 +153,19 @@ class Ship extends AsteroidObject
          gameStart = false;
          if (explosionTimer > 1)
          {
-           shipDeath(position, explosionRadius);
+           //shipDeath(position, explosionRadius);
            explosionRadius += 2;
            explosionTimer = 0;
          }
          explosionTimer++;
+              
+         if (asteroids.get(i).position.x > width * 0.4f && asteroids.get(i).position.x < width * 0.6f
+            && asteroids.get(i).position.y > height * 0.4f && asteroids.get(i).position.y < height * 0.6f)
+         {
+           asteroids.get(i).position.x = random(width);
+           asteroids.get(i).position.y = random(200);
+         }
+         countdown = 3;
       }
     }
   }
