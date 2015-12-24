@@ -9,7 +9,7 @@ void setup()
   size(700, 600);
   smooth(8);
   for (int i = 0; i < 5; i++)
-    noAsteroids[i] = i + 5;
+    noAsteroids[i] = i + 1;
   gameStart = false;
   level = 1;
   countdown = 3;
@@ -50,20 +50,6 @@ void setupAsteroidObject()
   AsteroidObject ship = new Ship(UP, LEFT, RIGHT, ' ', width * 0.5f, height * 0.5f);
   asteroids.add(ship);
   
-  //// Twice as many small asteroids as medium (4 * as many as large ), so when a medium asteroid is hit, it splits into two small
-  //for (int i = 0; i < noAsteroids[level - 1] * 4; i++)
-  //{
-  //  AsteroidObject asteroid = new Asteroid(smallAstRad, random(width), random(200), 3);
-  //  asteroids.add(asteroid);
-  //}
-  
-  //// Twice as many medium asteroids as large ones, so when a big asteroid is hit, it splits into two medium
-  //for (int i = 0; i < noAsteroids[level - 1] * 2; i++)
-  //{
-  //  AsteroidObject asteroid = new Asteroid(medAstRad, random(width), random(height, height - 200), 2);
-  //  asteroids.add(asteroid);
-  //}
-  
   // For first level, 5 big asteroids, 6 for 2nd, 7 for 3rd and so on
   for (int i = 0; i < noAsteroids[level - 1]; i++)
   {
@@ -94,9 +80,8 @@ void draw()
   background(0);
   stroke(255);
 
-  switch (level)
+  if (level == 1)
   {
-  case 1:
     asteroids.get(0).render();
     fill(255);
     textSize(80);
@@ -113,47 +98,60 @@ void draw()
       textSize(40);
     }
     text("Start Game", width * 0.5f, height * 0.75f);
-    //break;
-  case 2:
+  }
+  else if (level > 1)
+  {
     // 3.. 2.. 1.. Countdown to game start
-    //if (countdown != 0)
-    //{
-    // text(countdown + "..", width * 0.5f, height * 0.3f);
-    // if (countdownTimer > 60)
-    // {
-    //   countdown--;
-    //   countdownTimer = 0;
-    // }
-    //}
-    //else
-    //{
+    if (countdown != 0 && gameStart != true)
+    {
+      text(countdown + "..", width * 0.5f, height * 0.3f);
+      if (countdownTimer > 60)
+      {
+        countdown--;
+        countdownTimer = 0;
+      }
+    }
+    else
+    {
       gameStart = true;
-    //}
-    //if (gameStart != true)
-    // countdownTimer++;
+      countdown = 3;
+      countdownTimer = 0;
+    }
+    
+    if (gameStart != true)
+      countdownTimer++;
+    
     // Ship is the first element in list, therefore always render and update
     asteroids.get(0).update();
     asteroids.get(0).render();
     
-    for (int i = 0; i < asteroids.size(); i++)
+    if (asteroids.size() > 1)
     {
-      asteroids.get(i).render();
-      // Only update (move) asteroids if the game has started
-      if (gameStart)
-        asteroids.get(i).update();
-    }
-    
-    for (int i = 0; i < lasers.size(); i++)
-    {
-      if (gameStart)
+      for (int i = 0; i < asteroids.size(); i++)
       {
-        if (i > 0)
-           lasers.get(i).colourSwap =! lasers.get(i - 1).colourSwap; 
-        lasers.get(i).render();
-        lasers.get(i).update();
+        asteroids.get(i).render();
+        // Only update (move) asteroids if the game has started
+        if (gameStart)
+          asteroids.get(i).update();
+      }
+      
+      for (int i = 0; i < lasers.size(); i++)
+      {
+        if (gameStart)
+        {
+          if (i > 0)
+             lasers.get(i).colourSwap =! lasers.get(i - 1).colourSwap; 
+          lasers.get(i).render();
+          lasers.get(i).update();
+        }
       }
     }
-    break;
+    else
+    {
+      gameStart = false;
+      level++;
+      setupAsteroidObject();
+    }
   }
 }
 
