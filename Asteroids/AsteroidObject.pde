@@ -30,7 +30,6 @@ class AsteroidObject
       astSpeed = 0.35f;
     else if (size == 3)
       astSpeed = 0.45f;
-    //astSpeed *= size;
     // Set random asteroids to go in opposite directions
     if (random(1) > 0.5f)
       astSpeed = -astSpeed;

@@ -6,15 +6,11 @@ class Ship extends AsteroidObject
   int fire;
   int laserTimer;
   int laserTimeLimit;
-  //boolean thrust;
-  int thrustFlicker;
-  
+  int thrustFlicker;  
   int explosionTimer;
   int explosionRadius;
-  
-  boolean resistance;
-  
   float expTheta;
+  boolean resistance;
 
   Ship(int move, int left, int right, int fire, float startX, float startY)
   {
@@ -24,14 +20,12 @@ class Ship extends AsteroidObject
     this.right = right;
     this.fire = fire;
     // Divide 60 by number of bullets to shoot per second
-    laserTimeLimit = 60 / 3;
+    laserTimeLimit = 60 / 2;
     laserTimer = 0;
-    //thrust = false;
     thrustFlicker = 2;
     explosionTimer = 2;
-    resistance = false;
-    
     expTheta = 0.0f;
+    resistance = false;
   }
 
   // Draw the ship in the correct position and at the correct angle
@@ -64,26 +58,7 @@ class Ship extends AsteroidObject
   }
   
   void update()
-  {
-    if (exp)
-    {
-      if (explosionTimer > 1)
-      {
-        shipDeath(position, explosionRadius, expTheta);
-        if (explosionRadius < 40)
-          explosionRadius += 2;
-        else
-          explosionRadius = 0;
-        explosionTimer = 0;
-        if (random(1) > 0.5f)
-          expTheta += 2.5f;
-        else
-          expTheta -= 3.5f;
-        shipDeath(position, explosionRadius - 15, expTheta);
-      }
-      explosionTimer+=1;
-    }
-         
+  {      
     moveShip.x = sin(theta);
     moveShip.y = - cos(theta);
     moveShip.mult(speed);
@@ -113,12 +88,10 @@ class Ship extends AsteroidObject
     // Once not moving (move key not pressed), reduce speed until stop
     if (resistance && keys[move] == false)
     {
-       speed = speed * 0.985;
+       speed = speed * 0.99;
        position.add(moveShip);
        if (speed < 0.02)
-       {
          resistance = false;
-       }
     }
 
     if (keys[fire] && laserTimer > laserTimeLimit)
@@ -145,27 +118,42 @@ class Ship extends AsteroidObject
       
     for (int i = 1; i < asteroids.size(); i++)
     {
-      if (position.x +- shipWidth > asteroids.get(i).position.x - asteroids.get(i).radius * 0.65f &&
-          position.x +- shipWidth < asteroids.get(i).position.x + asteroids.get(i).radius * 0.65f &&
-          position.y +- shipHeight > asteroids.get(i).position.y - asteroids.get(i).radius * 0.5f &&
-          position.y +- shipHeight < asteroids.get(i).position.y + asteroids.get(i).radius * 0.5f)
+      if (asteroids.get(i).position.x + asteroids.get(i).radius * 0.5f > position.x - shipWidth && 
+          asteroids.get(i).position.x - asteroids.get(i).radius * 0.5f < position.x + shipWidth &&
+          asteroids.get(i).position.y + asteroids.get(i).radius * 0.5f > position.y - shipHeight &&
+          asteroids.get(i).position.y - asteroids.get(i).radius * 0.5f < position.y + shipHeight)
       {
+         lasers.clear();
          gameStart = false;
+         resistance = false;
          if (explosionTimer > 1)
          {
-           //shipDeath(position, explosionRadius);
-           explosionRadius += 2;
+           shipDeath(position, explosionRadius, expTheta);
+           if (explosionRadius < 40)
+             explosionRadius += 2;
+           else
+             explosionRadius = 0;
            explosionTimer = 0;
+           if (random(1) > 0.5f)
+             expTheta += 2.5f;
+           else
+             expTheta -= 3.5f;
+           shipDeath(position, explosionRadius - 20, expTheta);
          }
          explosionTimer++;
-              
-         if (asteroids.get(i).position.x > width * 0.4f && asteroids.get(i).position.x < width * 0.6f
-            && asteroids.get(i).position.y > height * 0.4f && asteroids.get(i).position.y < height * 0.6f)
+         
+         if (reset)
          {
-           asteroids.get(i).position.x = random(width);
-           asteroids.get(i).position.y = random(200);
+           if (asteroids.get(i).position.x > width * 0.3f && asteroids.get(i).position.x < width * 0.7f
+              && asteroids.get(i).position.y > height * 0.3f && asteroids.get(i).position.y < height * 0.7f)
+           {
+             asteroids.get(i).position.x = random(width);
+             asteroids.get(i).position.y = random(height * 0.3f);
+           }
+           
+           if (i == asteroids.size() - 1)
+             reset = false;
          }
-         countdown = 3;
       }
     }
   }

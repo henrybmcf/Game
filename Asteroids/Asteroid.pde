@@ -8,18 +8,17 @@ class Asteroid extends AsteroidObject
   // Resize each one dependent incoming size variable
   
   // Depending on that size variable, show that image
-  //(float radius, 
+  
   Asteroid(float x, float y, int size)
   {
     super(x, y, size);
     //super.radius = radius;
     larAsteroid = loadImage("asteroid.png");
-    larAsteroid.resize((int)(largeAstRad * 1.3), (int)largeAstRad);
+    larAsteroid.resize(largeAstRad, largeAstRad);
     medAsteroid = loadImage("asteroid.png");
-    medAsteroid.resize((int)(medAstRad * 1.3), (int)medAstRad);
+    medAsteroid.resize(medAstRad, medAstRad);
     smallAsteroid = loadImage("asteroid.png");
-    smallAsteroid.resize((int)(smallAstRad * 1.3), (int)smallAstRad);
-    //this.astRad = radius;
+    smallAsteroid.resize(smallAstRad, smallAstRad);
     radius = largeAstRad/size;
     this.size = size;
   }
@@ -27,21 +26,13 @@ class Asteroid extends AsteroidObject
   void render()
   {
     pushMatrix();
+    translate(position.x - ((largeAstRad / size) * 0.5f), position.y - ((largeAstRad / size) * 0.5f));
     if (size == 1)
-    {
-      translate(position.x - (largeAstRad * 0.65f), position.y - (largeAstRad * 0.5f));
       image(larAsteroid, 0, 0);
-    }
     else if (size == 2)
-    {
-      translate(position.x - (medAstRad * 0.65f), position.y - (medAstRad * 0.5f));
       image(medAsteroid, 0, 0);
-    }
     else if (size == 3)
-    {
-      translate(position.x - (smallAstRad * 0.65f), position.y - (smallAstRad * 0.5f));
       image(smallAsteroid, 0, 0);
-    }
     popMatrix();
   }
   
