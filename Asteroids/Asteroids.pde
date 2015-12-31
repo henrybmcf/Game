@@ -48,7 +48,6 @@ boolean thrust;
 int j, k;
 boolean reset;
 int resetTimer;
-
 int lives;
 int livesHitCounter;
 
@@ -88,6 +87,7 @@ void keyReleased()
   keys[keyCode] = false;
 }
 
+// Draw player lives as ships in top left corner of screen
 void drawShipLives()
 {
   float drawHeight = 13;

@@ -29,6 +29,7 @@ class Ship extends AsteroidObject
   }
 
   // Draw the ship in the correct position and at the correct angle
+  // Draw thrust flame is ship is moving
   void render()
   {
     pushMatrix();
@@ -62,7 +63,8 @@ class Ship extends AsteroidObject
     moveShip.x = sin(theta);
     moveShip.y = - cos(theta);
     moveShip.mult(speed);
-
+    
+    // Move or rotate ship depending on key pressed
     if (keys[move])
     {
       position.add(moveShip);
@@ -92,7 +94,8 @@ class Ship extends AsteroidObject
       if (speed < 0.02)
         resistance = false;
     }
-
+    
+    // Shoot lasers if fire key is pressed and over time limit (ship can only shoot certain amount of lasers per second
     if (keys[fire] && laserTimer > laserTimeLimit)
     {
       //laserSound.play();   
@@ -105,7 +108,8 @@ class Ship extends AsteroidObject
       laserTimer = 0;
     }
     laserTimer++;
-
+    
+    // If ship goes off screen, loop around to other side of screen
     if (position.x < 0)
       position.x = width;
     if (position.x > width)
@@ -117,23 +121,27 @@ class Ship extends AsteroidObject
 
     for (int i = 1; i < asteroids.size(); i++)
     {
+      // For each asteroid check to see if ship is touching
       if (asteroids.get(i).position.x + asteroids.get(i).radius * 0.5f > position.x - shipWidth && 
         asteroids.get(i).position.x - asteroids.get(i).radius * 0.5f < position.x + shipWidth &&
         asteroids.get(i).position.y + asteroids.get(i).radius * 0.5f > position.y - shipHeight &&
         asteroids.get(i).position.y - asteroids.get(i).radius * 0.5f < position.y + shipHeight)
       {
+        // If the player still has lives, deduct a life
         if (lives > 0)
         {
+          // Ensure only one life is dedcuted per crash
           if (livesHitCounter == 0)
-            lives--;
-
+            lives--;     
           livesHitCounter = 1;
-
+          
+          // Clear all lasers from the screen so upon restart of game, they won't continue to show
           lasers.clear();
           // Stop the game
           gameStart = false;
           // Stop ship from moving
           resistance = false;
+          // Time exlposion grpahics of ship
           if (explosionTimer > 1)
           {
             shipDeath(position, explosionRadius, expTheta);
@@ -150,6 +158,7 @@ class Ship extends AsteroidObject
           }
           explosionTimer++;
         }
+        // If user has no more lives, give them the option to play the game again
         else
         {
           gameStart = false;
@@ -158,7 +167,9 @@ class Ship extends AsteroidObject
           text("Play Again?", width * 0.5f, height * 0.5f);
           text("Yes", width * 0.3f, height * 0.8f);
           text("No", width * 0.7f, height * 0.8f);
-
+          
+          // If they select to play again, setup asteroids and reset level
+          // Otherwise, exit the game
           if (mousePressed)
           {
             if (mouseY > height * 0.7f && mouseY < height * 0.9f)
