@@ -33,6 +33,8 @@ void setup()
   powerupTimer = 600;
   powerupEntryTimer = int(random(300, 600));
   powerupCountTimer = 0;
+  
+  pause = false;
 }
 
 boolean[] keys = new boolean[512];
@@ -62,6 +64,8 @@ int powerup;
 int powerupTimer;
 int powerupEntryTimer;
 int powerupCountTimer;
+
+boolean pause;
 
 void setupAsteroidObject()
 {
@@ -93,6 +97,16 @@ void keyPressed()
     keys[keyCode] = true;
   if (key >= '1' && key <= '2')
     level = key - '0';
+    
+  if (keyCode == 'P')
+  {
+    // If countdown has stopped (i.e. game has started), set pause and gameStart to be opposite to their current values, hence pausing the game
+    if (countdown == 0)
+    {
+      pause =! pause;
+      gameStart =! gameStart;
+    }
+  }
 }
 void keyReleased()
 {
@@ -140,7 +154,6 @@ void draw()
        powerupCountTimer = 0;
      }
   }
-  //println(powerupCountTimer, powerupTimer, powerupEntryTimer + powerupTimer);
   
   if (level == 1)
   {
@@ -173,7 +186,8 @@ void draw()
         countdownTimer = 0;
       }
     }
-    else
+    // Only start game if pause is not active
+    else if (pause == false)
     {
       gameStart = true;
     }
