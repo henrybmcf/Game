@@ -25,6 +25,9 @@ void setup()
   thrust = true;
   reset = false;
   resetTimer = 0;
+
+  lives = 5;
+  livesHitCounter = 0;
 }
 
 boolean[] keys = new boolean[512];
@@ -46,13 +49,17 @@ int j, k;
 boolean reset;
 int resetTimer;
 
+
+int lives;
+int livesHitCounter;
+
 void setupAsteroidObject()
 {
   lasers.clear();
   asteroids.clear();
   AsteroidObject ship = new Ship(UP, LEFT, RIGHT, ' ', width * 0.5f, height * 0.5f);
   asteroids.add(ship);
-  
+
   // For first level, 5 big asteroids, 6 for 2nd, 7 for 3rd and so on
   for (int i = 0; i < noAsteroids[level - 1]; i++)
   {
@@ -82,86 +89,104 @@ void keyReleased()
   keys[keyCode] = false;
 }
 
+void drawShipLives()
+{
+  float drawHeight = 13;
+  float drawWidth = drawHeight * 0.7f;
+  
+  for (int i = 0; i < lives; i++)
+  {
+    pushMatrix();
+    translate((i + 1) * 25, 30);
+    stroke(0, 206, 209);
+    line(0, -drawHeight, -drawWidth, drawHeight);
+    line(0, -drawHeight, drawWidth, drawHeight);
+    line(-drawWidth * 0.75f, drawHeight * 0.7f, drawWidth * 0.75f, drawHeight * 0.7f);
+    popMatrix();
+  } 
+}
+
 void draw()
 {
   background(0);
   stroke(255);
-
+  
   if (level == 1)
   {
-   asteroids.get(0).render();
-   fill(255);
-   textSize(80);
-   textAlign(CENTER);
-   text("ASTEROIDS", width * 0.5f, height * 0.3f);
-   if (mouseX > width * 0.35f && mouseX < width * 0.65f && mouseY > height * 0.7f && mouseY < height * 0.8f)
-   {
-     fill(0, 255, 0);
-     textSize(50);
-   }
-   else
-   {
-     fill(255);
-     textSize(40);
-   }
-   text("Start Game", width * 0.5f, height * 0.75f);
+    asteroids.get(0).render();
+    fill(255);
+    textSize(80);
+    textAlign(CENTER);
+    text("ASTEROIDS", width * 0.5f, height * 0.3f);
+    if (mouseX > width * 0.35f && mouseX < width * 0.65f && mouseY > height * 0.7f && mouseY < height * 0.8f)
+    {
+      fill(0, 255, 0);
+      textSize(50);
+    }
+    else
+    {
+      fill(255);
+      textSize(40);
+    }
+    text("Start Game", width * 0.5f, height * 0.75f);
   }
   else if (level > 1)
   {
-   // 3.. 2.. 1.. Countdown to game start
-   if (countdown != 0 && gameStart != true)
-   {
-     text(countdown + "..", width * 0.5f, height * 0.3f);
-     if (countdownTimer > 60)
-     {
-       countdown--;
-       countdownTimer = 0;
-     }
-   }
-   else
-   {
-     gameStart = true;
-     //countdown = 3;
-     //countdownTimer = 0;
-   }
-    
-   if (gameStart != true)
-     countdownTimer++;
-    
-   // Ship is the first element in list, therefore always render and update
-   asteroids.get(0).update();
-   asteroids.get(0).render();
-    
-   if (asteroids.size() > 1)
-   {
-     for (int i = 0; i < asteroids.size(); i++)
-     {
-       asteroids.get(i).render();
-       // Only update (move) asteroids if the game has started
-       if (gameStart)
-         asteroids.get(i).update();
-     }
-      
-     for (int i = 0; i < lasers.size(); i++)
-     {
-       if (gameStart)
-       {
-         if (i > 0)
+    // 3.. 2.. 1.. Countdown to game start
+    if (countdown != 0 && gameStart != true)
+    {
+      text(countdown + "..", width * 0.5f, height * 0.3f);
+      if (countdownTimer > 60)
+      {
+        countdown--;
+        countdownTimer = 0;
+      }
+    }
+    else
+    {
+      gameStart = true;
+    }
+
+    if (gameStart != true)
+      countdownTimer++;
+
+    // Ship is the first element in list, therefore always render and update
+    asteroids.get(0).update();
+    asteroids.get(0).render();
+
+    if (asteroids.size() > 1)
+    {
+      for (int i = 0; i < asteroids.size(); i++)
+      {
+        asteroids.get(i).render();
+        // Only update (move) asteroids if the game has started
+        if (gameStart)
+          asteroids.get(i).update();
+      }
+
+      for (int i = 0; i < lasers.size(); i++)
+      {
+        if (gameStart)
+        {
+          if (i > 0)
             lasers.get(i).colourSwap =! lasers.get(i - 1).colourSwap; 
-         lasers.get(i).render();
-         lasers.get(i).update();
-       }
-     }
-   }
-   else
-   {
-     gameStart = false;
-     level++;
-     setupAsteroidObject();
-     countdown = 3;
-     countdownTimer = 0;
-   }
+          lasers.get(i).render();
+          lasers.get(i).update();
+        }
+      }
+    }
+    else
+    {
+      gameStart = false;
+      level++;
+      setupAsteroidObject();
+      countdown = 3;
+      countdownTimer = 0;
+    }
   }
+  
+  // Show the user how many lives they have
+  drawShipLives();
 }
 
 void shipDeath(PVector pos, int radius, float angle)
@@ -187,8 +212,7 @@ void shipDeath(PVector pos, int radius, float angle)
       {
         x = sin(theta) * (radius * 0.5f);
         y = -cos(theta) * (radius * 0.5f);
-      }
-      else
+      } else
       {
         x = sin(theta) * radius;
         y = -cos(theta) * radius;
@@ -199,11 +223,9 @@ void shipDeath(PVector pos, int radius, float angle)
     }
     popMatrix();
     resetTimer++;
-    //println(resetTimer);
   }
   else
   {
-    println("resetting");
     resetShip();
   }
 }
@@ -211,19 +233,20 @@ void shipDeath(PVector pos, int radius, float angle)
 void resetShip()
 {
   asteroids.set(0, new Ship(UP, LEFT, RIGHT, ' ', width * 0.5f, height * 0.5f));
-  
+
   for (int i = 1; i < asteroids.size(); i++)
   {
-    if (asteroids.get(i).position.x > width * 0.4f &&
-        asteroids.get(i).position.x < width * 0.6f && 
-        asteroids.get(i).position.y > height * 0.4f &&
-        asteroids.get(i).position.y < height * 0.6f)
+    if (asteroids.get(i).position.x > width * 0.3f &&
+      asteroids.get(i).position.x < width * 0.7f && 
+      asteroids.get(i).position.y > height * 0.3f &&
+      asteroids.get(i).position.y < height * 0.7f)
     {
       asteroids.get(i).position.x = random(width);
       asteroids.get(i).position.y = random(200);
-    }     
+    }
   }
   reset = true;
   countdown = 3;
   resetTimer = 0;
+  livesHitCounter = 0;
 }

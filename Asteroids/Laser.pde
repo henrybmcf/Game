@@ -36,7 +36,7 @@ class Laser extends AsteroidObject
           position.y > asteroids.get(i).position.y - asteroids.get(i).radius * 0.5f &&
           position.y < asteroids.get(i).position.y + asteroids.get(i).radius * 0.5f)
       {
-        explosionSound.play();
+        //explosionSound.play();
         
         if (asteroids.get(i).radius == 90)
         {

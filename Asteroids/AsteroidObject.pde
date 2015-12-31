@@ -13,6 +13,8 @@ class AsteroidObject
   
   boolean colourSwap;
   boolean thrustColour;
+  
+
 
   AsteroidObject()
   {

@@ -76,8 +76,8 @@ class Ship extends AsteroidObject
     if (keys[move] || keys[left] || keys[right])
     {
       thrust = true;
-      thrustSound.play();
-      thrustSound.amp(0.08);
+      //thrustSound.play();
+      //thrustSound.amp(0.08);
     }
     else
     {
@@ -96,7 +96,7 @@ class Ship extends AsteroidObject
 
     if (keys[fire] && laserTimer > laserTimeLimit)
     {
-      laserSound.play();   
+      //laserSound.play();   
       Laser laser = new Laser();
       laser.position.x = position.x;
       laser.position.y = position.y;
@@ -123,36 +123,41 @@ class Ship extends AsteroidObject
           asteroids.get(i).position.y + asteroids.get(i).radius * 0.5f > position.y - shipHeight &&
           asteroids.get(i).position.y - asteroids.get(i).radius * 0.5f < position.y + shipHeight)
       {
-         lasers.clear();
-         gameStart = false;
-         resistance = false;
-         if (explosionTimer > 1)
+         if (lives > 0)
          {
-           shipDeath(position, explosionRadius, expTheta);
-           if (explosionRadius < 40)
-             explosionRadius += 2;
-           else
-             explosionRadius = 0;
-           explosionTimer = 0;
-           if (random(1) > 0.5f)
-             expTheta += 2.5f;
-           else
-             expTheta -= 3.5f;
-           shipDeath(position, explosionRadius - 20, expTheta);
-         }
-         explosionTimer++;
-         
-         if (reset)
-         {
-           if (asteroids.get(i).position.x > width * 0.3f && asteroids.get(i).position.x < width * 0.7f
-              && asteroids.get(i).position.y > height * 0.3f && asteroids.get(i).position.y < height * 0.7f)
-           {
-             asteroids.get(i).position.x = random(width);
-             asteroids.get(i).position.y = random(height * 0.3f);
-           }
+           if (livesHitCounter == 0)
+             lives--;
            
-           if (i == asteroids.size() - 1)
-             reset = false;
+           livesHitCounter = 1;
+           
+           lasers.clear();
+           // Stop the game
+           gameStart = false;
+           // Stop ship from moving
+           resistance = false;
+           if (explosionTimer > 1)
+           {
+             shipDeath(position, explosionRadius, expTheta);
+             if (explosionRadius < 40)
+               explosionRadius += 2;
+             else
+               explosionRadius = 0;
+             explosionTimer = 0;
+             if (random(1) > 0.5f)
+               expTheta += 2.5f;
+             else
+               expTheta -= 3.5f;
+             shipDeath(position, explosionRadius - 20, expTheta);
+           }
+           explosionTimer++;
+         }
+         else
+         {
+           text("GAME OVER", width * 0.5f, height * 0.5f);
+           gameStart = false;
+           //lasers.clear();
+           //asteroids.clear();
+           exit();
          }
       }
     }
