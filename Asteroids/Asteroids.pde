@@ -9,8 +9,9 @@ void setup()
   size(700, 600);
   smooth(8);
   for (int i = 0; i < 5; i++)
-    noAsteroids[i] = 1;//i + 5;
+    noAsteroids[i] = i + 5;
   gameStart = false;
+  pause = false;
   level = 1;
   countdown = 3;
   countdownTimer = 0;
@@ -24,9 +25,10 @@ void setup()
   thrust = true;
   reset = false;
   resetTimer = 0;
-  lives = 1;
+  lives = 5;
   livesHitCounter = 0;
   
+  // Set all powerups to be false for beginning of game
   for (int i = 0; i < powerUps.length; i++)
     powerUps[i] = false;
   
@@ -34,8 +36,15 @@ void setup()
   powerupEntryTimer = int(random(300, 600));
   powerupCountTimer = 0;
   
-  pause = false;
+  powerupOnTimer = 0;
+  
+  power = new PowerUp(50, -20);
+  
+  enterPowerUp = false;
+  powerupEnabled = false;
 }
+
+PowerUp power;
 
 boolean[] keys = new boolean[512];
 ArrayList<AsteroidObject> asteroids = new ArrayList<AsteroidObject>();
@@ -58,78 +67,19 @@ int resetTimer;
 int lives;
 int livesHitCounter;
 
-// 1 = double shooter, 2 = quad shooter, 3 = forcefield
-boolean[] powerUps = new boolean[3];
+// 1 = double shooter, 2 = quad shooter, 3 = extra life, 4 = forcefield, 5 = empty (to change to once extra life has been added)
+boolean[] powerUps = new boolean[5];
 int powerup;
 int powerupTimer;
 int powerupEntryTimer;
 int powerupCountTimer;
 
+int powerupOnTimer;
+
 boolean pause;
 
-void setupAsteroidObject()
-{
-  lasers.clear();
-  asteroids.clear();
-  AsteroidObject ship = new Ship(UP, LEFT, RIGHT, ' ', width * 0.5f, height * 0.5f);
-  asteroids.add(ship);
-
-  // For first level, 5 big asteroids, 6 for 2nd, 7 for 3rd and so on
-  for (int i = 0; i < noAsteroids[level - 1]; i++)
-  {
-    AsteroidObject asteroid;
-    if (i % 2 == 0)
-      asteroid = new Asteroid(random(200), random(height), 1);
-    else
-      asteroid = new Asteroid(random(width - 200, width), random(height), 1);
-    asteroids.add(asteroid);
-  }
-}
-
-void mousePressed()
-{
-  if (mouseX > width * 0.35f && mouseX < width * 0.65f && mouseY > height * 0.7f && mouseY < height * 0.8f)
-    level = 2;
-}
-void keyPressed()
-{  
-  if (gameStart)
-    keys[keyCode] = true;
-  if (key >= '1' && key <= '2')
-    level = key - '0';
-    
-  if (keyCode == 'P')
-  {
-    // If countdown has stopped (i.e. game has started), set pause and gameStart to be opposite to their current values, hence pausing the game
-    if (countdown == 0)
-    {
-      pause =! pause;
-      gameStart =! gameStart;
-    }
-  }
-}
-void keyReleased()
-{
-  keys[keyCode] = false;
-}
-
-// Draw player lives as ships in top left corner of screen
-void drawShipLives()
-{
-  float drawHeight = 13;
-  float drawWidth = drawHeight * 0.7f;
-  
-  for (int i = 0; i < lives; i++)
-  {
-    pushMatrix();
-    translate((i + 1) * 25, 30);
-    stroke(0, 206, 209);
-    line(0, -drawHeight, -drawWidth, drawHeight);
-    line(0, -drawHeight, drawWidth, drawHeight);
-    line(-drawWidth * 0.75f, drawHeight * 0.7f, drawWidth * 0.75f, drawHeight * 0.7f);
-    popMatrix();
-  } 
-}
+boolean enterPowerUp;
+boolean powerupEnabled;
 
 void draw()
 {
@@ -142,16 +92,41 @@ void draw()
      // Once timer has reached time to enter powerup
      if (powerupCountTimer == powerupEntryTimer)
      {
-       // Choose random number: 0, 1 or 2
+       // Choose random number: 0, 1, 2 or 3
        // Enable the corresponding powerup
-       powerup = int(random(2));
-       powerUps[powerup] = true;
+       powerup = int(random(3));
+       //powerUps[powerup] = true;
+       println("PowerUp No.: " + powerup);
+       if (powerup == 2)
+       {
+         if (lives < 10)
+           lives++;
+         powerup = 4;
+       }
+       
+       //powerupCountTimer = 0;
+       
+       enterPowerUp = true;
      }
+     
+     if (enterPowerUp)
+     {
+       power.render(powerup);
+       power.update();
+     }
+     
      // Once powerup has been enabled for 10 seconds, disable
-     if (powerupCountTimer == powerupEntryTimer + powerupTimer)
-     {   
-       powerUps[powerup] = false;
-       powerupCountTimer = 0;
+     if (powerupEnabled)
+     {
+       powerUps[powerup] = true;
+       powerupOnTimer++;
+       if (powerupOnTimer == powerupTimer)
+       {   
+         powerUps[powerup] = false;
+         powerupEnabled = false;
+         powerupOnTimer = 0;
+         powerupCountTimer = 0;
+       }
      }
   }
   
@@ -179,6 +154,7 @@ void draw()
     // 3.. 2.. 1.. Countdown to game start
     if (countdown != 0 && gameStart != true)
     {
+      textSize(40);
       text(countdown + "..", width * 0.5f, height * 0.3f);
       if (countdownTimer > 60)
       {
@@ -234,6 +210,81 @@ void draw()
   
   // Show the user how many lives they have
   drawShipLives();
+  
+  // Show user the current level
+  fill(255);
+  textSize(25);
+  if (level > 1)
+    text("Level " + (level - 1), width * 0.5f, height * 0.065f);
+}
+
+void setupAsteroidObject()
+{
+  lasers.clear();
+  asteroids.clear();
+  AsteroidObject ship = new Ship(UP, LEFT, RIGHT, ' ', width * 0.5f, height * 0.5f);
+  asteroids.add(ship);
+
+  // For first level, 5 big asteroids, 6 for 2nd, 7 for 3rd and so on
+  for (int i = 0; i < noAsteroids[level - 1]; i++)
+  {
+    AsteroidObject asteroid;
+    if (i % 2 == 0)
+      asteroid = new Asteroid(random(200), random(height), 1);
+    else
+      asteroid = new Asteroid(random(width - 200, width), random(height), 1);
+    asteroids.add(asteroid);
+  }
+}
+
+void mousePressed()
+{
+  if (mouseX > width * 0.35f && mouseX < width * 0.65f && mouseY > height * 0.7f && mouseY < height * 0.8f)
+    level = 2;
+}
+void keyPressed()
+{  
+  if (gameStart)
+    keys[keyCode] = true;
+  if (key >= '1' && key <= '2')
+    level = key - '0';
+  
+  // Enable PowerUp
+  if (keyCode == 'Z')
+    powerupEnabled = true;
+  
+  // Pause/Unpause game when P is pressed
+  if (keyCode == 'P')
+  {
+    // If countdown has stopped (i.e. game has started), set pause and gameStart to be opposite to their current values, hence pausing the game
+    if (countdown == 0)
+    {
+      pause =! pause;
+      gameStart =! gameStart;
+    }
+  }
+}
+void keyReleased()
+{
+  keys[keyCode] = false;
+}
+
+// Draw player lives as ships in top left corner of screen
+void drawShipLives()
+{
+  float drawHeight = 13;
+  float drawWidth = drawHeight * 0.7f;
+  
+  for (int i = 0; i < lives; i++)
+  {
+    pushMatrix();
+    translate((i + 1) * 25, 30);
+    stroke(0, 206, 209);
+    line(0, -drawHeight, -drawWidth, drawHeight);
+    line(0, -drawHeight, drawWidth, drawHeight);
+    line(-drawWidth * 0.75f, drawHeight * 0.7f, drawWidth * 0.75f, drawHeight * 0.7f);
+    popMatrix();
+  } 
 }
 
 void shipDeath(PVector pos, int radius, float angle)

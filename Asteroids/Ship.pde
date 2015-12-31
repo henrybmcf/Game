@@ -59,7 +59,7 @@ class Ship extends AsteroidObject
   }
 
   void update()
-  {      
+  {
     moveShip.x = sin(theta);
     moveShip.y = - cos(theta);
     moveShip.mult(speed);
@@ -142,6 +142,11 @@ class Ship extends AsteroidObject
     if (position.y > height)
       position.y = 0;
 
+    // Power Up hit detection
+    //if (position.x > power.pos.x - 15 && position.x < power.pos.x + 15 && position.y > power.pos.y - 15 && position.y < power.pos.y + 15)
+     
+    
+    
     for (int i = 1; i < asteroids.size(); i++)
     {
       // For each asteroid check to see if ship is touching
@@ -186,6 +191,7 @@ class Ship extends AsteroidObject
         {
           gameStart = false;
           fill(255);
+          textSize(40);
           text("GAME OVER", width * 0.5f, height * 0.3f);
           text("Play Again?", width * 0.5f, height * 0.5f);
           text("Yes", width * 0.3f, height * 0.8f);
