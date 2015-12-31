@@ -98,13 +98,36 @@ class Ship extends AsteroidObject
     // Shoot lasers if fire key is pressed and over time limit (ship can only shoot certain amount of lasers per second
     if (keys[fire] && laserTimer > laserTimeLimit)
     {
-      //laserSound.play();   
+      //laserSound.play();
       Laser laser = new Laser();
       laser.position.x = position.x;
       laser.position.y = position.y;
       laser.position.add(PVector.mult(moveShip, 6));
       laser.theta = theta;
       lasers.add(laser);
+      // Double Shooter
+      if (powerUps[0])
+      {
+        Laser doubleLaser = new Laser();
+        doubleLaser.position.x = position.x;
+        doubleLaser.position.y = position.y;
+        doubleLaser.position.add(PVector.mult(moveShip, 6));
+        doubleLaser.theta = theta + PI;
+        lasers.add(doubleLaser);
+      }
+      // Quad Shooter
+      if (powerUps[1])
+      {
+        for (int i = 1; i < 4; i ++)
+        {
+          Laser quadLaser = new Laser();
+          quadLaser.position.x = position.x;
+          quadLaser.position.y = position.y;
+          quadLaser.position.add(PVector.mult(moveShip, 6));
+          quadLaser.theta = theta + (i * HALF_PI);
+          lasers.add(quadLaser);
+        }
+      }
       laserTimer = 0;
     }
     laserTimer++;

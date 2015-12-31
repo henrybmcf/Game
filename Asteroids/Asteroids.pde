@@ -9,7 +9,7 @@ void setup()
   size(700, 600);
   smooth(8);
   for (int i = 0; i < 5; i++)
-    noAsteroids[i] = i + 5;
+    noAsteroids[i] = 1;//i + 5;
   gameStart = false;
   level = 1;
   countdown = 3;
@@ -21,13 +21,18 @@ void setup()
   laserSound = new SoundFile(this, "shoot.wav");
   thrustSound = new SoundFile(this, "thrust.wav");
   explosionSound = new SoundFile(this, "expLarge.wav");
-
   thrust = true;
   reset = false;
   resetTimer = 0;
-
   lives = 1;
   livesHitCounter = 0;
+  
+  for (int i = 0; i < powerUps.length; i++)
+    powerUps[i] = false;
+  
+  powerupTimer = 600;
+  powerupEntryTimer = int(random(300, 600));
+  powerupCountTimer = 0;
 }
 
 boolean[] keys = new boolean[512];
@@ -50,6 +55,13 @@ boolean reset;
 int resetTimer;
 int lives;
 int livesHitCounter;
+
+// 1 = double shooter, 2 = quad shooter, 3 = forcefield
+boolean[] powerUps = new boolean[3];
+int powerup;
+int powerupTimer;
+int powerupEntryTimer;
+int powerupCountTimer;
 
 void setupAsteroidObject()
 {
@@ -110,6 +122,26 @@ void draw()
   background(0);
   stroke(255);
   
+  if (gameStart)
+  {
+     powerupCountTimer++;
+     // Once timer has reached time to enter powerup
+     if (powerupCountTimer == powerupEntryTimer)
+     {
+       // Choose random number: 0, 1 or 2
+       // Enable the corresponding powerup
+       powerup = int(random(2));
+       powerUps[powerup] = true;
+     }
+     // Once powerup has been enabled for 10 seconds, disable
+     if (powerupCountTimer == powerupEntryTimer + powerupTimer)
+     {   
+       powerUps[powerup] = false;
+       powerupCountTimer = 0;
+     }
+  }
+  //println(powerupCountTimer, powerupTimer, powerupEntryTimer + powerupTimer);
+  
   if (level == 1)
   {
     asteroids.get(0).render();
@@ -157,10 +189,10 @@ void draw()
     {
       for (int i = 0; i < asteroids.size(); i++)
       {
-        asteroids.get(i).render();
-        // Only update (move) asteroids if the game has started
-        if (gameStart)
-          asteroids.get(i).update();
+       asteroids.get(i).render();
+       // Only update (move) asteroids if the game has started
+       if (gameStart)
+         asteroids.get(i).update();
       }
 
       for (int i = 0; i < lasers.size(); i++)
@@ -181,6 +213,8 @@ void draw()
       setupAsteroidObject();
       countdown = 3;
       countdownTimer = 0;
+      powerupCountTimer = 0;
+      powerUps[powerup] = false;
     }
   }
   
