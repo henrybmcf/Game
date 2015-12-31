@@ -26,7 +26,7 @@ void setup()
   reset = false;
   resetTimer = 0;
 
-  lives = 5;
+  lives = 1;
   livesHitCounter = 0;
 }
 
@@ -48,7 +48,6 @@ boolean thrust;
 int j, k;
 boolean reset;
 int resetTimer;
-
 
 int lives;
 int livesHitCounter;
