@@ -37,22 +37,26 @@ class Laser extends AsteroidObject
           position.y < asteroids.get(i).position.y + asteroids.get(i).radius * 0.5f)
       {
         //explosionSound.play();
-        
         if (asteroids.get(i).radius == 90)
         {
+          score += 5;
           AsteroidObject asteroid = new Asteroid(asteroids.get(i).position.x, asteroids.get(i).position.y, 2);
           asteroids.add(asteroid);
           asteroid = new Asteroid(asteroids.get(i).position.x, asteroids.get(i).position.y, 2);
           asteroids.add(asteroid);
         }
-        else if (asteroids.get(i).radius == 45)
+        else if (asteroids.get(i).radius == 60)
         {
+          score += 10;
           AsteroidObject asteroid = new Asteroid(asteroids.get(i).position.x, asteroids.get(i).position.y, 3);
           asteroids.add(asteroid);
           asteroid = new Asteroid(asteroids.get(i).position.x, asteroids.get(i).position.y, 3);
           asteroids.add(asteroid);
         }
-        
+        else if (asteroids.get(i).radius == 30)
+        {
+          score += 15;
+        }
         asteroids.remove(i);
         lasers.remove(this);
       }

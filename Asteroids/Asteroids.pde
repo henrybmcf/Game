@@ -8,7 +8,8 @@ void setup()
 {
   size(700, 600);
   smooth(8);
-  for (int i = 0; i < 5; i++)
+  levels = 5;
+  for (int i = 0; i < levels; i++)
     noAsteroids[i] = i + 5;
   gameStart = false;
   pause = false;
@@ -27,10 +28,11 @@ void setup()
   resetTimer = 0;
   lives = 5;
   livesHitCounter = 0;
+  score = 0;
     
   power = new PowerUp(random(width), -20);
   // Enter powerup onto screen after random time between 5 & 10 seconds.
-  entryTime = 150;//= int(random(300, 600));
+  entryTime = int(random(300, 600));
   // Timer to time entry onto screen
   entryCountTimer = 0;
   // Initiliase onScreen, collected & activated boolean arrays to be false for start of game 
@@ -49,6 +51,7 @@ void setup()
 boolean[] keys = new boolean[512];
 ArrayList<AsteroidObject> asteroids = new ArrayList<AsteroidObject>();
 ArrayList<Laser> lasers = new ArrayList<Laser>();
+int levels;
 int[] noAsteroids = new int[5];
 boolean gameStart;
 // Boolean to set game to a paused state
@@ -69,11 +72,13 @@ int resetTimer;
 int lives;
 int livesHitCounter;
 
+int score;
+
 PowerUp power;
 // Integer to select powerup
 int powerup;
-// 1 = double shooter, 2 = quad shooter, 3 = extra life, 4 = forcefield, 5 = empty (to change to once extra life has been added)
-int noPowerUps = 5;
+// 1 = double shooter, 2 = quad shooter, 3 = extra life, 4 = forcefield
+int noPowerUps = 4;
 // Time to enter onto screen
 int entryTime;
 // Timer to time entry onto screen
@@ -84,7 +89,7 @@ boolean[] onScreen = new boolean[noPowerUps];
 boolean[] collected = new boolean[noPowerUps];
 // Boolean array for is powerup has been activated
 boolean[] activated = new boolean[noPowerUps];
-// Timer to time how long powerup has been active and to subsequently deactivate
+// Time how long powerup has been active and to subsequently deactivate
 int activeTimer;
 // Time to deactivate powerup
 int deactivateTime;
@@ -93,57 +98,6 @@ void draw()
 {
   background(0);
   stroke(255);
-  
-  // Powerup stuff
-  if (gameStart)
-  {
-    // Increment entry timer to know when to enter onto screen
-    entryCountTimer++;
-     
-    // Once timer has reached time to enter, enter powerup onto screen
-    if (entryCountTimer == entryTime)
-    {
-      // Select a random powerup
-      powerup = int(random(3));   
-      
-      // Set that powerup to be on screen
-      onScreen[powerup] = true;
-    }
-    
-    // Check to see if any powerups are supposed to be on screen 
-    for (int i = 0; i < noPowerUps; i++)
-    {
-      if (onScreen[i])
-      {
-        // Call class to show powerup and move across screen
-        power.render(powerup);
-        power.update();
-      }
-    }
-    
-    // Check to see if any powerups are active
-    for (int i = 0; i < noPowerUps; i++)
-    {
-      // If they are, start timing how long they have been active for
-      if (activated[i])
-      {
-        activeTimer++;
-        
-        // Once they reach the time limit, deactivate the powerup and reset the timer
-        if (activeTimer == deactivateTime)
-        {
-          activated[i] = false;
-          activeTimer = 0;
-        }
-      }
-    }
-  }
-  
-  for (int i = 0; i < noPowerUps; i++)
-  {
-    if (collected[i])
-      drawPowerupSymbols(i);
-  }
   
   if (level == 1)
   {
@@ -154,8 +108,8 @@ void draw()
     text("ASTEROIDS", width * 0.5f, height * 0.3f);
     if (mouseX > width * 0.35f && mouseX < width * 0.65f && mouseY > height * 0.7f && mouseY < height * 0.8f)
     {
-      fill(0, 255, 0);
-      textSize(50);
+      fill(255, 255, 0);
+      textSize(45);
     }
     else
     {
@@ -233,6 +187,55 @@ void draw()
     }
   }
   
+  // Powerup timing, collection and activations
+  if (gameStart)
+  {
+    // Increment entry timer to know when to enter onto screen
+    entryCountTimer++;    
+    // Once timer has reached time to enter, enter powerup onto screen
+    if (entryCountTimer == entryTime)
+    {
+      // Select a random powerup
+      powerup = int(random(3));   
+      // Set that powerup to be on screen
+      onScreen[powerup] = true;
+    }
+    
+    // Check to see if any powerups are supposed to be on screen 
+    for (int i = 0; i < noPowerUps; i++)
+    {
+      if (onScreen[i])
+      {
+        // Call class to show powerup and move across screen
+        power.render(powerup);
+        power.update();
+      }
+    }
+    
+    // Check to see if any powerups are active
+    for (int i = 0; i < noPowerUps; i++)
+    {
+      // If they are, start timing how long they have been active for
+      if (activated[i])
+      {
+        activeTimer++;     
+        // Once they reach the time limit, deactivate the powerup and reset the timer
+        if (activeTimer == deactivateTime)
+        {
+          activated[i] = false;
+          activeTimer = 0;
+        }
+      }
+    }
+  }
+  
+  // Draw which power ups have been collected
+  for (int i = 0; i < noPowerUps; i++)
+  {
+    if (collected[i])
+      drawPowerupSymbols(i);
+  }
+  
   // Show the user how many lives they have
   drawShipLives();
   
@@ -241,6 +244,9 @@ void draw()
   textSize(25);
   if (level > 1)
     text("Level " + (level - 1), width * 0.5f, height * 0.065f);
+  
+  // Show user their current score
+  text(score, width * 0.95f, height * 0.95f);
 }
 
 void setupAsteroidObject()
@@ -391,9 +397,9 @@ void drawPowerupSymbols(int ID)
 {
   // Draw the relevant powerup symbols in the top right corner when collected
   pushMatrix();
-  translate(width - ((ID + 1) * 50), height * 0.05f);
+  translate(width - ((ID + 1) * 40), height * 0.05f);
   fill(0);
-  stroke(255);
+  stroke(0, 206, 209);
   ellipse(0, 0, 30, 30);
   
   switch(ID)

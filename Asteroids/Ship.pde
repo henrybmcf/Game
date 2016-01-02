@@ -146,7 +146,7 @@ class Ship extends AsteroidObject
     // If ship hits (collects) a power up, hide powerup (set onScreen to be false) and set powerup entry timer to zero (i.e. start timing for next powerup to enter)
     if (position.x > power.pos.x - 30 && position.x < power.pos.x + 30 && position.y > power.pos.y - 30 && position.y < power.pos.y + 30)
     {
-      power.pos = new PVector(50, -20);
+      power = new PowerUp(random(width), -20);
       if (powerup != 2)
         collected[powerup] = true;
       else
@@ -198,6 +198,7 @@ class Ship extends AsteroidObject
         else
         {
           gameStart = false;
+          score = 0;
           fill(255);
           textSize(40);
           text("GAME OVER", width * 0.5f, height * 0.3f);

@@ -19,7 +19,10 @@ class Asteroid extends AsteroidObject
     medAsteroid.resize(medAstRad, medAstRad);
     smallAsteroid = loadImage("asteroid.png");
     smallAsteroid.resize(smallAstRad, smallAstRad);
-    radius = largeAstRad/size;
+    if (size == 2)
+      radius = largeAstRad / (size * 0.75f);
+    else
+      radius = largeAstRad / size;
     this.size = size;
   }
   

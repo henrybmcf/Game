@@ -14,7 +14,7 @@ class PowerUp extends AsteroidObject
   PowerUp(float startX, float startY)
   {
     pos = new PVector(startX, startY);
-
+    
     if (startX > width * 0.5f)
       move = new PVector(-0.5, 0.75);
     else
@@ -36,6 +36,7 @@ class PowerUp extends AsteroidObject
     pushMatrix();
     translate(pos.x, pos.y);
     fill(0);
+    stroke(aqua);
     ellipse(0, 0, size, size);
     
     switch (ID)
@@ -78,8 +79,7 @@ class PowerUp extends AsteroidObject
     {
       onScreen[ID] = false;
       entryCountTimer = 0;
-      println(entryCountTimer);
-      pos = new PVector(random(width), -20); 
+      power = new PowerUp(random(width), -20);
     }
   }
 }

@@ -27,14 +27,17 @@ class AsteroidObject
     else if (size == 2)
       astSpeed = 0.35f;
     else if (size == 3)
-      astSpeed = 0.45f;
+      astSpeed = 0.4f;
     // Set random asteroids to go in opposite directions
     if (random(1) > 0.5f)
       astSpeed = -astSpeed;
     if (random(1) > 0.5f)
       size = -size;
-    // Set movement of asteroid to be random on the y axis, speed dependent on size 
-    asteroidMove = new PVector(astSpeed, random(size, size * 1.5));
+    // Set movement of asteroid to be random on the y axis, speed dependent on size
+    if (random(1) > 0.5f)
+      asteroidMove = new PVector(astSpeed, random(size, size * 1.5));
+    else
+      asteroidMove = new PVector(-astSpeed, random(-size, -size * 1.5));
 
     this.theta = 0.0f;
     this.shipHeight = 20;
