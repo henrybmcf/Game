@@ -1,4 +1,4 @@
-class PowerUp extends AsteroidObject
+class PowerUp
 {
   PVector pos;
   PVector move;

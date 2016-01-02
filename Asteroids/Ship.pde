@@ -31,7 +31,6 @@ class Ship extends AsteroidObject
   }
 
   // Draw the ship in the correct position and at the correct angle
-  // Draw thrust flame is ship is moving
   void render()
   {
     pushMatrix();
@@ -41,6 +40,8 @@ class Ship extends AsteroidObject
     line(0, -shipHeight, -shipWidth, shipHeight);
     line(0, -shipHeight, shipWidth, shipHeight);
     line(-shipWidth * 0.75f, shipHeight * 0.7f, shipWidth * 0.75f, shipHeight * 0.7f);
+    
+    // Draw thrust flame is ship is moving
     if (thrust)
     {
       if (thrustFlicker > 2)
@@ -94,6 +95,7 @@ class Ship extends AsteroidObject
             asteroids.get(i).position.y + asteroids.get(i).radius * 0.5f > position.y - nukeRadius &&
             asteroids.get(i).position.y - asteroids.get(i).radius * 0.5f < position.y + nukeRadius)
         {
+           nukeSound.play();
            asteroids.remove(i); 
         }
       }
@@ -117,8 +119,8 @@ class Ship extends AsteroidObject
     if (keys[move] || keys[left] || keys[right])
     {
       thrust = true;
-      //thrustSound.play();
-      //thrustSound.amp(0.08);
+      thrustSound.play();
+      thrustSound.amp(0.08);
     }
     else
     {
@@ -138,7 +140,7 @@ class Ship extends AsteroidObject
     // Shoot lasers if fire key is pressed and over time limit (ship can only shoot certain amount of lasers per second
     if (keys[fire] && laserTimer > laserTimeLimit)
     {
-      //laserSound.play();
+      laserSound.play();
       Laser laser = new Laser();
       laser.position.x = position.x;
       laser.position.y = position.y;
@@ -187,15 +189,9 @@ class Ship extends AsteroidObject
     {
       power = new PowerUp(random(width), -20);
       if (powerup != 3)
-      {
         collected[powerup] = true;
-        println(collected[powerup]);
-        println(powerup);
-      }
       else
-      {
         lives++;
-      }
       onScreen[powerup] = false;
       entryCountTimer = 0;
     }

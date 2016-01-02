@@ -1,8 +1,11 @@
 import processing.sound.*;
 
+SoundFile intro;
+SoundFile countdownSound;
 SoundFile laserSound;
 SoundFile thrustSound;
 SoundFile explosionSound;
+SoundFile nukeSound;
 
 void setup()
 {
@@ -15,15 +18,20 @@ void setup()
   gameStart = false;
   pause = false;
   level = 1;
-  countdown = 3;
+  countdown = 5;
   countdownTimer = 0;
   smallAstRad = 30;
   medAstRad = 60;
   largeAstRad = 90;
   setupAsteroidObject();
+  intro = new SoundFile(this, "introMusic.wav");
+  intro.rate(0.4);
+  intro.play();
+  countdownSound = new SoundFile(this, "countdown.mp3");
   laserSound = new SoundFile(this, "shoot.wav");
   thrustSound = new SoundFile(this, "thrust.wav");
   explosionSound = new SoundFile(this, "expLarge.wav");
+  nukeSound = new SoundFile(this, "nuke.wav"); 
   thrust = true;
   reset = false;
   resetTimer = 0;
@@ -148,6 +156,7 @@ void draw()
     // Only start game if pause is not active
     else if (pause == false)
     {
+      countdownSound.stop();
       gameStart = true;
     }
 
@@ -283,26 +292,25 @@ void setupAsteroidObject()
 void mousePressed()
 {
   if (mouseX > width * 0.35f && mouseX < width * 0.65f && mouseY > height * 0.7f && mouseY < height * 0.8f)
+  {
     level = 2;
+    intro.stop();
+    countdownSound.play();
+  }
 }
 void keyPressed()
 {  
   if (gameStart)
     keys[keyCode] = true;
-  //if (key >= '1' && key <= '2')
-  //  level = key - '0';
   
   // Enable relevant powerup when key pressed if within collection and not already activated
   if (key >= '1' && key <= '3')
   {
-    println(key - '0' - 1);
-    println(collected[key - '0' - 1], activated[key - '0' - 1]);
     if (collected[key - '0' - 1] && activated[key - '0' - 1] == false)
     {
       // Set powerup to be activated and remove from collection
       activated[key - '0' - 1] = true;
       collected[key - '0' - 1] = false;
-      println("Key");
     }
   }
   
@@ -346,6 +354,7 @@ void shipDeath(PVector pos, int radius, float angle)
   int points = 13;
   if (resetTimer < 120)
   {
+    // Set all keys to false, so player cannot move ship
     for (int i = 0; i < keys.length; i++)
       keys[i] = false;
     pushMatrix();
