@@ -11,6 +11,8 @@ class Ship extends AsteroidObject
   int explosionRadius;
   float expTheta;
   boolean resistance;
+  
+  float angle = 0;
 
   Ship(int move, int left, int right, int fire, float startX, float startY)
   {
@@ -60,6 +62,43 @@ class Ship extends AsteroidObject
 
   void update()
   {
+    if (activated[2])
+    {
+      // Time exlposion graphics of ship explosion
+      if (nukeTimer == 2)
+      {
+        if (nukeRadius < 200)
+        {
+          nukeRadius += 4;
+          angle += 0.08f;
+          nukeExplosion(position, angle);
+          nukeRadius -= 3;
+          angle -= 0.05f;
+          nukeExplosion(position, angle);
+          nukeTimer = 0;
+        }
+        else
+        {
+          activated[2] = false;
+          nukeRadius = 30;
+          nukeTimer = 0;
+        }
+      }
+      nukeTimer++;
+      
+      // Check to see if any asteroids are withing nuke blast radius, if they are, remove them from the game
+      for (int i = 1; i < asteroids.size(); i++)
+      {
+        if (asteroids.get(i).position.x + asteroids.get(i).radius * 0.5f > position.x - nukeRadius && 
+            asteroids.get(i).position.x - asteroids.get(i).radius * 0.5f < position.x + nukeRadius &&
+            asteroids.get(i).position.y + asteroids.get(i).radius * 0.5f > position.y - nukeRadius &&
+            asteroids.get(i).position.y - asteroids.get(i).radius * 0.5f < position.y + nukeRadius)
+        {
+           asteroids.remove(i); 
+        }
+      }
+    }
+    
     moveShip.x = sin(theta);
     moveShip.y = - cos(theta);
     moveShip.mult(speed);
@@ -80,7 +119,8 @@ class Ship extends AsteroidObject
       thrust = true;
       //thrustSound.play();
       //thrustSound.amp(0.08);
-    } else
+    }
+    else
     {
       thrust = false;
     }
@@ -142,15 +182,20 @@ class Ship extends AsteroidObject
     if (position.y > height)
       position.y = 0;
 
-
     // If ship hits (collects) a power up, hide powerup (set onScreen to be false) and set powerup entry timer to zero (i.e. start timing for next powerup to enter)
     if (position.x > power.pos.x - 30 && position.x < power.pos.x + 30 && position.y > power.pos.y - 30 && position.y < power.pos.y + 30)
     {
       power = new PowerUp(random(width), -20);
-      if (powerup != 2)
+      if (powerup != 3)
+      {
         collected[powerup] = true;
+        println(collected[powerup]);
+        println(powerup);
+      }
       else
+      {
         lives++;
+      }
       onScreen[powerup] = false;
       entryCountTimer = 0;
     }
@@ -177,7 +222,7 @@ class Ship extends AsteroidObject
           gameStart = false;
           // Stop ship from moving
           resistance = false;
-          // Time exlposion grpahics of ship
+          // Time exlposion graphics of ship explosion
           if (explosionTimer > 1)
           {
             shipDeath(position, explosionRadius, expTheta);

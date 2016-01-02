@@ -7,6 +7,7 @@ SoundFile explosionSound;
 void setup()
 {
   size(700, 600);
+  //fullScreen();
   smooth(8);
   levels = 5;
   for (int i = 0; i < levels; i++)
@@ -32,7 +33,7 @@ void setup()
     
   power = new PowerUp(random(width), -20);
   // Enter powerup onto screen after random time between 5 & 10 seconds.
-  entryTime = int(random(300, 600));
+  entryTime = 100;//int(random(300, 600));
   // Timer to time entry onto screen
   entryCountTimer = 0;
   // Initiliase onScreen, collected & activated boolean arrays to be false for start of game 
@@ -46,6 +47,12 @@ void setup()
   activeTimer = 0;
   // Deactivate powerup after 5 seconds
   deactivateTime = 300;
+  
+  nukeRadius = 30;
+  nukeTimer = 0;
+  
+  powerupSymbol = 30;
+  nukeSymbol = powerupSymbol * 0.9f;
 }
 
 boolean[] keys = new boolean[512];
@@ -77,7 +84,7 @@ int score;
 PowerUp power;
 // Integer to select powerup
 int powerup;
-// 1 = double shooter, 2 = quad shooter, 3 = extra life, 4 = forcefield
+// 1 = double shooter, 2 = quad shooter, 3 = Nuke, 4 = extra life, 5 = forcefield (maybe)
 int noPowerUps = 4;
 // Time to enter onto screen
 int entryTime;
@@ -93,6 +100,12 @@ boolean[] activated = new boolean[noPowerUps];
 int activeTimer;
 // Time to deactivate powerup
 int deactivateTime;
+
+float nukeRadius;
+int nukeTimer;
+
+int powerupSymbol;
+float nukeSymbol;
 
 void draw()
 {
@@ -196,7 +209,7 @@ void draw()
     if (entryCountTimer == entryTime)
     {
       // Select a random powerup
-      powerup = int(random(3));   
+      powerup = int(random(noPowerUps));   
       // Set that powerup to be on screen
       onScreen[powerup] = true;
     }
@@ -217,14 +230,14 @@ void draw()
     {
       // If they are, start timing how long they have been active for
       if (activated[i])
-      {
-        activeTimer++;     
+      {      
         // Once they reach the time limit, deactivate the powerup and reset the timer
         if (activeTimer == deactivateTime)
         {
           activated[i] = false;
           activeTimer = 0;
         }
+        activeTimer++; 
       }
     }
   }
@@ -256,7 +269,6 @@ void setupAsteroidObject()
   AsteroidObject ship = new Ship(UP, LEFT, RIGHT, ' ', width * 0.5f, height * 0.5f);
   asteroids.add(ship);
 
-  // For first level, 5 big asteroids, 6 for 2nd, 7 for 3rd and so on
   for (int i = 0; i < noAsteroids[level - 1]; i++)
   {
     AsteroidObject asteroid;
@@ -281,13 +293,16 @@ void keyPressed()
   //  level = key - '0';
   
   // Enable relevant powerup when key pressed if within collection and not already activated
-  if (key >= '1' && key <= '2')
+  if (key >= '1' && key <= '3')
   {
+    println(key - '0' - 1);
+    println(collected[key - '0' - 1], activated[key - '0' - 1]);
     if (collected[key - '0' - 1] && activated[key - '0' - 1] == false)
     {
       // Set powerup to be activated and remove from collection
       activated[key - '0' - 1] = true;
       collected[key - '0' - 1] = false;
+      println("Key");
     }
   }
   
@@ -400,10 +415,11 @@ void drawPowerupSymbols(int ID)
   translate(width - ((ID + 1) * 40), height * 0.05f);
   fill(0);
   stroke(0, 206, 209);
-  ellipse(0, 0, 30, 30);
+  ellipse(0, 0, powerupSymbol, powerupSymbol);
   
   switch(ID)
   {
+    // Double Shooter
     case 0:
       fill(255, 0, 0);
       stroke(255, 0, 0);
@@ -412,6 +428,7 @@ void drawPowerupSymbols(int ID)
       stroke(255, 255, 0);
       ellipse(-5, 0, 3, 3);
       break;
+    // Quad Shooter
     case 1:
       fill(255, 0, 0);
       stroke(255, 0, 0);
@@ -422,6 +439,47 @@ void drawPowerupSymbols(int ID)
       ellipse(5, -5, 2, 2);
       ellipse(-5, 5, 2, 2);
       break;
+    // Nuke
+    case 2:
+      float beta = TWO_PI / 6;
+      stroke(255, 255, 0);
+      fill(255, 255, 0);
+      arc(0, 0, nukeSymbol, nukeSymbol, beta, beta * 2.0f);
+      arc(0, 0, nukeSymbol, nukeSymbol, PI, PI + beta);
+      arc(0, 0, nukeSymbol, nukeSymbol, TWO_PI - beta, TWO_PI);
+      stroke(0);
+      ellipse(0, 0, powerupSymbol * 0.15f, powerupSymbol * 0.15f);
+      break;
+  }
+  popMatrix();
+}
+
+void nukeExplosion(PVector pos, float angle)
+{
+  int points = 15;
+  pushMatrix();
+  translate(pos.x, pos.y);
+  rotate(angle);
+  float thetaInc = TWO_PI / (points * 2);
+  float lastX = 0;
+  float lastY = -nukeRadius;
+  stroke(255, 0, 0);
+  for (int i = 1; i <= (points * 2); i++)
+  {
+    float theta = i * thetaInc;
+    float x, y;
+    if (i % 2 == 1)
+    {
+      x = sin(theta) * (nukeRadius * 0.95f);
+      y = -cos(theta) * (nukeRadius * 0.95f);
+    } else
+    {
+      x = sin(theta) * nukeRadius;
+      y = -cos(theta) * nukeRadius;
+    }
+    line(lastX, lastY, x, y);
+    lastX = x;
+    lastY = y;
   }
   popMatrix();
 }

@@ -7,6 +7,8 @@ class PowerUp extends AsteroidObject
   int laserSize;
   int lifeHeight;
   float lifeWidth;
+  float theta;
+  float sym;
   color red;
   color yellow;
   color aqua;
@@ -24,6 +26,8 @@ class PowerUp extends AsteroidObject
     laserSize = 3;
     lifeHeight = 10;
     lifeWidth = lifeHeight * 0.7f;
+    theta = TWO_PI / 6;
+    sym = size * 0.9f;
     red = color(255, 0, 0);
     yellow = color(255, 255, 0);
     aqua = color(0, 206, 209);
@@ -41,6 +45,7 @@ class PowerUp extends AsteroidObject
     
     switch (ID)
     {
+      // Double Shooter
       case 0:
         fill(red);
         stroke(red);
@@ -49,6 +54,7 @@ class PowerUp extends AsteroidObject
         stroke(yellow);
         ellipse(-5, 0, laserSize, laserSize);
         break;
+      // Quad Shooter
       case 1:
         fill(red);
         stroke(red);
@@ -59,12 +65,23 @@ class PowerUp extends AsteroidObject
         ellipse(5, -5, laserSize, laserSize);
         ellipse(-5, 5, laserSize, laserSize);
         break;
+      // Nuke
       case 2:
+        stroke(yellow);
+        fill(yellow);
+        arc(0, 0, sym, sym, theta, theta * 2.0f);
+        arc(0, 0, sym, sym, PI, PI + theta);
+        arc(0, 0, sym, sym, TWO_PI - theta, TWO_PI);
+        stroke(0);
+        ellipse(0, 0, size * 0.15f, size * 0.15f);
+        break;
+      // Extra Life
+      case 3:
         stroke(aqua);
         line(0, -lifeHeight, -lifeWidth, lifeHeight);
         line(0, -lifeHeight, lifeWidth, lifeHeight);
         line(-lifeWidth * 0.75f, lifeHeight * 0.7f, lifeWidth * 0.75f, lifeHeight * 0.7f);
-        break;
+        break; 
     }
     popMatrix();
   }

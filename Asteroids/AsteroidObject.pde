@@ -37,7 +37,7 @@ class AsteroidObject
     if (random(1) > 0.5f)
       asteroidMove = new PVector(astSpeed, random(size, size * 1.5));
     else
-      asteroidMove = new PVector(-astSpeed, random(-size, -size * 1.5));
+      asteroidMove = new PVector(random(-size, -size * 1.5), astSpeed);
 
     this.theta = 0.0f;
     this.shipHeight = 20;
