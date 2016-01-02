@@ -78,8 +78,8 @@ class Ship extends AsteroidObject
     if (keys[move] || keys[left] || keys[right])
     {
       thrust = true;
-      //thrustSound.play();
-      //thrustSound.amp(0.08);
+      thrustSound.play();
+      thrustSound.amp(0.08);
     } else
     {
       thrust = false;
@@ -98,7 +98,7 @@ class Ship extends AsteroidObject
     // Shoot lasers if fire key is pressed and over time limit (ship can only shoot certain amount of lasers per second
     if (keys[fire] && laserTimer > laserTimeLimit)
     {
-      //laserSound.play();
+      laserSound.play();
       Laser laser = new Laser();
       laser.position.x = position.x;
       laser.position.y = position.y;
@@ -142,9 +142,14 @@ class Ship extends AsteroidObject
     if (position.y > height)
       position.y = 0;
 
-    // Power Up hit detection
-    //if (position.x > power.pos.x - 15 && position.x < power.pos.x + 15 && position.y > power.pos.y - 15 && position.y < power.pos.y + 15)
-     
+
+
+    // If ship hits (collects) a power up, hide powerup (set onScreen to be false) and set powerup entry timer to zero (i.e. start timing for next powerup to enter)
+    if (position.x > power.pos.x - 15 && position.x < power.pos.x + 15 && position.y > power.pos.y - 15 && position.y < power.pos.y + 15)
+    {
+       onScreen[powerup] = false;
+       entryCountTimer = 0;
+    }
     
     
     for (int i = 1; i < asteroids.size(); i++)

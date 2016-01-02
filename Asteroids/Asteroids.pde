@@ -32,9 +32,14 @@ void setup()
   for (int i = 0; i < powerUps.length; i++)
     powerUps[i] = false;
   
+  // PowerUp Timers
+  
   powerupTimer = 600;
-  powerupEntryTimer = int(random(300, 600));
-  powerupCountTimer = 0;
+  
+  // Time to enter onto screen
+  entryTime = 150;//= int(random(300, 600));
+  // Timer to time entry onto screen
+  entryCountTimer = 0;
   
   powerupOnTimer = 0;
   
@@ -71,8 +76,14 @@ int livesHitCounter;
 boolean[] powerUps = new boolean[5];
 int powerup;
 int powerupTimer;
-int powerupEntryTimer;
-int powerupCountTimer;
+
+int noPowerUps = 5;
+// Time to enter onto screen
+int entryTime;
+// Timer to time entry onto screen
+int entryCountTimer;
+// Boolean array for if powerup is on screen or not. True = on screen.
+boolean[] onScreen = new boolean[noPowerUps];
 
 int powerupOnTimer;
 
@@ -86,12 +97,37 @@ void draw()
   background(0);
   stroke(255);
   
+  // Powerup stuff
   if (gameStart)
   {
-     powerupCountTimer++;
-     // Once timer has reached time to enter powerup
-     if (powerupCountTimer == powerupEntryTimer)
-     {
+    // Increment entry timer to know when to enter onto screen
+    entryCountTimer++;
+     
+    // Once timer has reached time to enter, enter powerup onto screen
+    if (entryCountTimer == entryTime)
+    {
+      // Select a random powerup
+      //powerup = int(random(3));
+      
+      /* For now hard code to be first powerup (double shooter) for testing purposes */
+      powerup = 0;
+      // Set that powerup to be on screen
+      onScreen[powerup] = true;
+    }
+    
+    // Check to see if any powerups are supposed to be on screen 
+    for (int i = 0; i < noPowerUps; i++)
+    {
+      if (onScreen[i])
+      {
+        // Call class to show powerup and move across screen
+        power.render(powerup);
+        power.update();
+      }
+    }
+  }
+      
+  /*   
        // Choose random number: 0, 1, 2 or 3
        // Enable the corresponding powerup
        powerup = int(random(3));
@@ -129,6 +165,7 @@ void draw()
        }
      }
   }
+  */
   
   if (level == 1)
   {
