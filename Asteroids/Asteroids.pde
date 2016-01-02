@@ -27,35 +27,32 @@ void setup()
   resetTimer = 0;
   lives = 5;
   livesHitCounter = 0;
-  
-  // Set all powerups to be false for beginning of game
-  for (int i = 0; i < powerUps.length; i++)
-    powerUps[i] = false;
-  
-  // PowerUp Timers
-  
-  powerupTimer = 600;
-  
-  // Time to enter onto screen
+    
+  power = new PowerUp(random(width), -20);
+  // Enter powerup onto screen after random time between 5 & 10 seconds.
   entryTime = 150;//= int(random(300, 600));
   // Timer to time entry onto screen
   entryCountTimer = 0;
-  
-  powerupOnTimer = 0;
-  
-  power = new PowerUp(50, -20);
-  
-  enterPowerUp = false;
-  powerupEnabled = false;
+  // Initiliase onScreen, collected & activated boolean arrays to be false for start of game 
+  for (int i = 0; i < noPowerUps; i++)
+  {
+    onScreen[i] = false;
+    collected[i] = false;
+    activated[i] = false;
+  }
+  // Timer to time how long powerup has been active and to subsequently deactivate
+  activeTimer = 0;
+  // Deactivate powerup after 5 seconds
+  deactivateTime = 300;
 }
-
-PowerUp power;
 
 boolean[] keys = new boolean[512];
 ArrayList<AsteroidObject> asteroids = new ArrayList<AsteroidObject>();
 ArrayList<Laser> lasers = new ArrayList<Laser>();
 int[] noAsteroids = new int[5];
 boolean gameStart;
+// Boolean to set game to a paused state
+boolean pause;
 int level;
 int countdown;
 int countdownTimer;
@@ -72,11 +69,10 @@ int resetTimer;
 int lives;
 int livesHitCounter;
 
-// 1 = double shooter, 2 = quad shooter, 3 = extra life, 4 = forcefield, 5 = empty (to change to once extra life has been added)
-boolean[] powerUps = new boolean[5];
+PowerUp power;
+// Integer to select powerup
 int powerup;
-int powerupTimer;
-
+// 1 = double shooter, 2 = quad shooter, 3 = extra life, 4 = forcefield, 5 = empty (to change to once extra life has been added)
 int noPowerUps = 5;
 // Time to enter onto screen
 int entryTime;
@@ -84,13 +80,14 @@ int entryTime;
 int entryCountTimer;
 // Boolean array for if powerup is on screen or not. True = on screen.
 boolean[] onScreen = new boolean[noPowerUps];
-
-int powerupOnTimer;
-
-boolean pause;
-
-boolean enterPowerUp;
-boolean powerupEnabled;
+// Boolean array for if powerup has been collected by ship
+boolean[] collected = new boolean[noPowerUps];
+// Boolean array for is powerup has been activated
+boolean[] activated = new boolean[noPowerUps];
+// Timer to time how long powerup has been active and to subsequently deactivate
+int activeTimer;
+// Time to deactivate powerup
+int deactivateTime;
 
 void draw()
 {
@@ -107,10 +104,8 @@ void draw()
     if (entryCountTimer == entryTime)
     {
       // Select a random powerup
-      //powerup = int(random(3));
+      powerup = int(random(3));   
       
-      /* For now hard code to be first powerup (double shooter) for testing purposes */
-      powerup = 0;
       // Set that powerup to be on screen
       onScreen[powerup] = true;
     }
@@ -125,47 +120,30 @@ void draw()
         power.update();
       }
     }
+    
+    // Check to see if any powerups are active
+    for (int i = 0; i < noPowerUps; i++)
+    {
+      // If they are, start timing how long they have been active for
+      if (activated[i])
+      {
+        activeTimer++;
+        
+        // Once they reach the time limit, deactivate the powerup and reset the timer
+        if (activeTimer == deactivateTime)
+        {
+          activated[i] = false;
+          activeTimer = 0;
+        }
+      }
+    }
   }
-      
-  /*   
-       // Choose random number: 0, 1, 2 or 3
-       // Enable the corresponding powerup
-       powerup = int(random(3));
-       //powerUps[powerup] = true;
-       println("PowerUp No.: " + powerup);
-       if (powerup == 2)
-       {
-         if (lives < 10)
-           lives++;
-         powerup = 4;
-       }
-       
-       //powerupCountTimer = 0;
-       
-       enterPowerUp = true;
-     }
-     
-     if (enterPowerUp)
-     {
-       power.render(powerup);
-       power.update();
-     }
-     
-     // Once powerup has been enabled for 10 seconds, disable
-     if (powerupEnabled)
-     {
-       powerUps[powerup] = true;
-       powerupOnTimer++;
-       if (powerupOnTimer == powerupTimer)
-       {   
-         powerUps[powerup] = false;
-         powerupEnabled = false;
-         powerupOnTimer = 0;
-         powerupCountTimer = 0;
-       }
-     }
+  
+  for (int i = 0; i < noPowerUps; i++)
+  {
+    if (collected[i])
+      drawPowerupSymbols(i);
   }
-  */
   
   if (level == 1)
   {
@@ -191,6 +169,7 @@ void draw()
     // 3.. 2.. 1.. Countdown to game start
     if (countdown != 0 && gameStart != true)
     {
+      fill(255);
       textSize(40);
       text(countdown + "..", width * 0.5f, height * 0.3f);
       if (countdownTimer > 60)
@@ -237,11 +216,20 @@ void draw()
     {
       gameStart = false;
       level++;
+      // Player gets an extra life for each level they pass after level 2
+      if (level > 2)
+        lives++;
       setupAsteroidObject();
       countdown = 3;
       countdownTimer = 0;
-      powerupCountTimer = 0;
-      powerUps[powerup] = false;
+      
+      // Reset any currently activated powerups to be false (deactivated)
+      for(int i = 0; i < noPowerUps; i++)
+      {
+        if (activated[i])
+          activated[i] = false;
+        activeTimer = 0;
+      }
     }
   }
   
@@ -283,12 +271,19 @@ void keyPressed()
 {  
   if (gameStart)
     keys[keyCode] = true;
-  if (key >= '1' && key <= '2')
-    level = key - '0';
+  //if (key >= '1' && key <= '2')
+  //  level = key - '0';
   
-  // Enable PowerUp
-  if (keyCode == 'Z')
-    powerupEnabled = true;
+  // Enable relevant powerup when key pressed if within collection and not already activated
+  if (key >= '1' && key <= '2')
+  {
+    if (collected[key - '0' - 1] && activated[key - '0' - 1] == false)
+    {
+      // Set powerup to be activated and remove from collection
+      activated[key - '0' - 1] = true;
+      collected[key - '0' - 1] = false;
+    }
+  }
   
   // Pause/Unpause game when P is pressed
   if (keyCode == 'P')
@@ -371,10 +366,8 @@ void resetShip()
 
   for (int i = 1; i < asteroids.size(); i++)
   {
-    if (asteroids.get(i).position.x > width * 0.3f &&
-      asteroids.get(i).position.x < width * 0.7f && 
-      asteroids.get(i).position.y > height * 0.3f &&
-      asteroids.get(i).position.y < height * 0.7f)
+    if (asteroids.get(i).position.x > width * 0.3f && asteroids.get(i).position.x < width * 0.7f && 
+      asteroids.get(i).position.y > height * 0.3f && asteroids.get(i).position.y < height * 0.7f)
     {
       asteroids.get(i).position.x = random(width);
       asteroids.get(i).position.y = random(200);
@@ -384,4 +377,45 @@ void resetShip()
   countdown = 3;
   resetTimer = 0;
   livesHitCounter = 0;
+  
+  // Reset any currently activated powerups to be false (deactivated)
+  for(int i = 0; i < noPowerUps; i++)
+  {
+    if (activated[i])
+      activated[i] = false;
+    activeTimer = 0;
+  }
+}
+
+void drawPowerupSymbols(int ID)
+{
+  // Draw the relevant powerup symbols in the top right corner when collected
+  pushMatrix();
+  translate(width - ((ID + 1) * 50), height * 0.05f);
+  fill(0);
+  stroke(255);
+  ellipse(0, 0, 30, 30);
+  
+  switch(ID)
+  {
+    case 0:
+      fill(255, 0, 0);
+      stroke(255, 0, 0);
+      ellipse(5, 0, 3, 3);
+      fill(255, 255, 0);
+      stroke(255, 255, 0);
+      ellipse(-5, 0, 3, 3);
+      break;
+    case 1:
+      fill(255, 0, 0);
+      stroke(255, 0, 0);
+      ellipse(-5, -5, 2, 2);
+      ellipse(5, 5, 2, 2);
+      fill(255, 255, 0);
+      stroke(255, 255, 0);
+      ellipse(5, -5, 2, 2);
+      ellipse(-5, 5, 2, 2);
+      break;
+  }
+  popMatrix();
 }

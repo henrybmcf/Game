@@ -78,8 +78,8 @@ class Ship extends AsteroidObject
     if (keys[move] || keys[left] || keys[right])
     {
       thrust = true;
-      thrustSound.play();
-      thrustSound.amp(0.08);
+      //thrustSound.play();
+      //thrustSound.amp(0.08);
     } else
     {
       thrust = false;
@@ -98,7 +98,7 @@ class Ship extends AsteroidObject
     // Shoot lasers if fire key is pressed and over time limit (ship can only shoot certain amount of lasers per second
     if (keys[fire] && laserTimer > laserTimeLimit)
     {
-      laserSound.play();
+      //laserSound.play();
       Laser laser = new Laser();
       laser.position.x = position.x;
       laser.position.y = position.y;
@@ -106,7 +106,7 @@ class Ship extends AsteroidObject
       laser.theta = theta;
       lasers.add(laser);
       // Double Shooter
-      if (powerUps[0])
+      if (activated[0])
       {
         Laser doubleLaser = new Laser();
         doubleLaser.position.x = position.x;
@@ -116,7 +116,7 @@ class Ship extends AsteroidObject
         lasers.add(doubleLaser);
       }
       // Quad Shooter
-      if (powerUps[1])
+      if (activated[1])
       {
         for (int i = 1; i < 4; i ++)
         {
@@ -143,15 +143,18 @@ class Ship extends AsteroidObject
       position.y = 0;
 
 
-
     // If ship hits (collects) a power up, hide powerup (set onScreen to be false) and set powerup entry timer to zero (i.e. start timing for next powerup to enter)
-    if (position.x > power.pos.x - 15 && position.x < power.pos.x + 15 && position.y > power.pos.y - 15 && position.y < power.pos.y + 15)
+    if (position.x > power.pos.x - 30 && position.x < power.pos.x + 30 && position.y > power.pos.y - 30 && position.y < power.pos.y + 30)
     {
-       onScreen[powerup] = false;
-       entryCountTimer = 0;
+      power.pos = new PVector(50, -20);
+      if (powerup != 2)
+        collected[powerup] = true;
+      else
+        lives++;
+      onScreen[powerup] = false;
+      entryCountTimer = 0;
     }
-    
-    
+        
     for (int i = 1; i < asteroids.size(); i++)
     {
       // For each asteroid check to see if ship is touching
