@@ -12,9 +12,9 @@ class Laser extends AsteroidObject
     rotate(theta);
     // Alternate colour of lasers between red and yellow
     if (colourSwap)
-      stroke(255, 0, 0);
+      stroke(red);
     else
-      stroke(255, 255, 0);
+      stroke(yellow);
     ellipse(0, 0, 2, 2);
     popMatrix();    
   }
@@ -36,40 +36,7 @@ class Laser extends AsteroidObject
           position.y > asteroids.get(i).position.y - asteroids.get(i).radius * 0.5f &&
           position.y < asteroids.get(i).position.y + asteroids.get(i).radius * 0.5f)
       {
-        explosionSound.play();
-        if (asteroids.get(i).radius == 90)
-        {
-          score += 5;
-          if (asteroids.size() < 27)
-          {
-            AsteroidObject asteroid = new Asteroid(asteroids.get(i).position.x, asteroids.get(i).position.y, 2);
-            asteroids.add(asteroid);
-          }
-          if (asteroids.size() < 27)
-          {
-            AsteroidObject asteroid = new Asteroid(asteroids.get(i).position.x, asteroids.get(i).position.y, 2);
-            asteroids.add(asteroid);
-          }
-        }
-        else if (asteroids.get(i).radius == 60)
-        {
-          score += 10;
-          if (asteroids.size() < 27)
-          {
-            AsteroidObject asteroid = new Asteroid(asteroids.get(i).position.x, asteroids.get(i).position.y, 3);
-            asteroids.add(asteroid);
-          } 
-          if (asteroids.size() < 27)
-          {
-            AsteroidObject asteroid = new Asteroid(asteroids.get(i).position.x, asteroids.get(i).position.y, 3);
-            asteroids.add(asteroid);
-          }
-        }
-        else if (asteroids.get(i).radius == 30)
-        {
-          score += 15;
-        }
-        asteroids.remove(i);
+        splitAsteroid(i);
         lasers.remove(this);
       }
     }

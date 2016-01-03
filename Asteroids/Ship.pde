@@ -11,8 +11,11 @@ class Ship extends AsteroidObject
   int explosionRadius;
   float expTheta;
   boolean resistance;
-  
-  float angle = 0;
+  float angle;
+
+
+  float forcefieldRadius;
+  PVector forcefieldPosition;
 
   Ship(int move, int left, int right, int fire, float startX, float startY)
   {
@@ -28,6 +31,10 @@ class Ship extends AsteroidObject
     explosionTimer = 2;
     expTheta = 0.0f;
     resistance = false;
+    angle = 0;
+
+    forcefieldRadius = 70;
+    forcefieldPosition = new PVector(0, 0);
   }
 
   // Draw the ship in the correct position and at the correct angle
@@ -35,12 +42,19 @@ class Ship extends AsteroidObject
   {
     pushMatrix();
     translate(position.x, position.y);
+    
+    if (activated[3])
+    {
+      fill(0);
+      ellipse(0, 0, forcefieldRadius * 2.0f, forcefieldRadius * 2.0f);
+    }
+
     rotate(theta);
-    stroke(0, 206, 209);
+    stroke(aqua);
     line(0, -shipHeight, -shipWidth, shipHeight);
     line(0, -shipHeight, shipWidth, shipHeight);
     line(-shipWidth * 0.75f, shipHeight * 0.7f, shipWidth * 0.75f, shipHeight * 0.7f);
-    
+
     // Draw thrust flame is ship is moving
     if (thrust)
     {
@@ -49,9 +63,9 @@ class Ship extends AsteroidObject
         // Alternate colour of thruster flame between red and yellow
         thrustColour =! thrustColour;
         if (thrustColour)
-          stroke(255, 0, 0);
+          stroke(red);
         else
-          stroke(255, 255, 0);
+          stroke(yellow);
         line(0, shipHeight * 1.3f, -shipWidth * 0.4f, shipHeight * 0.75f);
         line(0, shipHeight * 1.3f, shipWidth * 0.4f, shipHeight * 0.75f);
         thrustFlicker = 0;
@@ -77,8 +91,7 @@ class Ship extends AsteroidObject
           angle -= 0.05f;
           nukeExplosion(position, angle);
           nukeTimer = 0;
-        }
-        else
+        } else
         {
           activated[2] = false;
           nukeRadius = 30;
@@ -86,17 +99,41 @@ class Ship extends AsteroidObject
         }
       }
       nukeTimer++;
-      
+
       // Check to see if any asteroids are withing nuke blast radius, if they are, remove them from the game
       for (int i = 1; i < asteroids.size(); i++)
       {
         if (asteroids.get(i).position.x + asteroids.get(i).radius * 0.5f > position.x - nukeRadius && 
-            asteroids.get(i).position.x - asteroids.get(i).radius * 0.5f < position.x + nukeRadius &&
-            asteroids.get(i).position.y + asteroids.get(i).radius * 0.5f > position.y - nukeRadius &&
-            asteroids.get(i).position.y - asteroids.get(i).radius * 0.5f < position.y + nukeRadius)
+          asteroids.get(i).position.x - asteroids.get(i).radius * 0.5f < position.x + nukeRadius &&
+          asteroids.get(i).position.y + asteroids.get(i).radius * 0.5f > position.y - nukeRadius &&
+          asteroids.get(i).position.y - asteroids.get(i).radius * 0.5f < position.y + nukeRadius)
         {
-           nukeSound.play();
-           asteroids.remove(i); 
+          //nukeSound.play();
+          asteroids.remove(i);
+        }
+      }
+    }
+    
+    // If forcefield powerup is active
+    // Loop through all angles (in a circle), calculate x & y coordinates of each of those points check to see if they are hitting asteroids
+    if (activated[3])
+    {
+      // Forcefield asteroid hit detection
+      for (float alpha = 0; alpha < TWO_PI; alpha += 0.1f)
+      {
+        forcefieldPosition.x = forcefieldRadius * cos(alpha) + position.x;
+        forcefieldPosition.y = forcefieldRadius * sin(alpha) + position.y;
+        
+        // For each asteroid check to see if forcefield is touching asteroids
+        for (int i = 1; i < asteroids.size(); i++)
+        {
+          if (forcefieldPosition.x > asteroids.get(i).position.x - asteroids.get(i).radius * 0.5f && 
+            forcefieldPosition.x < asteroids.get(i).position.x + asteroids.get(i).radius * 0.5f &&
+            forcefieldPosition.y > asteroids.get(i).position.y - asteroids.get(i).radius * 0.5f &&
+            forcefieldPosition.y < asteroids.get(i).position.y + asteroids.get(i).radius * 0.5f)
+          {
+            splitAsteroid(i);
+          }
         }
       }
     }
@@ -104,7 +141,7 @@ class Ship extends AsteroidObject
     moveShip.x = sin(theta);
     moveShip.y = - cos(theta);
     moveShip.mult(speed);
-    
+
     // Move or rotate ship depending on key pressed
     if (keys[move])
     {
@@ -119,10 +156,9 @@ class Ship extends AsteroidObject
     if (keys[move] || keys[left] || keys[right])
     {
       thrust = true;
-      thrustSound.play();
+      //thrustSound.play();
       thrustSound.amp(0.08);
-    }
-    else
+    } else
     {
       thrust = false;
     }
@@ -136,11 +172,11 @@ class Ship extends AsteroidObject
       if (speed < 0.02)
         resistance = false;
     }
-    
+
     // Shoot lasers if fire key is pressed and over time limit (ship can only shoot certain amount of lasers per second
     if (keys[fire] && laserTimer > laserTimeLimit)
     {
-      laserSound.play();
+      //laserSound.play();
       Laser laser = new Laser();
       laser.position.x = position.x;
       laser.position.y = position.y;
@@ -173,7 +209,7 @@ class Ship extends AsteroidObject
       laserTimer = 0;
     }
     laserTimer++;
-    
+
     // If ship goes off screen, loop around to other side of screen
     if (position.x < 0)
       position.x = width;
@@ -188,11 +224,10 @@ class Ship extends AsteroidObject
     if (position.x > power.pos.x - 30 && position.x < power.pos.x + 30 && position.y > power.pos.y - 30 && position.y < power.pos.y + 30)
     {
       power = new PowerUp(random(width), -20);
-      if (powerup != 3)
+      if (powerup != 4)
       {
         collected[powerup] = true;
-      }
-      else
+      } else
       {
         if (lives < 10)
           lives++;
@@ -200,7 +235,7 @@ class Ship extends AsteroidObject
       onScreen[powerup] = false;
       entryCountTimer = 0;
     }
-        
+
     for (int i = 1; i < asteroids.size(); i++)
     {
       // For each asteroid check to see if ship is touching
@@ -216,7 +251,7 @@ class Ship extends AsteroidObject
           if (livesHitCounter == 0)
             lives--;
           livesHitCounter = 1;
-          
+
           // Clear all lasers from the screen so upon restart of game, they won't continue to show
           lasers.clear();
           // Stop the game
@@ -245,10 +280,10 @@ class Ship extends AsteroidObject
         {
           playAgain(false);
         }
-        
+
         if (reset)
         {
-          asteroids.remove(i);
+          splitAsteroid(i);
           reset = false;
         }
       }

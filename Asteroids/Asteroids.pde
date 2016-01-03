@@ -26,7 +26,7 @@ void setup()
   setupAsteroidObject();
   intro = new SoundFile(this, "introMusic.wav");
   intro.rate(0.4);
-  intro.play();
+  //intro.play();
   countdownSound = new SoundFile(this, "countdown.mp3");
   laserSound = new SoundFile(this, "shoot.wav");
   thrustSound = new SoundFile(this, "thrust.wav");
@@ -38,7 +38,7 @@ void setup()
   lives = 5;
   livesHitCounter = 0;
   score = 0;
-    
+
   power = new PowerUp(random(width), -20);
   // Enter powerup onto screen after random time between 5 & 10 seconds.
   entryTime = 100;//int(random(300, 600));
@@ -55,12 +55,19 @@ void setup()
   activeTimer = 0;
   // Deactivate powerup after 5 seconds
   deactivateTime = 300;
-  
+
   nukeRadius = 30;
   nukeTimer = 0;
-  
+
   powerupSymbol = 30;
   nukeSymbol = powerupSymbol * 0.9f;
+  
+  red = color(255, 0, 0);
+  yellow = color(255, 255, 0);
+  aqua = color(0, 206, 209);
+  
+  powerupLifeHeight = 10;
+  powerupLifeWidth = powerupLifeHeight * 0.7f;
 }
 
 boolean[] keys = new boolean[512];
@@ -92,8 +99,8 @@ int score;
 PowerUp power;
 // Integer to select powerup
 int powerup;
-// 1 = double shooter, 2 = quad shooter, 3 = Nuke, 4 = extra life, 5 = forcefield (maybe)
-int noPowerUps = 4;
+// 1 = double shooter, 2 = quad shooter, 3 = Nuke, 4 = extra life, 5 = forcefield
+int noPowerUps = 5;
 // Time to enter onto screen
 int entryTime;
 // Timer to time entry onto screen
@@ -115,11 +122,18 @@ int nukeTimer;
 int powerupSymbol;
 float nukeSymbol;
 
+color red;
+color yellow;
+color aqua;
+  
+int powerupLifeHeight;
+float powerupLifeWidth;
+
 void draw()
 {
   background(0);
   stroke(255);
-  
+
   if (level == 1)
   {
     asteroids.get(0).render();
@@ -129,17 +143,15 @@ void draw()
     text("ASTEROIDS", width * 0.5f, height * 0.3f);
     if (mouseX > width * 0.35f && mouseX < width * 0.65f && mouseY > height * 0.7f && mouseY < height * 0.8f)
     {
-      fill(255, 255, 0);
+      fill(yellow);
       textSize(45);
-    }
-    else
+    } else
     {
       fill(255);
       textSize(40);
     }
     text("Start Game", width * 0.5f, height * 0.75f);
-  }
-  else if (level > 1)
+  } else if (level > 1)
   {
     // 3.. 2.. 1.. Countdown to game start
     if (countdown != 0 && gameStart != true)
@@ -171,10 +183,10 @@ void draw()
     {
       for (int i = 0; i < asteroids.size(); i++)
       {
-       asteroids.get(i).render();
-       // Only update (move) asteroids if the game has started
-       if (gameStart)
-         asteroids.get(i).update();
+        asteroids.get(i).render();
+        // Only update (move) asteroids if the game has started
+        if (gameStart)
+          asteroids.get(i).update();
       }
 
       for (int i = 0; i < lasers.size(); i++)
@@ -187,8 +199,7 @@ void draw()
           lasers.get(i).update();
         }
       }
-    }
-    else
+    } else
     {
       gameStart = false;
       if (level < levels)
@@ -200,22 +211,21 @@ void draw()
         setupAsteroidObject();
         countdown = 3;
         countdownTimer = 0;
-        
+
         // Reset any currently activated powerups to be false (deactivated)
-        for(int i = 0; i < noPowerUps; i++)
+        for (int i = 0; i < noPowerUps; i++)
         {
           if (activated[i])
             activated[i] = false;
           activeTimer = 0;
         }
-      }
-      else
+      } else
       {
         playAgain(true);
       }
     }
   }
-  
+
   // Powerup timing, collection and activations
   if (gameStart)
   {
@@ -225,11 +235,12 @@ void draw()
     if (entryCountTimer == entryTime)
     {
       // Select a random powerup
-      powerup = int(random(noPowerUps));   
+      powerup = 4;
+      //int(random(noPowerUps));   
       // Set that powerup to be on screen
       onScreen[powerup] = true;
     }
-    
+
     // Check to see if any powerups are supposed to be on screen 
     for (int i = 0; i < noPowerUps; i++)
     {
@@ -240,7 +251,7 @@ void draw()
         power.update();
       }
     }
-    
+
     // Check to see if any powerups are active
     for (int i = 0; i < noPowerUps; i++)
     {
@@ -253,29 +264,90 @@ void draw()
           activated[i] = false;
           activeTimer = 0;
         }
-        activeTimer++; 
+        activeTimer++;
       }
     }
   }
-  
-  // Draw which power ups have been collected
+
+  // Draw the collected powerup symbols in the top right corner
   for (int i = 0; i < noPowerUps; i++)
   {
     if (collected[i])
+    {
+      pushMatrix();
+      translate(width - ((i + 1) * 40), height * 0.05f);
+      
       drawPowerupSymbols(i);
+      popMatrix();
+    }
   }
-  
+
   // Show the user how many lives they have
   drawShipLives();
-  
+
   // Show user the current level
   fill(255);
   textSize(25);
   if (level > 1)
     text("Level " + (level - 1), width * 0.5f, height * 0.065f);
-  
+
   // Show user their current score
   text(score, width * 0.95f, height * 0.95f);
+}
+
+void drawPowerupSymbols(int ID)
+{
+  fill(0);
+  stroke(aqua);
+  ellipse(0, 0, powerupSymbol, powerupSymbol);
+  
+  switch(ID)
+  {
+    // Double Shooter
+    case 0:
+      fill(red);
+      stroke(red);
+      ellipse(5, 0, 3, 3);
+      fill(yellow);
+      stroke(yellow);
+      ellipse(-5, 0, 3, 3);
+      break;
+    // Quad Shooter
+    case 1:
+      fill(red);
+      stroke(red);
+      ellipse(-5, -5, 2, 2);
+      ellipse(5, 5, 2, 2);
+      fill(yellow);
+      stroke(yellow);
+      ellipse(5, -5, 2, 2);
+      ellipse(-5, 5, 2, 2);
+      break;
+    // Nuke
+    case 2:
+      float beta = TWO_PI / 6;
+      stroke(yellow);
+      fill(yellow);
+      arc(0, 0, nukeSymbol, nukeSymbol, beta, beta * 2.0f);
+      arc(0, 0, nukeSymbol, nukeSymbol, PI, PI + beta);
+      arc(0, 0, nukeSymbol, nukeSymbol, TWO_PI - beta, TWO_PI);
+      stroke(0);
+      ellipse(0, 0, powerupSymbol * 0.15f, powerupSymbol * 0.15f);
+      break;
+    // Forcefield
+    case 3:
+      ellipse(0, 0, powerupSymbol * 0.8f, powerupSymbol * 0.8f);
+      ellipse(0, 0, powerupSymbol * 0.6f, powerupSymbol * 0.6f);
+      ellipse(0, 0, powerupSymbol * 0.4f, powerupSymbol * 0.4f);
+      break;
+   // Extra Life
+   case 4:
+     stroke(aqua);
+     line(0, -powerupLifeHeight, -powerupLifeWidth, powerupLifeHeight);
+     line(0, -powerupLifeHeight, powerupLifeWidth, powerupLifeHeight);
+     line(-powerupLifeWidth * 0.75f, powerupLifeHeight * 0.7f, powerupLifeWidth * 0.75f, powerupLifeHeight * 0.7f);
+     break; 
+  }
 }
 
 void playAgain(boolean win)
@@ -294,7 +366,7 @@ void playAgain(boolean win)
   text("Play Again?", width * 0.5f, height * 0.6f);
   text("Yes", width * 0.3f, height * 0.8f);
   text("No", width * 0.7f, height * 0.8f);
-  
+
   // If they select to play again, setup asteroids and reset level
   // Otherwise, exit the game
   if (mousePressed)
@@ -307,8 +379,7 @@ void playAgain(boolean win)
         level = 1;
         lives = 5;
         setupAsteroidObject();
-      }
-      else if (mouseX > width * 0.55f && mouseX < width * 0.85f)
+      } else if (mouseX > width * 0.55f && mouseX < width * 0.85f)
       {
         exit();
       }
@@ -340,16 +411,16 @@ void mousePressed()
   {
     level = 2;
     intro.stop();
-    countdownSound.play();
+    //countdownSound.play();
   }
 }
 void keyPressed()
 {  
   if (gameStart)
     keys[keyCode] = true;
-  
+
   // Enable relevant powerup when key pressed if within collection and not already activated
-  if (key >= '1' && key <= '3')
+  if (key >= '1' && key <= '4')
   {
     if (collected[key - '0' - 1] && activated[key - '0' - 1] == false)
     {
@@ -358,7 +429,7 @@ void keyPressed()
       collected[key - '0' - 1] = false;
     }
   }
-  
+
   // Pause/Unpause game when P is pressed
   if (keyCode == 'P')
   {
@@ -380,17 +451,17 @@ void drawShipLives()
 {
   float drawHeight = 13;
   float drawWidth = drawHeight * 0.7f;
-  
+
   for (int i = 0; i < lives; i++)
   {
     pushMatrix();
     translate((i + 1) * 25, 30);
-    stroke(0, 206, 209);
+    stroke(aqua);
     line(0, -drawHeight, -drawWidth, drawHeight);
     line(0, -drawHeight, drawWidth, drawHeight);
     line(-drawWidth * 0.75f, drawHeight * 0.7f, drawWidth * 0.75f, drawHeight * 0.7f);
     popMatrix();
-  } 
+  }
 }
 
 void shipDeath(PVector pos, int radius, float angle)
@@ -408,7 +479,7 @@ void shipDeath(PVector pos, int radius, float angle)
     float thetaInc = TWO_PI / (points * 2);
     float lastX = 0;
     float lastY = -radius;
-    stroke(255, 0, 0);
+    stroke(red);
     for (int i = 1; i <= (points * 2); i++)
     {
       float theta = i * thetaInc;
@@ -428,8 +499,7 @@ void shipDeath(PVector pos, int radius, float angle)
     }
     popMatrix();
     resetTimer++;
-  }
-  else
+  } else
   {
     resetShip();
   }
@@ -449,64 +519,18 @@ void resetShip()
       asteroids.get(i).position.y = random(200);
     }
   }
-  
+
   countdown = 3;
   resetTimer = 0;
   livesHitCounter = 0;
-  
+
   // Reset any currently activated powerups to be false (deactivated)
-  for(int i = 0; i < noPowerUps; i++)
+  for (int i = 0; i < noPowerUps; i++)
   {
     if (activated[i])
       activated[i] = false;
     activeTimer = 0;
   }
-}
-
-void drawPowerupSymbols(int ID)
-{
-  // Draw the relevant powerup symbols in the top right corner when collected
-  pushMatrix();
-  translate(width - ((ID + 1) * 40), height * 0.05f);
-  fill(0);
-  stroke(0, 206, 209);
-  ellipse(0, 0, powerupSymbol, powerupSymbol);
-  
-  switch(ID)
-  {
-    // Double Shooter
-    case 0:
-      fill(255, 0, 0);
-      stroke(255, 0, 0);
-      ellipse(5, 0, 3, 3);
-      fill(255, 255, 0);
-      stroke(255, 255, 0);
-      ellipse(-5, 0, 3, 3);
-      break;
-    // Quad Shooter
-    case 1:
-      fill(255, 0, 0);
-      stroke(255, 0, 0);
-      ellipse(-5, -5, 2, 2);
-      ellipse(5, 5, 2, 2);
-      fill(255, 255, 0);
-      stroke(255, 255, 0);
-      ellipse(5, -5, 2, 2);
-      ellipse(-5, 5, 2, 2);
-      break;
-    // Nuke
-    case 2:
-      float beta = TWO_PI / 6;
-      stroke(255, 255, 0);
-      fill(255, 255, 0);
-      arc(0, 0, nukeSymbol, nukeSymbol, beta, beta * 2.0f);
-      arc(0, 0, nukeSymbol, nukeSymbol, PI, PI + beta);
-      arc(0, 0, nukeSymbol, nukeSymbol, TWO_PI - beta, TWO_PI);
-      stroke(0);
-      ellipse(0, 0, powerupSymbol * 0.15f, powerupSymbol * 0.15f);
-      break;
-  }
-  popMatrix();
 }
 
 void nukeExplosion(PVector pos, float angle)
@@ -518,7 +542,7 @@ void nukeExplosion(PVector pos, float angle)
   float thetaInc = TWO_PI / (points * 2);
   float lastX = 0;
   float lastY = -nukeRadius;
-  stroke(255, 0, 0);
+  stroke(red);
   for (int i = 1; i <= (points * 2); i++)
   {
     float theta = i * thetaInc;
@@ -537,4 +561,42 @@ void nukeExplosion(PVector pos, float angle)
     lastY = y;
   }
   popMatrix();
+}
+
+void splitAsteroid(int number)
+{
+  //explosionSound.play();
+  if (asteroids.get(number).radius == 90)
+  {
+    score += 5;
+    if (asteroids.size() < 27)
+    {
+      AsteroidObject asteroid = new Asteroid(asteroids.get(number).position.x, asteroids.get(number).position.y, 2);
+      asteroids.add(asteroid);
+    }
+    if (asteroids.size() < 27)
+    {
+      AsteroidObject asteroid = new Asteroid(asteroids.get(number).position.x, asteroids.get(number).position.y, 2);
+      asteroids.add(asteroid);
+    }
+  }
+  else if (asteroids.get(number).radius == 60)
+  {
+    score += 10;
+    if (asteroids.size() < 27)
+    {
+      AsteroidObject asteroid = new Asteroid(asteroids.get(number).position.x, asteroids.get(number).position.y, 3);
+      asteroids.add(asteroid);
+    } 
+    if (asteroids.size() < 27)
+    {
+      AsteroidObject asteroid = new Asteroid(asteroids.get(number).position.x, asteroids.get(number).position.y, 3);
+      asteroids.add(asteroid);
+    }
+  }
+  else if (asteroids.get(number).radius == 30)
+  {
+    score += 15;
+  }
+  asteroids.remove(number);
 }
