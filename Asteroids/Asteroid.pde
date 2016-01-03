@@ -2,17 +2,14 @@ class Asteroid extends AsteroidObject
 { 
   float astRad;
   int size;
-  
+
   // Three different image variables. One for each size
-  
   // Resize each one dependent incoming size variable
-  
   // Depending on that size variable, show that image
-  
+
   Asteroid(float x, float y, int size)
   {
     super(x, y, size);
-    //super.radius = radius;
     larAsteroid = loadImage("asteroid.png");
     larAsteroid.resize(largeAstRad, largeAstRad);
     medAsteroid = loadImage("asteroid.png");
@@ -25,32 +22,40 @@ class Asteroid extends AsteroidObject
       radius = largeAstRad / size;
     this.size = size;
   }
-  
+
   void render()
   {
     pushMatrix();
-    translate(position.x - ((largeAstRad / size) * 0.5f), position.y - ((largeAstRad / size) * 0.5f));
-    if (size == 1)
+    switch (size)
+    {
+    case 1:
+      translate(position.x - (largeAstRad * 0.5f), position.y - (largeAstRad * 0.5f)); 
       image(larAsteroid, 0, 0);
-    else if (size == 2)
+      break;
+    case 2:
+      translate(position.x - (medAstRad * 0.5f), position.y - (medAstRad * 0.5f));
       image(medAsteroid, 0, 0);
-    else if (size == 3)
+      break;
+    case 3:
+      translate(position.x - (smallAstRad * 0.5f), position.y - (smallAstRad * 0.5f));
       image(smallAsteroid, 0, 0);
+      break;
+    }
     popMatrix();
   }
-  
+
   void update()
   {
     position.add(asteroidMove);
-    
+
     // Loop back around if off screen
     if (position.x < 0)
-     position.x = width;
+      position.x = width;
     if (position.x > width)
-     position.x = 0;
+      position.x = 0;
     if (position.y < 0)
-     position.y = height;
+      position.y = height;
     if (position.y > height)
-     position.y = 0;
+      position.y = 0;
   }
 }

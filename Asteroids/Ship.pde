@@ -189,9 +189,14 @@ class Ship extends AsteroidObject
     {
       power = new PowerUp(random(width), -20);
       if (powerup != 3)
+      {
         collected[powerup] = true;
+      }
       else
-        lives++;
+      {
+        if (lives < 10)
+          lives++;
+      }
       onScreen[powerup] = false;
       entryCountTimer = 0;
     }
@@ -209,7 +214,7 @@ class Ship extends AsteroidObject
         {
           // Ensure only one life is dedcuted per crash
           if (livesHitCounter == 0)
-            lives--;     
+            lives--;
           livesHitCounter = 1;
           
           // Clear all lasers from the screen so upon restart of game, they won't continue to show
@@ -238,32 +243,13 @@ class Ship extends AsteroidObject
         // If user has no more lives, give them the option to play the game again
         else
         {
-          gameStart = false;
-          score = 0;
-          fill(255);
-          textSize(40);
-          text("GAME OVER", width * 0.5f, height * 0.3f);
-          text("Play Again?", width * 0.5f, height * 0.5f);
-          text("Yes", width * 0.3f, height * 0.8f);
-          text("No", width * 0.7f, height * 0.8f);
-          
-          // If they select to play again, setup asteroids and reset level
-          // Otherwise, exit the game
-          if (mousePressed)
-          {
-            if (mouseY > height * 0.7f && mouseY < height * 0.9f)
-            {
-              if (mouseX > width * 0.15f && mouseX < width * 0.45f)
-              {
-                level = 1;
-                setupAsteroidObject();
-              }
-              else if (mouseX > width * 0.55f && mouseX < width * 0.85f)
-              {
-                exit();
-              }
-            }
-          }
+          playAgain(false);
+        }
+        
+        if (reset)
+        {
+          asteroids.remove(i);
+          reset = false;
         }
       }
     }

@@ -12,7 +12,7 @@ void setup()
   size(700, 600);
   //fullScreen();
   smooth(8);
-  levels = 5;
+  levels = 6;
   for (int i = 0; i < levels; i++)
     noAsteroids[i] = i + 5;
   gameStart = false;
@@ -67,7 +67,7 @@ boolean[] keys = new boolean[512];
 ArrayList<AsteroidObject> asteroids = new ArrayList<AsteroidObject>();
 ArrayList<Laser> lasers = new ArrayList<Laser>();
 int levels;
-int[] noAsteroids = new int[5];
+int[] noAsteroids = new int[6];
 boolean gameStart;
 // Boolean to set game to a paused state
 boolean pause;
@@ -191,20 +191,27 @@ void draw()
     else
     {
       gameStart = false;
-      level++;
-      // Player gets an extra life for each level they pass after level 2
-      if (level > 2)
-        lives++;
-      setupAsteroidObject();
-      countdown = 3;
-      countdownTimer = 0;
-      
-      // Reset any currently activated powerups to be false (deactivated)
-      for(int i = 0; i < noPowerUps; i++)
+      if (level < levels)
       {
-        if (activated[i])
-          activated[i] = false;
-        activeTimer = 0;
+        level++;
+        // Player gets an extra life for each level they pass after level 2
+        if (level > 2)
+          lives++;
+        setupAsteroidObject();
+        countdown = 3;
+        countdownTimer = 0;
+        
+        // Reset any currently activated powerups to be false (deactivated)
+        for(int i = 0; i < noPowerUps; i++)
+        {
+          if (activated[i])
+            activated[i] = false;
+          activeTimer = 0;
+        }
+      }
+      else
+      {
+        playAgain(true);
       }
     }
   }
@@ -269,6 +276,44 @@ void draw()
   
   // Show user their current score
   text(score, width * 0.95f, height * 0.95f);
+}
+
+void playAgain(boolean win)
+{
+  gameStart = false;
+  fill(255);
+  textSize(35);
+  // Add 25 points to score per life
+  score += lives * 25;
+  text("Your Score: " + score, width * 0.5f, height * 0.4f);
+  textSize(40);
+  if (win)
+    text("YOU WIN", width * 0.5f, height * 0.3f);
+  else
+    text("GAME OVER", width * 0.5f, height * 0.3f);
+  text("Play Again?", width * 0.5f, height * 0.6f);
+  text("Yes", width * 0.3f, height * 0.8f);
+  text("No", width * 0.7f, height * 0.8f);
+  
+  // If they select to play again, setup asteroids and reset level
+  // Otherwise, exit the game
+  if (mousePressed)
+  {
+    if (mouseY > height * 0.7f && mouseY < height * 0.9f)
+    {
+      if (mouseX > width * 0.15f && mouseX < width * 0.45f)
+      {
+        score = 0;
+        level = 1;
+        lives = 5;
+        setupAsteroidObject();
+      }
+      else if (mouseX > width * 0.55f && mouseX < width * 0.85f)
+      {
+        exit();
+      }
+    }
+  }
 }
 
 void setupAsteroidObject()
@@ -392,6 +437,7 @@ void shipDeath(PVector pos, int radius, float angle)
 
 void resetShip()
 {
+  reset = true;
   asteroids.set(0, new Ship(UP, LEFT, RIGHT, ' ', width * 0.5f, height * 0.5f));
 
   for (int i = 1; i < asteroids.size(); i++)
@@ -403,7 +449,7 @@ void resetShip()
       asteroids.get(i).position.y = random(200);
     }
   }
-  reset = true;
+  
   countdown = 3;
   resetTimer = 0;
   livesHitCounter = 0;
