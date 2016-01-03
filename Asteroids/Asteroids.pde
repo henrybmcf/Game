@@ -37,6 +37,7 @@ void setup()
   resetTimer = 0;
   lives = 5;
   livesHitCounter = 0;
+  shipAlive = true;
   score = 0;
 
   power = new PowerUp(random(width), -20);
@@ -93,7 +94,7 @@ boolean reset;
 int resetTimer;
 int lives;
 int livesHitCounter;
-
+boolean shipAlive;
 int score;
 
 PowerUp power;
@@ -199,7 +200,8 @@ void draw()
           lasers.get(i).update();
         }
       }
-    } else
+    }
+    else
     {
       gameStart = false;
       if (level < levels)
@@ -219,7 +221,8 @@ void draw()
             activated[i] = false;
           activeTimer = 0;
         }
-      } else
+      }
+      else
       {
         playAgain(true);
       }
@@ -235,7 +238,7 @@ void draw()
     if (entryCountTimer == entryTime)
     {
       // Select a random powerup
-      powerup = 4;
+      powerup = 3;
       //int(random(noPowerUps));   
       // Set that powerup to be on screen
       onScreen[powerup] = true;
@@ -336,6 +339,7 @@ void drawPowerupSymbols(int ID)
       break;
     // Forcefield
     case 3:
+      stroke(yellow);
       ellipse(0, 0, powerupSymbol * 0.8f, powerupSymbol * 0.8f);
       ellipse(0, 0, powerupSymbol * 0.6f, powerupSymbol * 0.6f);
       ellipse(0, 0, powerupSymbol * 0.4f, powerupSymbol * 0.4f);
@@ -419,14 +423,17 @@ void keyPressed()
   if (gameStart)
     keys[keyCode] = true;
 
-  // Enable relevant powerup when key pressed if within collection and not already activated
-  if (key >= '1' && key <= '4')
+  if (shipAlive)
   {
-    if (collected[key - '0' - 1] && activated[key - '0' - 1] == false)
+    // Enable relevant powerup when key pressed if within collection and not already activated
+    if (key >= '1' && key <= '4')
     {
-      // Set powerup to be activated and remove from collection
-      activated[key - '0' - 1] = true;
-      collected[key - '0' - 1] = false;
+      if (collected[key - '0' - 1] && activated[key - '0' - 1] == false)
+      {
+        // Set powerup to be activated and remove from collection
+        activated[key - '0' - 1] = true;
+        collected[key - '0' - 1] = false;
+      }
     }
   }
 
@@ -466,6 +473,8 @@ void drawShipLives()
 
 void shipDeath(PVector pos, int radius, float angle)
 {
+  shipAlive = false;
+  
   // Explosion on ship death
   int points = 13;
   if (resetTimer < 120)
@@ -531,6 +540,8 @@ void resetShip()
       activated[i] = false;
     activeTimer = 0;
   }
+  
+  shipAlive = true;
 }
 
 void nukeExplosion(PVector pos, float angle)

@@ -46,6 +46,7 @@ class Ship extends AsteroidObject
     if (activated[3])
     {
       fill(0);
+      stroke(yellow);
       ellipse(0, 0, forcefieldRadius * 2.0f, forcefieldRadius * 2.0f);
     }
 
@@ -158,7 +159,8 @@ class Ship extends AsteroidObject
       thrust = true;
       //thrustSound.play();
       thrustSound.amp(0.08);
-    } else
+    }
+    else
     {
       thrust = false;
     }
@@ -244,9 +246,14 @@ class Ship extends AsteroidObject
         asteroids.get(i).position.y + asteroids.get(i).radius * 0.5f > position.y - shipHeight &&
         asteroids.get(i).position.y - asteroids.get(i).radius * 0.5f < position.y + shipHeight)
       {
+        // Stop the game
+        gameStart = false;
+        // Stop ship from moving
+        resistance = false;
+        
         // If the player still has lives, deduct a life
         if (lives > 0)
-        {
+        { 
           // Ensure only one life is dedcuted per crash
           if (livesHitCounter == 0)
             lives--;
@@ -254,10 +261,7 @@ class Ship extends AsteroidObject
 
           // Clear all lasers from the screen so upon restart of game, they won't continue to show
           lasers.clear();
-          // Stop the game
-          gameStart = false;
-          // Stop ship from moving
-          resistance = false;
+          
           // Time exlposion graphics of ship explosion
           if (explosionTimer > 1)
           {
