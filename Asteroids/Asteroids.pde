@@ -1,11 +1,13 @@
-//import processing.sound.*;
+import processing.sound.*;
+import java.io.FileWriter;
+import java.io.BufferedWriter;
 
-//SoundFile intro;
-//SoundFile countdownSound;
-//SoundFile laserSound;
-//SoundFile thrustSound;
-//SoundFile explosionSound;
-//SoundFile nukeSound;
+SoundFile intro;
+SoundFile countdownSound;
+SoundFile laserSound;
+SoundFile thrustSound;
+SoundFile explosionSound;
+SoundFile nukeSound;
 
 PrintWriter scoring;
 String playerName = "";
@@ -18,19 +20,19 @@ Table scoreTable;
 
 void setup()
 {
-  scoring = createWriter("scores.csv");
-  scoring.println("Name,Score");
+  //scoring = createWriter("scores.csv");
+  //scoring.println("Name,Score");
   size(700, 600);
   //fullScreen();
   smooth(8);
   strokeWeight(1.5);
   //levels = 6;
   for (int i = 0; i < levels; i++)
-    noAsteroids[i] = i + 5;
+    noAsteroids[i] = i + 1;
   gameStart = false;
   pause = false;
   level = 1;
-  countdown = 1;
+  countdown = 3;
   countdownTimer = 0;
   smallAstRad = 30;
   medAstRad = 60;
@@ -47,14 +49,14 @@ void setup()
   thrust = true;
   reset = false;
   resetTimer = 0;
-  lives = 0;
+  lives = 5;
   livesHitCounter = 0;
   shipAlive = true;
   score = 0;
 
   power = new PowerUp(random(width), -20);
-  // Enter powerup onto screen after random time between 5 & 10 seconds.
-  entryTime = 100;//int(random(300, 600));
+  // Enter powerup onto screen after random time between 5 & 7 seconds.
+  entryTime = int(random(300, 420));
   // Timer to time entry onto screen
   entryCountTimer = 0;
   // Initiliase onScreen, collected & activated boolean arrays to be false for start of game 
@@ -66,8 +68,8 @@ void setup()
   }
   // Timer to time how long powerup has been active and to subsequently deactivate
   activeTimer = 0;
-  // Deactivate powerup after 5 seconds
-  deactivateTime = 300;
+  // Deactivate powerup after 6 seconds
+  deactivateTime = 360;
 
   nukeRadius = 30;
   nukeTimer = 0;
@@ -151,8 +153,6 @@ float powerupLifeWidth;
 boolean showHighScores;
 boolean playAgain;
 
-
-
 void draw()
 {
   background(0);
@@ -193,7 +193,7 @@ void draw()
     // Only start game if pause is not active
     else if (pause == false)
     {
-      // countdownSound.stop();
+      //countdownSound.stop();
       shipAlive = true;
       gameStart = true;
     }
@@ -201,9 +201,7 @@ void draw()
     if (gameStart != true)
       countdownTimer++;
 
-
     // Ship is the first element in list, therefore always render and update
-
     asteroids.get(0).update();
     asteroids.get(0).render();
 
@@ -270,8 +268,7 @@ void draw()
     if (entryCountTimer == entryTime)
     {
       // Select a random powerup
-      powerup = 5;
-      //int(random(noPowerUps));   
+      powerup = int(random(noPowerUps));   
       // Set that powerup to be on screen
       onScreen[powerup] = true;
     }
@@ -327,8 +324,6 @@ void draw()
   
   if (showHighScores)
     showHighScores();
-  if (playAgain)
-    playAgain();
 }
 
 void gameOver(boolean win)
@@ -339,6 +334,7 @@ void gameOver(boolean win)
   textSize(35);
   // Add 25 points to score per life
   score += lives * 25;
+  lives = 0;
   textSize(40);
   if (win)
     text("YOU WIN", width * 0.5f, height * 0.15f);
@@ -355,7 +351,7 @@ void showHighScores()
   textSize(35);
   
   int i = 1;
-  scoreTable = loadTable("scores.csv", "header");
+  scoreTable = loadTable("/Users/HenryBallingerMcFarlane/Desktop/Game/Asteroids/scores.csv", "header");
   for (TableRow row : scoreTable.rows())
   {
     text(row.getString("Name"), width * 0.3f, height * 0.3f + (i * height * 0.1f));
@@ -392,20 +388,13 @@ void showHighScores()
     }
   }
 }
-void playAgain()
-{
-  
-}
 void keyPressed()
 {
   if (gameEnd)
   {
-    if (keyCode == BACKSPACE)
+    if (keyCode == BACKSPACE && playerName.length() > 0)
     {
-      if (playerName.length() > 0)
-      {
-        playerName = playerName.substring(0, playerName.length()-1);
-      }
+      playerName = playerName.substring(0, playerName.length()-1);
     }
     else if (keyCode != SHIFT && keyCode != CONTROL && keyCode != ALT && keyCode != ENTER && keyCode != RETURN && playerName.length() < 10)
     {
@@ -413,10 +402,19 @@ void keyPressed()
     }
     else if (keyCode == ENTER && playerName.length() > 0)
     {
-      // Write player's name and score to text file
-      scoring.println(playerName + "," + score);
-      scoring.flush();
-      //scoring.close();
+      // Write player's name and score to file
+      try
+      { 
+        println("Writing");
+        scoring = new PrintWriter(new BufferedWriter(new FileWriter("/Users/HenryBallingerMcFarlane/Desktop/Game/Asteroids/scores.csv", true)));
+        scoring.println(playerName + "," + score);
+        scoring.flush();
+        scoring.close();
+      }
+      catch (IOException e)
+      {  
+        println(e);
+      }
       showHighScores = true;
     }
   }

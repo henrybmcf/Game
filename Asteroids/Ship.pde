@@ -85,7 +85,10 @@ class Ship extends AsteroidObject
     if (keys[move])
     {
       position.add(moveShip);
-      speed = 4.0f;
+      if (speed < 4.0f)
+        speed = speed * 1.15f;
+      else
+        speed = 4.0f;
       resistance = true;
     }
     if (keys[left])
@@ -107,13 +110,13 @@ class Ship extends AsteroidObject
     // Once not moving (move key not pressed), reduce speed until stop
     if (resistance && keys[move] == false)
     {
-      speed = speed * 0.99;
+      speed = speed * 0.99f;
       position.add(moveShip);
       if (speed < 0.02)
         resistance = false;
     }
 
-    // Rapid fir powerup
+    // Rapid fire powerup
     if (activated[5])
       laserTimeLimit = 60 / 12;
     else
