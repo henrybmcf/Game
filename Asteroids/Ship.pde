@@ -113,6 +113,12 @@ class Ship extends AsteroidObject
         resistance = false;
     }
 
+    // Rapid fir powerup
+    if (activated[5])
+      laserTimeLimit = 60 / 12;
+    else
+      laserTimeLimit = 60 / 3;
+      
     // Shoot lasers if fire key is pressed and over time limit (ship can only shoot certain amount of lasers per second
     if (keys[fire] && laserTimer > laserTimeLimit)
     {
@@ -165,7 +171,7 @@ class Ship extends AsteroidObject
     {
       power = new PowerUp(random(width), -20);
       // If powerup isn't extra life
-      if (powerup != 5)
+      if (powerup != 6)
       {
         collected[powerup] = true;
       }
@@ -222,9 +228,9 @@ class Ship extends AsteroidObject
           explosionTimer++;
         }
         // If user has no more lives, give them the option to play the game again
-        else
+        else if (showHighScores != true)
         {
-          playAgain(false);
+          gameOver(false);
         }
 
         if (reset)
