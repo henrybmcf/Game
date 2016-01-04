@@ -15,8 +15,6 @@ class Ship extends AsteroidObject
 
   float forcefieldRadius;
   PVector forcefieldPosition;
-  
-  
 
   Ship(int move, int left, int right, int fire, float startX, float startY)
   {
@@ -26,7 +24,7 @@ class Ship extends AsteroidObject
     this.right = right;
     this.fire = fire;
     // Divide 60 by number of bullets to shoot per second
-    laserTimeLimit = 60 / 2;
+    laserTimeLimit = 60 / 3;
     laserTimer = 0;
     thrustFlicker = 2;
     explosionTimer = 2;
@@ -79,68 +77,6 @@ class Ship extends AsteroidObject
 
   void update()
   {
-    if (activated[2])
-    {
-      // Time exlposion graphics of ship explosion
-      if (nukeTimer == 2)
-      {
-        if (nukeRadius < 200)
-        {
-          nukeRadius += 4;
-          angle += 0.08f;
-          nukeExplosion(angle);
-          nukeRadius -= 3;
-          angle -= 0.05f;
-          nukeExplosion(angle);
-          nukeTimer = 0;
-        }
-        else
-        {
-          activated[2] = false;
-          nukeRadius = 30;
-          nukeTimer = 0;
-        }
-      }
-      nukeTimer++;
-
-      // Check to see if any asteroids are withing nuke blast radius, if they are, remove them from the game
-      for (int i = 1; i < asteroids.size(); i++)
-      {
-        if (asteroids.get(i).position.x + asteroids.get(i).radius * 0.5f > nukePos.x - nukeRadius && 
-          asteroids.get(i).position.x - asteroids.get(i).radius * 0.5f < nukePos.x + nukeRadius &&
-          asteroids.get(i).position.y + asteroids.get(i).radius * 0.5f > nukePos.y - nukeRadius &&
-          asteroids.get(i).position.y - asteroids.get(i).radius * 0.5f < nukePos.y + nukeRadius)
-        {
-          //nukeSound.play();
-          asteroids.remove(i);
-        }
-      }
-    }
-    
-    // If forcefield powerup is active
-    // Loop through all angles (in a circle), calculate x & y coordinates of each of those points check to see if they are hitting asteroids
-    if (activated[3])
-    {
-      // Forcefield asteroid hit detection
-      for (float alpha = 0; alpha < TWO_PI; alpha += 0.1f)
-      {
-        forcefieldPosition.x = forcefieldRadius * cos(alpha) + position.x;
-        forcefieldPosition.y = forcefieldRadius * sin(alpha) + position.y;
-        
-        // For each asteroid check to see if forcefield is touching asteroids
-        for (int i = 1; i < asteroids.size(); i++)
-        {
-          if (forcefieldPosition.x > asteroids.get(i).position.x - asteroids.get(i).radius * 0.5f && 
-            forcefieldPosition.x < asteroids.get(i).position.x + asteroids.get(i).radius * 0.5f &&
-            forcefieldPosition.y > asteroids.get(i).position.y - asteroids.get(i).radius * 0.5f &&
-            forcefieldPosition.y < asteroids.get(i).position.y + asteroids.get(i).radius * 0.5f)
-          {
-            splitAsteroid(i);
-          }
-        }
-      }
-    }
-    
     moveShip.x = sin(theta);
     moveShip.y = - cos(theta);
     moveShip.mult(speed);
@@ -149,18 +85,18 @@ class Ship extends AsteroidObject
     if (keys[move])
     {
       position.add(moveShip);
-      speed = 2.5f;
+      speed = 4.0f;
       resistance = true;
     }
     if (keys[left])
-      theta -= 0.05f;
+      theta -= 0.08f;
     if (keys[right])
-      theta += 0.05f;
+      theta += 0.08f;
     if (keys[move] || keys[left] || keys[right])
     {
       thrust = true;
       //thrustSound.play();
-//      thrustSound.amp(0.08);
+      //thrustSound.amp(0.08);
     }
     else
     {
@@ -228,10 +164,12 @@ class Ship extends AsteroidObject
     if (position.x > power.pos.x - 30 && position.x < power.pos.x + 30 && position.y > power.pos.y - 30 && position.y < power.pos.y + 30)
     {
       power = new PowerUp(random(width), -20);
-      if (powerup != 4)
+      // If powerup isn't extra life
+      if (powerup != 5)
       {
         collected[powerup] = true;
-      } else
+      }
+      else
       {
         if (lives < 10)
           lives++;
@@ -267,9 +205,12 @@ class Ship extends AsteroidObject
           // Time exlposion graphics of ship explosion
           if (explosionTimer > 1)
           {
-            shipDeath(position, explosionRadius, expTheta);
-            if (explosionRadius < 40)
-              explosionRadius += 2;
+            shipDeath(explosionRadius, expTheta);
+            shipDeath(explosionRadius - 5, expTheta);
+            shipDeath(explosionRadius - 10, expTheta);
+            shipDeath(explosionRadius - 15, expTheta);
+            if (explosionRadius < 30)
+              explosionRadius += 1;
             else
               explosionRadius = 0;
             explosionTimer = 0;
@@ -277,7 +218,6 @@ class Ship extends AsteroidObject
               expTheta += 2.5f;
             else
               expTheta -= 3.5f;
-            shipDeath(position, explosionRadius - 20, expTheta);
           }
           explosionTimer++;
         }
@@ -291,6 +231,67 @@ class Ship extends AsteroidObject
         {
           splitAsteroid(i);
           reset = false;
+        }
+      }
+    }
+    
+    if (activated[2])
+    {
+      // Time exlposion graphics of ship explosion
+      if (nukeTimer == 2)
+      {
+        if (nukeRadius < 200)
+        {
+          nukeRadius += 4;
+          angle += 0.08f;
+          nukeExplosion(angle);
+          nukeRadius -= 3;
+          angle -= 0.05f;
+          nukeExplosion(angle);
+          nukeTimer = 0;
+        }
+        else
+        {
+          activated[2] = false;
+          nukeRadius = 30;
+          nukeTimer = 0;
+        }
+      }
+      nukeTimer++;
+
+      // Check to see if any asteroids are withing nuclear blast radius, if they are, remove them from the game
+      for (int i = 1; i < asteroids.size(); i++)
+      {
+        if (asteroids.get(i).position.x + asteroids.get(i).radius * 0.5f > nukePos.x - nukeRadius && 
+          asteroids.get(i).position.x - asteroids.get(i).radius * 0.5f < nukePos.x + nukeRadius &&
+          asteroids.get(i).position.y + asteroids.get(i).radius * 0.5f > nukePos.y - nukeRadius &&
+          asteroids.get(i).position.y - asteroids.get(i).radius * 0.5f < nukePos.y + nukeRadius)
+        {
+          //nukeSound.play();
+          asteroids.remove(i);
+        }
+      }
+    } 
+    // If forcefield powerup is active
+    // Loop through all angles (in a circle), calculate x & y coordinates of each of those points check to see if they are hitting asteroids
+    else if (activated[3])
+    {
+      // Forcefield asteroid hit detection
+      for (float alpha = 0; alpha < TWO_PI; alpha += 0.1f)
+      {
+        forcefieldPosition.x = forcefieldRadius * cos(alpha) + position.x;
+        forcefieldPosition.y = forcefieldRadius * sin(alpha) + position.y;
+        
+        // For each asteroid check to see if forcefield is touching asteroids
+        for (int i = 1; i < asteroids.size(); i++)
+        {
+          if (forcefieldPosition.x > asteroids.get(i).position.x - asteroids.get(i).radius * 0.5f && 
+            forcefieldPosition.x < asteroids.get(i).position.x + asteroids.get(i).radius * 0.5f &&
+            forcefieldPosition.y > asteroids.get(i).position.y - asteroids.get(i).radius * 0.5f &&
+            forcefieldPosition.y < asteroids.get(i).position.y + asteroids.get(i).radius * 0.5f)
+          {
+            splitAsteroid(i);
+          }
         }
       }
     }

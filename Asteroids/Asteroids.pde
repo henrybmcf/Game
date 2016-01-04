@@ -12,13 +12,14 @@ void setup()
   size(700, 600);
   //fullScreen();
   smooth(8);
-  levels = 6;
+  strokeWeight(1.5);
+  //levels = 6;
   for (int i = 0; i < levels; i++)
     noAsteroids[i] = i + 5;
   gameStart = false;
   pause = false;
   level = 1;
-  countdown = 5;
+  countdown = 1;
   countdownTimer = 0;
   smallAstRad = 30;
   medAstRad = 60;
@@ -78,8 +79,8 @@ PVector nukePos;
 boolean[] keys = new boolean[512];
 ArrayList<AsteroidObject> asteroids = new ArrayList<AsteroidObject>();
 ArrayList<Laser> lasers = new ArrayList<Laser>();
-int levels;
-int[] noAsteroids = new int[6];
+int levels = 6;
+int[] noAsteroids = new int[levels];
 boolean gameStart;
 // Boolean to set game to a paused state
 boolean pause;
@@ -105,7 +106,7 @@ PowerUp power;
 // Integer to select powerup
 int powerup;
 // 1 = double shooter, 2 = quad shooter, 3 = Nuke, 4 = extra life, 5 = forcefield
-int noPowerUps = 5;
+int noPowerUps = 6;
 // Time to enter onto screen
 int entryTime;
 // Timer to time entry onto screen
@@ -189,11 +190,11 @@ void draw()
 
     if (asteroids.size() > 1)
     {
-      for (int i = 0; i < asteroids.size(); i++)
+      for (int i = 1; i < asteroids.size(); i++)
       {
         asteroids.get(i).render();
         // Only update (move) asteroids if the game has started
-        if (gameStart)
+        if (gameStart && activated[4] == false)
           asteroids.get(i).update();
       }
 
@@ -224,11 +225,10 @@ void draw()
         countdown = 3;
         countdownTimer = 0;
 
-        // Reset any currently activated powerups to be false (deactivated)
+        // Deactivate all currently activated powerups
         for (int i = 0; i < noPowerUps; i++)
         {
-          if (activated[i])
-            activated[i] = false;
+          activated[i] = false;
           activeTimer = 0;
         }
       }
@@ -248,7 +248,7 @@ void draw()
     if (entryCountTimer == entryTime)
     {
       // Select a random powerup
-      powerup = 2;
+      powerup = 4;
       //int(random(noPowerUps));   
       // Set that powerup to be on screen
       onScreen[powerup] = true;
@@ -257,12 +257,12 @@ void draw()
     // Check to see if any powerups are supposed to be on screen or are active
     for (int i = 0; i < noPowerUps; i++)
     {
-      if (onScreen[i])
-      {
-        // Call class to show powerup and move across screen
-        power.render(powerup);
-        power.update();
-      }
+      //if (onScreen[i])
+      //{
+      //  // Call class to show powerup and move across screen
+      //  power.render(powerup);
+      //  power.update();
+      //}
       
       // If they are, start timing how long they have been active for
       if (activated[i])
@@ -281,6 +281,14 @@ void draw()
   // Draw the collected powerup symbols in the top right corner
   for (int i = 0; i < noPowerUps; i++)
   {
+    if (onScreen[i])
+    {
+      // Call class to show powerup and move across screen (if game is running)
+      power.render(powerup);
+      if (gameStart)
+        power.update();
+    }
+    
     if (collected[i])
     {
       pushMatrix();
@@ -349,8 +357,26 @@ void drawPowerupSymbols(int ID)
       ellipse(0, 0, powerupSymbol * 0.6f, powerupSymbol * 0.6f);
       ellipse(0, 0, powerupSymbol * 0.4f, powerupSymbol * 0.4f);
       break;
-   // Extra Life
-   case 4:
+    // Freeze
+    case 4:
+      stroke(255);
+      pushMatrix();
+      for (int i = 0; i < 6; i++)
+      {     
+        line(0, 0, 0, powerupSymbol * 0.4f);
+        pushMatrix();
+        translate(0, powerupSymbol * 0.2f);
+        rotate(PI * 0.2f);
+        line(0, 0, 0, powerupSymbol * 0.2f);
+        rotate(-PI * 0.4f);
+        line(0, 0, 0, powerupSymbol * 0.2f);
+        popMatrix();
+        rotate(PI / 3);
+      }
+      popMatrix();
+      break;
+    // Extra Life
+    case 5:
      stroke(aqua);
      line(0, -powerupLifeHeight, -powerupLifeWidth, powerupLifeHeight);
      line(0, -powerupLifeHeight, powerupLifeWidth, powerupLifeHeight);
@@ -420,19 +446,22 @@ void mousePressed()
   if (mouseX > width * 0.35f && mouseX < width * 0.65f && mouseY > height * 0.7f && mouseY < height * 0.8f)
   {
     level = 2;
-//    intro.stop();
+    //intro.stop();
     //countdownSound.play();
   }
 }
 void keyPressed()
-{  
+{
+  if (keyCode == ' ' && level == 1)
+    level++;
+    
   if (gameStart)
     keys[keyCode] = true;
   
   if (shipAlive)
   {
     // Enable relevant powerup when key pressed if within collection and not already activated
-    if (key >= '1' && key <= '4')
+    if (key >= '1' && key <= '5')
     {
       if (collected[key - '0' - 1] && activated[key - '0' - 1] == false)
       {
@@ -443,8 +472,8 @@ void keyPressed()
         // If nuke power up selected, set current ship position to be nuke drop location
         if (key - '0' == 3)
         {
-          nukeRadius = 30;
           nukePos = asteroids.get(0).position.copy();
+          nukeRadius = 30;
         }
       }
     }
@@ -484,19 +513,19 @@ void drawShipLives()
   }
 }
 
-void shipDeath(PVector pos, int radius, float angle)
+void shipDeath(int radius, float angle)
 {
   shipAlive = false;
   
   // Explosion on ship death
-  int points = 13;
-  if (resetTimer < 120)
+  int points = 15;
+  if (resetTimer < 300)
   {
     // Set all keys to false, so player cannot move ship
     for (int i = 0; i < keys.length; i++)
       keys[i] = false;
     pushMatrix();
-    translate(pos.x, pos.y);
+    translate(asteroids.get(0).position.x, asteroids.get(0).position.y);
     rotate(angle);
     float thetaInc = TWO_PI / (points * 2);
     float lastX = 0;
@@ -508,8 +537,8 @@ void shipDeath(PVector pos, int radius, float angle)
       float x, y;
       if (i % 2 == 1)
       {
-        x = sin(theta) * (radius * 0.5f);
-        y = -cos(theta) * (radius * 0.5f);
+        x = sin(theta) * (radius * 0.8f);
+        y = -cos(theta) * (radius * 0.8f);
       } else
       {
         x = sin(theta) * radius;
