@@ -322,6 +322,7 @@ void draw()
   // Show user their current score
   text(score, width * 0.95f, height * 0.95f);
 
+  // Show play again menu
   if (playAgain)
     playAgain();
 }
@@ -332,8 +333,11 @@ void gameOver(boolean win)
   {
     gameEnd = true;
     gameStart = false;
-    // Add 25 points to score per life
+    // Add 25 points to score per life, set lives to be zero to prevent infinite multiplying
+    score += lives * 25;
+    lives = 0;
     textSize(40);
+    // Display relevant win/lose message
     if (win)
     {
       fill(0, 255, 0);
@@ -347,10 +351,9 @@ void gameOver(boolean win)
     fill(255);
     textSize(35);
     text("Your Score: " + score, width * 0.5f, height * 0.3f);
-    score += lives * 25;
-    lives = 0;
     textSize(30);
     text("Name: " + playerName, width * 0.5f, height * 0.45f);
+    // Flashing typing line like in most word programs
     float tw = textWidth("Name: " + playerName) * 0.53f;
     if (typeTimer > 40)
     {
@@ -361,7 +364,7 @@ void gameOver(boolean win)
     typeTimer++;
   }
 }
-void showHighScores()
+void calculateHighScores()
 {
   scoreTable = loadTable("/Users/HenryBallingerMcFarlane/Desktop/Game/Asteroids/scores.csv", "header");
   for (TableRow row : scoreTable.rows())
@@ -374,7 +377,10 @@ void showHighScores()
   scores.sortReverse();
   
   // Go through top 5 elements of sorted scores list, finding them in the unsorted array of scores in order to find player names
-  for (int s = 0; s < 5; s++)
+  int display = scores.size();
+  if (scores.size() > 5)
+    display = 5;
+  for (int s = 0; s < display; s++)
   {
     for (int a = 0; a < scoresArray.length; a++)
     {
@@ -390,7 +396,10 @@ void playAgain()
   textSize(40);
   text("HighScores", width * 0.5f, height * 0.1f);
   textSize(25);
-  for (int i = 0; i < playerArray.length; i++)
+  int display = scores.size();
+  if (scores.size() > 5)
+    display = playerArray.length;
+  for (int i = 0; i < display; i++)
   {
     text(playerArray[i], width * 0.3f, height * 0.3f + (i * height * 0.06f));
     text(scores.get(i), width * 0.7f, height * 0.3f + (i * height * 0.06f));
@@ -452,15 +461,21 @@ void keyPressed()
 {
   if (gameEnd)
   {
+    // Delete last typed letter of name if backspace hit and length is greater than zero
     if (keyCode == BACKSPACE && playerName.length() > 0)
     {
       playerName = playerName.substring(0, playerName.length()-1);
-    } else if (keyCode != SHIFT && keyCode != CONTROL && keyCode != ALT && keyCode != ENTER && keyCode != RETURN && playerName.length() < 10)
+    }
+    // As long as the key is not a commonly used 'extra' key and the length is less than characters, add the typed key ot the player name
+    else if (keyCode != SHIFT && keyCode != CONTROL && keyCode != ALT && keyCode != ENTER && keyCode != RETURN && playerName.length() < 10)
     {
       playerName = playerName + key;
-    } else if (keyCode == ENTER && playerName.length() > 0)
+    }
+    // Upon enter key being pressed and the name containing some characters, pass to the file
+    else if (keyCode == ENTER && playerName.length() > 0)
     {
-      // Write player's name and score to file
+      // Write player's name and score to file, using this method allows appending to previously created file
+      // Allowing you to view highscores from previous sessions
       try
       { 
         scoring = new PrintWriter(new BufferedWriter(new FileWriter("/Users/HenryBallingerMcFarlane/Desktop/Game/Asteroids/scores.csv", true)));
@@ -473,10 +488,11 @@ void keyPressed()
         println(e);
       }
       //showHighScores = true;
-      showHighScores();
+      calculateHighScores();
     }
   }
 
+  // Press space bar to start game on intro screen
   if (keyCode == ' ' && level == 1)
     level++;
 
@@ -524,7 +540,7 @@ void drawPowerupSymbols(int ID)
 
   switch(ID)
   {
-    // Double Shooter
+  // Double Shooter
   case 0:
     fill(red);
     stroke(red);
@@ -533,7 +549,7 @@ void drawPowerupSymbols(int ID)
     stroke(yellow);
     ellipse(-5, 0, 3, 3);
     break;
-    // Quad Shooter
+  // Quad Shooter
   case 1:
     fill(red);
     stroke(red);
@@ -544,7 +560,7 @@ void drawPowerupSymbols(int ID)
     ellipse(5, -5, 2, 2);
     ellipse(-5, 5, 2, 2);
     break;
-    // Nuke
+  // Nuke
   case 2:
     float beta = TWO_PI / 6;
     stroke(yellow);
@@ -555,14 +571,14 @@ void drawPowerupSymbols(int ID)
     stroke(0);
     ellipse(0, 0, powerupSymbol * 0.15f, powerupSymbol * 0.15f);
     break;
-    // Forcefield
+  // Forcefield
   case 3:
     stroke(yellow);
     ellipse(0, 0, powerupSymbol * 0.8f, powerupSymbol * 0.8f);
     ellipse(0, 0, powerupSymbol * 0.6f, powerupSymbol * 0.6f);
     ellipse(0, 0, powerupSymbol * 0.4f, powerupSymbol * 0.4f);
     break;
-    // Freeze
+  // Freeze
   case 4:
     stroke(255);
     pushMatrix();
@@ -580,7 +596,7 @@ void drawPowerupSymbols(int ID)
     }
     popMatrix();
     break;
-    // Rapid Fire
+  // Rapid Fire
   case 5:
     fill(red);
     stroke(red);
@@ -591,7 +607,7 @@ void drawPowerupSymbols(int ID)
     ellipse(0, 3, 3, 3);
     ellipse(0, -9, 3, 3);
     break;
-    // Extra Life
+  // Extra Life
   case 6:
     stroke(aqua);
     line(0, -powerupLifeHeight, -powerupLifeWidth, powerupLifeHeight);
@@ -607,7 +623,8 @@ void setupAsteroidObject()
   asteroids.clear();
   AsteroidObject ship = new Ship(UP, LEFT, RIGHT, ' ', width * 0.5f, height * 0.5f);
   asteroids.add(ship);
-
+  
+  // Load correct number of asteorids for the level
   for (int i = 0; i < noAsteroids[level - 1]; i++)
   {
     AsteroidObject asteroid;
@@ -621,14 +638,16 @@ void setupAsteroidObject()
 
 void mousePressed()
 {
-  if (mouseX > width * 0.35f && mouseX < width * 0.65f && mouseY > height * 0.7f && mouseY < height * 0.8f)
+  // If mouse position is over Start Game
+  textSize(45);
+  float startWidth = textWidth("Start Game") * 0.5f;
+  if (mouseX > width * 0.5f - startWidth && mouseX < width * 0.5f + startWidth && mouseY > height * 0.7f && mouseY < height * 0.8f)
   {
     level = 2;
     //intro.stop();
     //countdownSound.play();
   }
 }
-
 
 void keyReleased()
 {
