@@ -2,7 +2,7 @@ class AsteroidObject
 {
   PVector position;
   PVector moveShip;
-  float speed = 2.5f;
+  float speed = 2.2f;
   PVector asteroidMove;
   float astSpeed = 0.25f;
   float theta;

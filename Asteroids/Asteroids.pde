@@ -1,11 +1,11 @@
-import processing.sound.*;
+//import processing.sound.*;
 
-SoundFile intro;
-SoundFile countdownSound;
-SoundFile laserSound;
-SoundFile thrustSound;
-SoundFile explosionSound;
-SoundFile nukeSound;
+//SoundFile intro;
+//SoundFile countdownSound;
+//SoundFile laserSound;
+//SoundFile thrustSound;
+//SoundFile explosionSound;
+//SoundFile nukeSound;
 
 void setup()
 {
@@ -24,14 +24,14 @@ void setup()
   medAstRad = 60;
   largeAstRad = 90;
   setupAsteroidObject();
-  intro = new SoundFile(this, "introMusic.wav");
-  intro.rate(0.4);
+  //intro = new SoundFile(this, "introMusic.wav");
+  //intro.rate(0.4);
   //intro.play();
-  countdownSound = new SoundFile(this, "countdown.mp3");
-  laserSound = new SoundFile(this, "shoot.wav");
-  thrustSound = new SoundFile(this, "thrust.wav");
-  explosionSound = new SoundFile(this, "expLarge.wav");
-  nukeSound = new SoundFile(this, "nuke.wav"); 
+  //countdownSound = new SoundFile(this, "countdown.mp3");
+  //laserSound = new SoundFile(this, "shoot.wav");
+  //thrustSound = new SoundFile(this, "thrust.wav");
+  //explosionSound = new SoundFile(this, "expLarge.wav");
+  //nukeSound = new SoundFile(this, "nuke.wav"); 
   thrust = true;
   reset = false;
   resetTimer = 0;
@@ -69,7 +69,11 @@ void setup()
   
   powerupLifeHeight = 10;
   powerupLifeWidth = powerupLifeHeight * 0.7f;
+  
+  nukePos = new PVector(0, 0);
 }
+
+PVector nukePos;
 
 boolean[] keys = new boolean[512];
 ArrayList<AsteroidObject> asteroids = new ArrayList<AsteroidObject>();
@@ -146,13 +150,15 @@ void draw()
     {
       fill(yellow);
       textSize(45);
-    } else
+    }
+    else
     {
       fill(255);
       textSize(40);
     }
     text("Start Game", width * 0.5f, height * 0.75f);
-  } else if (level > 1)
+  }
+  else if (level > 1)
   {
     // 3.. 2.. 1.. Countdown to game start
     if (countdown != 0 && gameStart != true)
@@ -169,7 +175,8 @@ void draw()
     // Only start game if pause is not active
     else if (pause == false)
     {
-      countdownSound.stop();
+     // countdownSound.stop();
+      shipAlive = true;
       gameStart = true;
     }
 
@@ -204,6 +211,9 @@ void draw()
     else
     {
       gameStart = false;
+      // Set all keys to false, so player cannot move ship
+      for (int i = 0; i < keys.length; i++)
+        keys[i] = false;
       if (level < levels)
       {
         level++;
@@ -238,13 +248,13 @@ void draw()
     if (entryCountTimer == entryTime)
     {
       // Select a random powerup
-      powerup = 3;
+      powerup = 2;
       //int(random(noPowerUps));   
       // Set that powerup to be on screen
       onScreen[powerup] = true;
     }
 
-    // Check to see if any powerups are supposed to be on screen 
+    // Check to see if any powerups are supposed to be on screen or are active
     for (int i = 0; i < noPowerUps; i++)
     {
       if (onScreen[i])
@@ -253,11 +263,7 @@ void draw()
         power.render(powerup);
         power.update();
       }
-    }
-
-    // Check to see if any powerups are active
-    for (int i = 0; i < noPowerUps; i++)
-    {
+      
       // If they are, start timing how long they have been active for
       if (activated[i])
       {      
@@ -279,7 +285,6 @@ void draw()
     {
       pushMatrix();
       translate(width - ((i + 1) * 40), height * 0.05f);
-      
       drawPowerupSymbols(i);
       popMatrix();
     }
@@ -383,7 +388,8 @@ void playAgain(boolean win)
         level = 1;
         lives = 5;
         setupAsteroidObject();
-      } else if (mouseX > width * 0.55f && mouseX < width * 0.85f)
+      }
+      else if (mouseX > width * 0.55f && mouseX < width * 0.85f)
       {
         exit();
       }
@@ -414,7 +420,7 @@ void mousePressed()
   if (mouseX > width * 0.35f && mouseX < width * 0.65f && mouseY > height * 0.7f && mouseY < height * 0.8f)
   {
     level = 2;
-    intro.stop();
+//    intro.stop();
     //countdownSound.play();
   }
 }
@@ -422,7 +428,7 @@ void keyPressed()
 {  
   if (gameStart)
     keys[keyCode] = true;
-
+  
   if (shipAlive)
   {
     // Enable relevant powerup when key pressed if within collection and not already activated
@@ -433,6 +439,13 @@ void keyPressed()
         // Set powerup to be activated and remove from collection
         activated[key - '0' - 1] = true;
         collected[key - '0' - 1] = false;
+        
+        // If nuke power up selected, set current ship position to be nuke drop location
+        if (key - '0' == 3)
+        {
+          nukeRadius = 30;
+          nukePos = asteroids.get(0).position.copy();
+        }
       }
     }
   }
@@ -508,7 +521,8 @@ void shipDeath(PVector pos, int radius, float angle)
     }
     popMatrix();
     resetTimer++;
-  } else
+  }
+  else
   {
     resetShip();
   }
@@ -519,6 +533,7 @@ void resetShip()
   reset = true;
   asteroids.set(0, new Ship(UP, LEFT, RIGHT, ' ', width * 0.5f, height * 0.5f));
 
+  // Move any asteroids in centre of screen to edges to give player a far chance on respawn
   for (int i = 1; i < asteroids.size(); i++)
   {
     if (asteroids.get(i).position.x > width * 0.3f && asteroids.get(i).position.x < width * 0.7f && 
@@ -529,6 +544,7 @@ void resetShip()
     }
   }
 
+  // Reset countdown;
   countdown = 3;
   resetTimer = 0;
   livesHitCounter = 0;
@@ -540,15 +556,13 @@ void resetShip()
       activated[i] = false;
     activeTimer = 0;
   }
-  
-  shipAlive = true;
 }
 
-void nukeExplosion(PVector pos, float angle)
+void nukeExplosion(float angle)
 {
   int points = 15;
   pushMatrix();
-  translate(pos.x, pos.y);
+  translate(nukePos.x, nukePos.y);
   rotate(angle);
   float thetaInc = TWO_PI / (points * 2);
   float lastX = 0;

@@ -13,9 +13,10 @@ class Ship extends AsteroidObject
   boolean resistance;
   float angle;
 
-
   float forcefieldRadius;
   PVector forcefieldPosition;
+  
+  
 
   Ship(int move, int left, int right, int fire, float startX, float startY)
   {
@@ -87,12 +88,13 @@ class Ship extends AsteroidObject
         {
           nukeRadius += 4;
           angle += 0.08f;
-          nukeExplosion(position, angle);
+          nukeExplosion(angle);
           nukeRadius -= 3;
           angle -= 0.05f;
-          nukeExplosion(position, angle);
+          nukeExplosion(angle);
           nukeTimer = 0;
-        } else
+        }
+        else
         {
           activated[2] = false;
           nukeRadius = 30;
@@ -104,10 +106,10 @@ class Ship extends AsteroidObject
       // Check to see if any asteroids are withing nuke blast radius, if they are, remove them from the game
       for (int i = 1; i < asteroids.size(); i++)
       {
-        if (asteroids.get(i).position.x + asteroids.get(i).radius * 0.5f > position.x - nukeRadius && 
-          asteroids.get(i).position.x - asteroids.get(i).radius * 0.5f < position.x + nukeRadius &&
-          asteroids.get(i).position.y + asteroids.get(i).radius * 0.5f > position.y - nukeRadius &&
-          asteroids.get(i).position.y - asteroids.get(i).radius * 0.5f < position.y + nukeRadius)
+        if (asteroids.get(i).position.x + asteroids.get(i).radius * 0.5f > nukePos.x - nukeRadius && 
+          asteroids.get(i).position.x - asteroids.get(i).radius * 0.5f < nukePos.x + nukeRadius &&
+          asteroids.get(i).position.y + asteroids.get(i).radius * 0.5f > nukePos.y - nukeRadius &&
+          asteroids.get(i).position.y - asteroids.get(i).radius * 0.5f < nukePos.y + nukeRadius)
         {
           //nukeSound.play();
           asteroids.remove(i);
@@ -158,7 +160,7 @@ class Ship extends AsteroidObject
     {
       thrust = true;
       //thrustSound.play();
-      thrustSound.amp(0.08);
+//      thrustSound.amp(0.08);
     }
     else
     {
