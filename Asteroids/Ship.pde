@@ -15,6 +15,8 @@ class Ship extends AsteroidObject
 
   float forcefieldRadius;
   PVector forcefieldPosition;
+  
+  PVector nukeDetection;
 
   Ship(int move, int left, int right, int fire, float startX, float startY)
   {
@@ -34,6 +36,8 @@ class Ship extends AsteroidObject
 
     forcefieldRadius = 70;
     forcefieldPosition = new PVector(0, 0);
+    
+    nukeDetection = new PVector(0, 0);
   }
 
   // Draw the ship in the correct position and at the correct angle
@@ -100,6 +104,7 @@ class Ship extends AsteroidObject
       thrust = true;
       //thrustSound.play();
       //thrustSound.amp(0.08);
+      playSound(4);
     }
     else
     {
@@ -126,6 +131,8 @@ class Ship extends AsteroidObject
     if (keys[fire] && laserTimer > laserTimeLimit)
     {
       //laserSound.play();
+      playSound(5);
+      
       Laser laser = new Laser();
       laser.position.x = position.x;
       laser.position.y = position.y;
@@ -269,15 +276,35 @@ class Ship extends AsteroidObject
       nukeTimer++;
 
       // Check to see if any asteroids are withing nuclear blast radius, if they are, remove them from the game
-      for (int i = 1; i < asteroids.size(); i++)
+      //for (int i = 1; i < asteroids.size(); i++)
+      //{
+      //  if (asteroids.get(i).position.x + asteroids.get(i).radius * 0.5f > nukePos.x - nukeRadius && 
+      //    asteroids.get(i).position.x - asteroids.get(i).radius * 0.5f < nukePos.x + nukeRadius &&
+      //    asteroids.get(i).position.y + asteroids.get(i).radius * 0.5f > nukePos.y - nukeRadius &&
+      //    asteroids.get(i).position.y - asteroids.get(i).radius * 0.5f < nukePos.y + nukeRadius)
+      //  {
+      //    nukeSound.play();
+      //    asteroids.remove(i);
+      //  }
+      //}
+
+      for (float alpha = 0; alpha < TWO_PI; alpha += 0.1f)
       {
-        if (asteroids.get(i).position.x + asteroids.get(i).radius * 0.5f > nukePos.x - nukeRadius && 
-          asteroids.get(i).position.x - asteroids.get(i).radius * 0.5f < nukePos.x + nukeRadius &&
-          asteroids.get(i).position.y + asteroids.get(i).radius * 0.5f > nukePos.y - nukeRadius &&
-          asteroids.get(i).position.y - asteroids.get(i).radius * 0.5f < nukePos.y + nukeRadius)
+        nukeDetection.x = nukeRadius * cos(alpha) + nukePos.x;
+        nukeDetection.y = nukeRadius * sin(alpha) + nukePos.y;
+        
+        // For each asteroid check to see if forcefield is touching asteroids
+        for (int i = 1; i < asteroids.size(); i++)
         {
-          //nukeSound.play();
-          asteroids.remove(i);
+          if (nukeDetection.x > asteroids.get(i).position.x - asteroids.get(i).radius * 0.5f && 
+            nukeDetection.x < asteroids.get(i).position.x + asteroids.get(i).radius * 0.5f &&
+            nukeDetection.y > asteroids.get(i).position.y - asteroids.get(i).radius * 0.5f &&
+            nukeDetection.y < asteroids.get(i).position.y + asteroids.get(i).radius * 0.5f)
+          {
+            //nukeSound.play();
+            playSound(6);
+            asteroids.remove(i);
+          }
         }
       }
     } 
