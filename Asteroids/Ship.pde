@@ -15,8 +15,12 @@ class Ship extends AsteroidObject
 
   float forcefieldRadius;
   PVector forcefieldPosition;
-  
+
   PVector nukeDetection;
+  
+  float beta;
+  int turnTimer;
+  int turned = 0;
 
   Ship(int move, int left, int right, int fire, float startX, float startY)
   {
@@ -36,8 +40,11 @@ class Ship extends AsteroidObject
 
     forcefieldRadius = 70;
     forcefieldPosition = new PVector(0, 0);
-    
+
     nukeDetection = new PVector(0, 0);
+    
+    beta = 0;
+    turnTimer = 0;
   }
 
   // Draw the ship in the correct position and at the correct angle
@@ -46,6 +53,7 @@ class Ship extends AsteroidObject
     pushMatrix();
     translate(position.x, position.y);
     
+    // Draw forcefield if activated
     if (activated[3])
     {
       fill(0);
@@ -81,42 +89,79 @@ class Ship extends AsteroidObject
 
   void update()
   {
-    println(theta);
-    if (theta < 0)
-      theta = TWO_PI;
-    if (theta > TWO_PI)
-      theta = 0;
+    println(theta, beta);
+    //if (theta < 0)
+    //{
+    //  theta = TWO_PI;
+    //  beta += PI;
+    //} 
+    //else if (theta > TWO_PI)
+    //{
+    //  theta = 0;
+    //  beta -= PI;
+    //}
     
+    moveShip.x = sin(beta) * speed;
+    moveShip.y = -cos(beta) * speed;
+    //moveShip.mult(speed);
     
-    moveShip.x = sin(theta);
-    moveShip.y = - cos(theta);
-    moveShip.mult(speed);
-
     // Move or rotate ship depending on key pressed
     if (keys[move])
     {
-      position.add(moveShip);
+      if (turned == 0)
+      {
+        beta = theta;
+        turned = 1;
+      }
+      
+      position.x += moveShip.x;
+      position.y += moveShip.y;
       if (speed < 4.0f)
         speed = speed * 1.15f;
       else
         speed = 4.0f;
       resistance = true;
+      
+      if (turnTimer > 2)
+      {
+        if (beta < theta)
+        {
+          beta += map(theta - beta, 0, HALF_PI, 0.05, 0.12);
+          //if (theta - beta > PI * 0.3f)
+          //  beta += 0.2f;
+          //else
+          //  beta += 0.05f;
+        }
+        else if (beta > theta)
+        {
+          beta -= map(beta - theta, 0, HALF_PI, 0.05, 0.12);
+          //if (beta - theta > PI * 0.3f)
+          //  beta -= 0.2f;
+          //else
+          //  beta -= 0.05f;
+        }
+        turnTimer = 0;
+        //else if (beta > theta)
+        //    beta -= 0.1f;
+      }
+      turnTimer++;
     }
     
+    if (keys[move] != true)
+      turned = 0;
+    
     if (keys[left])
-      theta -= 0.08f;
-      
+      theta -= 0.08f;     
     if (keys[right])
       theta += 0.08f;
-      
+
     if (keys[move] || keys[left] || keys[right])
     {
       thrust = true;
       //thrustSound.play();
       //thrustSound.amp(0.08);
       playSound(4);
-    }
-    else
+    } else
     {
       thrust = false;
     }
@@ -125,6 +170,7 @@ class Ship extends AsteroidObject
     // Once not moving (move key not pressed), reduce speed until stop
     if (resistance && keys[move] == false)
     {
+      //println("Resisting");
       speed = speed * 0.99f;
       position.add(moveShip);
       if (speed < 0.02)
@@ -136,13 +182,13 @@ class Ship extends AsteroidObject
       laserTimeLimit = 60 / 12;
     else
       laserTimeLimit = 60 / 3;
-      
+
     // Shoot lasers if fire key is pressed and over time limit (ship can only shoot certain amount of lasers per second
     if (keys[fire] && laserTimer > laserTimeLimit)
     {
       //laserSound.play();
       playSound(5);
-      
+
       Laser laser = new Laser();
       laser.position.x = position.x;
       laser.position.y = position.y;
@@ -194,8 +240,7 @@ class Ship extends AsteroidObject
       if (powerup != 6)
       {
         collected[powerup] = true;
-      }
-      else
+      } else
       {
         if (lives < 10)
           lives++;
@@ -216,7 +261,7 @@ class Ship extends AsteroidObject
         gameStart = false;
         // Stop ship from moving
         resistance = false;
-        
+
         // If the player still has lives, deduct a life
         if (lives > 0)
         { 
@@ -227,7 +272,7 @@ class Ship extends AsteroidObject
 
           // Clear all lasers from the screen so upon restart of game, they won't continue to show
           lasers.clear();
-          
+
           // Time exlposion graphics of ship explosion
           if (explosionTimer > 1)
           {
@@ -260,7 +305,7 @@ class Ship extends AsteroidObject
         }
       }
     }
-    
+
     if (activated[2])
     {
       // Time exlposion graphics of ship explosion
@@ -275,8 +320,7 @@ class Ship extends AsteroidObject
           angle -= 0.05f;
           nukeExplosion(angle);
           nukeTimer = 0;
-        }
-        else
+        } else
         {
           activated[2] = false;
           nukeRadius = 30;
@@ -302,7 +346,7 @@ class Ship extends AsteroidObject
       {
         nukeDetection.x = nukeRadius * cos(alpha) + nukePos.x;
         nukeDetection.y = nukeRadius * sin(alpha) + nukePos.y;
-        
+
         // For each asteroid check to see if forcefield is touching asteroids
         for (int i = 1; i < asteroids.size(); i++)
         {
@@ -327,7 +371,7 @@ class Ship extends AsteroidObject
       {
         forcefieldPosition.x = forcefieldRadius * cos(alpha) + position.x;
         forcefieldPosition.y = forcefieldRadius * sin(alpha) + position.y;
-        
+
         // For each asteroid check to see if forcefield is touching asteroids
         for (int i = 1; i < asteroids.size(); i++)
         {
