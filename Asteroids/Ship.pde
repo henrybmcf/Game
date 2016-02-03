@@ -81,6 +81,13 @@ class Ship extends AsteroidObject
 
   void update()
   {
+    println(theta);
+    if (theta < 0)
+      theta = TWO_PI;
+    if (theta > TWO_PI)
+      theta = 0;
+    
+    
     moveShip.x = sin(theta);
     moveShip.y = - cos(theta);
     moveShip.mult(speed);
@@ -95,10 +102,13 @@ class Ship extends AsteroidObject
         speed = 4.0f;
       resistance = true;
     }
+    
     if (keys[left])
       theta -= 0.08f;
+      
     if (keys[right])
       theta += 0.08f;
+      
     if (keys[move] || keys[left] || keys[right])
     {
       thrust = true;

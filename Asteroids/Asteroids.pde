@@ -41,7 +41,8 @@ void setup()
   // Load the intro soundtrack and start playing
   intro = new SoundFile(this, "introMusic.wav");
   intro.rate(0.4);
-  intro.play();
+  playSound(1);
+  //intro.play();
   countdownSound = new SoundFile(this, "countdown.mp3");
   laserSound = new SoundFile(this, "shoot.wav");
   thrustSound = new SoundFile(this, "thrust.wav");
@@ -176,8 +177,7 @@ void draw()
     textSize(45);
     fill(yellow);
     text("Start Game", width * 0.5f, height * 0.75f);
-  }
-  else if (level > 1)
+  } else if (level > 1)
   {
     // 3.. 2.. 1.. Countdown to game start
     if (countdown != 0 && gameStart != true)
@@ -345,8 +345,7 @@ void gameOver(boolean win)
     {
       fill(0, 255, 0);
       text("YOU WIN", width * 0.5f, height * 0.15f);
-    }
-    else
+    } else
     {
       fill(red);
       text("GAME OVER", width * 0.5f, height * 0.15f);
@@ -378,7 +377,7 @@ void calculateHighScores()
 
   int[] scoresArray = scores.array();
   scores.sortReverse();
-  
+
   // Go through top 5 elements of sorted scores list, finding them in the unsorted array of scores in order to find player names
   int display = scores.size();
   if (scores.size() > 5)
@@ -388,7 +387,7 @@ void calculateHighScores()
     for (int a = 0; a < scoresArray.length; a++)
     {
       if (scores.get(s) == scoresArray[a])
-         playerArray[s] = players.get(a);
+        playerArray[s] = players.get(a);
     }
   }
   playAgain = true;
@@ -418,12 +417,12 @@ void playAgain()
   textSize(40);
   fill(255);
   text("Play Again?", width * 0.5f, height * 0.7f);
-  
+
   float yesWidth = textWidth("Yes") * 0.5f;
   float noWidth = textWidth("No") * 0.5f;
   float yesTextSize = 35;
   float noTextSize = 35;
-  
+
   // Detect which option mouse is over, highlight that option
   if (mouseY > height * 0.7f && mouseY < height * 0.9f)
   {
@@ -440,8 +439,7 @@ void playAgain()
         lives = 5;
         setupAsteroidObject();
       }
-    }
-    else if (mouseX > width * 0.7f - noWidth && mouseX < width * 0.7f + noWidth)
+    } else if (mouseX > width * 0.7f - noWidth && mouseX < width * 0.7f + noWidth)
     {
       noTextSize = 45;
       // Otherwise, exit the game
@@ -460,7 +458,7 @@ void playAgain()
   fill(red);
   text("No", width * 0.7f, height * 0.85f);
 }
-  
+
 void keyPressed()
 {
   if (gameEnd)
@@ -539,6 +537,20 @@ void keyPressed()
       gameStart =! gameStart;
     }
   }
+
+  if (keyCode == 'M')
+  {
+    mute =! mute;
+    if (mute)
+    {
+      intro.stop();
+      countdownSound.stop();
+      explosionSound.stop();
+      thrustSound.stop();
+      laserSound.stop();
+      nukeSound.stop();
+    }
+  }
 }
 
 void drawPowerupSymbols(int ID)
@@ -549,7 +561,7 @@ void drawPowerupSymbols(int ID)
 
   switch(ID)
   {
-  // Double Shooter
+    // Double Shooter
   case 0:
     fill(red);
     stroke(red);
@@ -558,7 +570,7 @@ void drawPowerupSymbols(int ID)
     stroke(yellow);
     ellipse(-5, 0, 3, 3);
     break;
-  // Quad Shooter
+    // Quad Shooter
   case 1:
     fill(red);
     stroke(red);
@@ -569,7 +581,7 @@ void drawPowerupSymbols(int ID)
     ellipse(5, -5, 2, 2);
     ellipse(-5, 5, 2, 2);
     break;
-  // Nuke
+    // Nuke
   case 2:
     float beta = TWO_PI / 6;
     stroke(yellow);
@@ -580,14 +592,14 @@ void drawPowerupSymbols(int ID)
     stroke(0);
     ellipse(0, 0, powerupSymbol * 0.15f, powerupSymbol * 0.15f);
     break;
-  // Forcefield
+    // Forcefield
   case 3:
     stroke(yellow);
     ellipse(0, 0, powerupSymbol * 0.8f, powerupSymbol * 0.8f);
     ellipse(0, 0, powerupSymbol * 0.6f, powerupSymbol * 0.6f);
     ellipse(0, 0, powerupSymbol * 0.4f, powerupSymbol * 0.4f);
     break;
-  // Freeze
+    // Freeze
   case 4:
     stroke(255);
     pushMatrix();
@@ -605,7 +617,7 @@ void drawPowerupSymbols(int ID)
     }
     popMatrix();
     break;
-  // Rapid Fire
+    // Rapid Fire
   case 5:
     fill(red);
     stroke(red);
@@ -616,7 +628,7 @@ void drawPowerupSymbols(int ID)
     ellipse(0, 3, 3, 3);
     ellipse(0, -9, 3, 3);
     break;
-  // Extra Life
+    // Extra Life
   case 6:
     stroke(aqua);
     line(0, -powerupLifeHeight, -powerupLifeWidth, powerupLifeHeight);
@@ -632,7 +644,7 @@ void setupAsteroidObject()
   asteroids.clear();
   AsteroidObject ship = new Ship(UP, LEFT, RIGHT, ' ', width * 0.5f, height * 0.5f);
   asteroids.add(ship);
-  
+
   // Load correct number of asteorids for the level
   for (int i = 0; i < noAsteroids[level - 1]; i++)
   {
@@ -789,7 +801,7 @@ void splitAsteroid(int number)
 {
   //explosionSound.play();
   playSound(3);
-  
+
   if (asteroids.get(number).radius == 90)
   {
     score += 5;
@@ -827,32 +839,33 @@ void playSound(int ID)
 {
   if (mute != true)
   {
-   switch (ID)
-   {
-     // Intro
-     case 1:
-       break;
-     // Countdown
-     case 2:
-       countdownSound.play();
-       break;
-     // Explosion
-     case 3:
-       explosionSound.play();
-       break;
-     // Thrust
-     case 4:
-       thrustSound.play();
-       thrustSound.amp(0.08);
-       break;
-     // Laser
-     case 5:
-       laserSound.play();
-       break;
-     // Nuke
-     case 6:
-       nukeSound.play();
-       break;
-   }
+    switch (ID)
+    {
+      // Intro
+    case 1:
+      intro.play();
+      break;
+      // Countdown
+    case 2:
+      countdownSound.play();
+      break;
+      // Explosion
+    case 3:
+      explosionSound.play();
+      break;
+      // Thrust
+    case 4:
+      thrustSound.play();
+      thrustSound.amp(0.08);
+      break;
+      // Laser
+    case 5:
+      laserSound.play();
+      break;
+      // Nuke
+    case 6:
+      nukeSound.play();
+      break;
+    }
   }
 }
