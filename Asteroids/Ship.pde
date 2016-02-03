@@ -5,6 +5,8 @@ class Ship extends AsteroidObject
   int left;
   int right;
   int fire;
+  // Boolean to determine if ship thrust is on or not
+  boolean thrust;
   int thrustFlicker;
   boolean resistance;
   int turnTimer;
@@ -29,6 +31,7 @@ class Ship extends AsteroidObject
     this.right = right;
     this.fire = fire;
     resistance = false;
+    thrust = true;
     thrustFlicker = 2;
     turnTimer = 0;
     turned = false;

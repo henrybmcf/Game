@@ -2,24 +2,6 @@ import processing.sound.*;
 import java.io.FileWriter;
 import java.io.BufferedWriter;
 
-SoundFile intro;
-SoundFile countdownSound;
-SoundFile laserSound;
-SoundFile thrustSound;
-SoundFile explosionSound;
-SoundFile nukeSound;
-
-PFont hyperspace;
-
-PrintWriter scoring;
-String playerName = "";
-boolean gameEnd = false;
-
-BufferedReader reader;
-String line;
-
-Table scoreTable;
-
 void setup()
 {
   size(700, 600);
@@ -27,16 +9,32 @@ void setup()
   smooth(8);
   strokeWeight(1.5);
   
+  // Load the intro soundtrack and start playing
+  //intro = new SoundFile(this, "introMusic.wav");
+  //intro.rate(0.4);
+  playSound(1);
+  //countdownSound = new SoundFile(this, "countdown.mp3");
+  //laserSound = new SoundFile(this, "shoot.wav");
+  //thrustSound = new SoundFile(this, "thrust.wav");
+  //explosionSound = new SoundFile(this, "expLarge.wav");
+  //nukeSound = new SoundFile(this, "nuke.wav");
+  
   // Create new font called hyperspace and set as font for whole sketch
   hyperspace = createFont("HyperspaceBold.otf", 32);
   textFont(hyperspace, 32);
-  
+  keys = new boolean[512];
+  asteroids = new ArrayList<AsteroidObject>();
+  lasers = new ArrayList<Laser>();
+  levels = 6;
+  level = 1;
+  noAsteroids = new int[levels];
   // Set the number of asteroids per level to be the level number plus 5.
   for (int i = 0; i < levels; i++)
-    noAsteroids[i] = i + 1;
+    noAsteroids[i] = i + 1;   
   gameStart = false;
+  gameEnd = false;
   pause = false;
-  level = 1;
+  mute = false;
   countdown = 3;
   countdownTimer = 0;
   // Set the sizes of the asteroids
@@ -45,29 +43,27 @@ void setup()
   largeAstRad = 90;
   // Call method to setup the arraylist of asteroids
   setupAsteroidObject();
-  // Load the intro soundtrack and start playing
-  //intro = new SoundFile(this, "introMusic.wav");
-  //intro.rate(0.4);
-  playSound(1);
-  //intro.play();
-  //countdownSound = new SoundFile(this, "countdown.mp3");
-  //laserSound = new SoundFile(this, "shoot.wav");
-  //thrustSound = new SoundFile(this, "thrust.wav");
-  //explosionSound = new SoundFile(this, "expLarge.wav");
-  //nukeSound = new SoundFile(this, "nuke.wav"); 
-  thrust = true;
   reset = false;
   resetTimer = 0;
   lives = 5;
   livesHitCounter = 0;
   shipAlive = true;
   score = 0;
-
+  scores = new IntList();
+  players = new StringList();
+  playerArray = new String[5];
+  typeTimer = 0;
+  showHighScores = false;
+  playAgain = false;
+  playerName = "";
   power = new PowerUp(random(width), -20);
+  noPowerUps = 7;
   // Enter powerup onto screen after random time between 5 & 7 seconds.
   entryTime = int(random(300, 420));
-  // Timer to time entry onto screen
-  entryCountTimer = 0;
+  entryCountTimer = 0; 
+  onScreen = new boolean[noPowerUps];
+  collected = new boolean[noPowerUps];
+  activated = new boolean[noPowerUps];
   // Initiliase onScreen, collected & activated boolean arrays to be false for start of game 
   for (int i = 0; i < noPowerUps; i++)
   {
@@ -75,100 +71,121 @@ void setup()
     collected[i] = false;
     activated[i] = false;
   }
-  // Timer to time how long powerup has been active and to subsequently deactivate
   activeTimer = 0;
-  // Deactivate powerup after 6 seconds
   deactivateTime = 360;
-
+  powerupSymbol = 30;
   nukeRadius = 30;
   nukeTimer = 0;
-
-  powerupSymbol = 30;
   nukeSymbol = powerupSymbol * 0.9f;
-
+  nukePos = new PVector(0, 0);
+  powerupLifeHeight = 10;
+  powerupLifeWidth = powerupLifeHeight * 0.7f;
   red = color(255, 0, 0);
   yellow = color(255, 255, 0);
   aqua = color(0, 206, 209);
-
-  powerupLifeHeight = 10;
-  powerupLifeWidth = powerupLifeHeight * 0.7f;
-
-  nukePos = new PVector(0, 0);
-  showHighScores = false;
-  playAgain = false;
 }
 
-PVector nukePos;
+// Various sound effect variables
+SoundFile intro;
+SoundFile countdownSound;
+SoundFile laserSound;
+SoundFile thrustSound;
+SoundFile explosionSound;
+SoundFile nukeSound;
 
-boolean[] keys = new boolean[512];
-ArrayList<AsteroidObject> asteroids = new ArrayList<AsteroidObject>();
-ArrayList<Laser> lasers = new ArrayList<Laser>();
-int levels = 6;
-int[] noAsteroids = new int[levels];
+// Custom font
+PFont hyperspace;
+// Boolean array to allow multiple simultaneous key presses and determine which keys they are
+boolean[] keys;
+// ArrayList of ship and all asteroids in game
+ArrayList<AsteroidObject> asteroids;
+// ArrayList of all lasers in game
+ArrayList<Laser> lasers;
+// Number of levels in the game
+int levels;
+// Variable for the level number
+int level;
+// Array to hold number of asteroids per level
+int[] noAsteroids;
+// Boolean to determine if game has started or not
 boolean gameStart;
+// Boolean to determine if game is over
+boolean gameEnd;
 // Boolean to set game to a paused state
 boolean pause;
-int level;
+// Boolean to determine if game is muted or not
+boolean mute;
+// Variables for countdown to start of each level
 int countdown;
 int countdownTimer;
+// Variables for sizes of different asteroids
 int largeAstRad;
 int medAstRad;
 int smallAstRad;
-PImage larAsteroid;
-PImage medAsteroid;
-PImage smallAsteroid;
-boolean thrust;
-int j, k;
+// Boolean to determine if game has been reset or not
 boolean reset;
 int resetTimer;
+// Number of lives
 int lives;
 int livesHitCounter;
+// Boolean to determine if ship is dead or alive
 boolean shipAlive;
+// Variable to hold player's score
 int score;
-
+// Integer list of previous scores
+IntList scores;
+// String list of previous player names
+StringList players;
+// String array of names of top five scoring players
+String[] playerArray;
+// Variable to time flashing of typing line when entering name for highscore 
+int typeTimer;
+// Booleans to perform certain actions upon completion of other actions, in this case show high score screen and option to play again
+boolean showHighScores;
+boolean playAgain;
+// Variables to enable writing of highscores to text file
+PrintWriter scoring;
+String playerName;
+// Variables to enable reading of highscores in text file
+BufferedReader reader;
+Table scoreTable;
+String line;
+// PowerUp variable
 PowerUp power;
 // Integer to select powerup
 int powerup;
 // 1(0) = Double Shooter, 2(1) = Quad Shooter, 3(2) = Nuke, 4(3) = Forcefield, 5(4) = Freeze, 6(5) = Extra Life, 7(6) = Rapid Fire
-int noPowerUps = 7;
+int noPowerUps;
 // Time to enter onto screen
 int entryTime;
 // Timer to time entry onto screen
 int entryCountTimer;
 // Boolean array for if powerup is on screen or not. True = on screen.
-boolean[] onScreen = new boolean[noPowerUps];
+boolean[] onScreen;
 // Boolean array for if powerup has been collected by ship
-boolean[] collected = new boolean[noPowerUps];
+boolean[] collected;
 // Boolean array for is powerup has been activated
-boolean[] activated = new boolean[noPowerUps];
+boolean[] activated;
 // Time how long powerup has been active and to subsequently deactivate
 int activeTimer;
 // Time to deactivate powerup
 int deactivateTime;
-
+// Size of powerup symbol
+int powerupSymbol;
+// Radius of and nuclear blast and timer to control expansion rate
 float nukeRadius;
 int nukeTimer;
-
-int powerupSymbol;
+// Size of nuclear symbol within powerup symbol
 float nukeSymbol;
-
+// Position of nuclear explosion
+PVector nukePos;
+// Size of extra life symbol within powerup symbol
+int powerupLifeHeight;
+float powerupLifeWidth;
+// Colour variables
 color red;
 color yellow;
 color aqua;
-
-int powerupLifeHeight;
-float powerupLifeWidth;
-
-boolean showHighScores;
-boolean playAgain;
-
-IntList scores = new IntList();
-StringList players = new StringList();
-String[] playerArray = new String[5];
-
-int typeTimer = 0;
-
-boolean mute = false;
 
 void draw()
 {
@@ -222,10 +239,10 @@ void draw()
       {
         for (int i = 1; i < asteroids.size(); i++)
         {
-         asteroids.get(i).render();
-         // Only update (move) asteroids if the game has started
-         if (gameStart && activated[4] == false)
-           asteroids.get(i).update();
+          asteroids.get(i).render();
+          // Only update (move) asteroids if the game has started
+          if (gameStart && activated[4] == false)
+            asteroids.get(i).update();
         }
       }
 
@@ -507,7 +524,6 @@ void keyPressed()
   {
     level = 2;
     //intro.stop();
-    //countdownSound.play();
     playSound(2);
   }
 
@@ -546,6 +562,7 @@ void keyPressed()
     }
   }
 
+  // Mute/Unmute sounds when M is pressed
   if (keyCode == 'M')
   {
     mute =! mute;
@@ -656,12 +673,12 @@ void setupAsteroidObject()
   // Load correct number of asteorids for the level
   for (int i = 0; i < noAsteroids[level - 1]; i++)
   {
-   AsteroidObject asteroid;
-   if (i % 2 == 0)
-     asteroid = new Asteroid(random(200), random(height), 1);
-   else
-     asteroid = new Asteroid(random(width - 200, width), random(height), 1);
-   asteroids.add(asteroid);
+    AsteroidObject asteroid;
+    if (i % 2 == 0)
+      asteroid = new Asteroid(random(200), random(height), 1);
+    else
+      asteroid = new Asteroid(random(width - 200, width), random(height), 1);
+    asteroids.add(asteroid);
   }
 }
 
@@ -674,7 +691,6 @@ void mousePressed()
   {
     level = 2;
     //intro.stop();
-    //countdownSound.play();
     playSound(2);
   }
 }
@@ -807,34 +823,29 @@ void nukeExplosion(float angle)
 
 void splitAsteroid(int number)
 {
-  //explosionSound.play();
   playSound(3);
 
   if (asteroids.get(number).radius == 90)
   {
     score += 5;
-    if (asteroids.size() < 27)
+    for (int i = 0; i < 2; i++)
     {
-      AsteroidObject asteroid = new Asteroid(asteroids.get(number).position.x, asteroids.get(number).position.y, 2);
-      asteroids.add(asteroid);
-    }
-    if (asteroids.size() < 27)
-    {
-      AsteroidObject asteroid = new Asteroid(asteroids.get(number).position.x, asteroids.get(number).position.y, 2);
-      asteroids.add(asteroid);
+      if (asteroids.size() < 27)
+      {
+        AsteroidObject asteroid = new Asteroid(asteroids.get(number).position.x, asteroids.get(number).position.y, 2);
+        asteroids.add(asteroid);
+      }
     }
   } else if (asteroids.get(number).radius == 60)
   {
     score += 10;
-    if (asteroids.size() < 27)
+    for (int i = 0; i < 2; i++)
     {
-      AsteroidObject asteroid = new Asteroid(asteroids.get(number).position.x, asteroids.get(number).position.y, 3);
-      asteroids.add(asteroid);
-    } 
-    if (asteroids.size() < 27)
-    {
-      AsteroidObject asteroid = new Asteroid(asteroids.get(number).position.x, asteroids.get(number).position.y, 3);
-      asteroids.add(asteroid);
+      if (asteroids.size() < 27)
+      {
+        AsteroidObject asteroid = new Asteroid(asteroids.get(number).position.x, asteroids.get(number).position.y, 3);
+        asteroids.add(asteroid);
+      }
     }
   } else if (asteroids.get(number).radius == 30)
   {
@@ -850,30 +861,30 @@ void playSound(int ID)
     switch (ID)
     {
       // Intro
-    //case 1:
-    //  intro.play();
-    //  break;
-    //  // Countdown
-    //case 2:
-    //  countdownSound.play();
-    //  break;
-    //  // Explosion
-    //case 3:
-    //  explosionSound.play();
-    //  break;
-    //  // Thrust
-    //case 4:
-    //  thrustSound.play();
-    //  thrustSound.amp(0.08);
-    //  break;
-    //  // Laser
-    //case 5:
-    //  laserSound.play();
-    //  break;
-    //  // Nuke
-    //case 6:
-    //  nukeSound.play();
-    //  break;
+      //case 1:
+      //  intro.play();
+      //  break;
+      //  // Countdown
+      //case 2:
+      //  countdownSound.play();
+      //  break;
+      //  // Explosion
+      //case 3:
+      //  explosionSound.play();
+      //  break;
+      //  // Thrust
+      //case 4:
+      //  thrustSound.play();
+      //  thrustSound.amp(0.08);
+      //  break;
+      //  // Laser
+      //case 5:
+      //  laserSound.play();
+      //  break;
+      //  // Nuke
+      //case 6:
+      //  nukeSound.play();
+      //  break;
     }
   }
 }

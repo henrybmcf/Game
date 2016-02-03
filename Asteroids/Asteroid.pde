@@ -1,5 +1,9 @@
 class Asteroid extends AsteroidObject
 { 
+  // Image variables for the asteroid images
+PImage larAsteroid;
+PImage medAsteroid;
+PImage smallAsteroid;
   float astRad;
   int size;
 
@@ -11,11 +15,12 @@ class Asteroid extends AsteroidObject
   {
     super(x, y, size);
     larAsteroid = loadImage("asteroid.png");
-    larAsteroid.resize(largeAstRad, largeAstRad);
     medAsteroid = loadImage("asteroid.png");
-    medAsteroid.resize(medAstRad, medAstRad);
     smallAsteroid = loadImage("asteroid.png");
+    larAsteroid.resize(largeAstRad, largeAstRad);
+    medAsteroid.resize(medAstRad, medAstRad); 
     smallAsteroid.resize(smallAstRad, smallAstRad);
+    
     if (size == 2)
       radius = largeAstRad / (size * 0.75f);
     else
