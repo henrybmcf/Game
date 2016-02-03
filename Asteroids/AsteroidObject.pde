@@ -5,7 +5,7 @@ class AsteroidObject
   float speed = 4.0f;
   PVector asteroidMove;
   float astSpeed = 0.25f;
-  float theta;
+  float facingAngle;
   float shipHeight;
   float shipWidth;
   float radius;
@@ -39,7 +39,7 @@ class AsteroidObject
     else
       asteroidMove = new PVector(random(-size, -size * 1.5), astSpeed);
 
-    this.theta = 0.0f;
+    this.facingAngle = 0.0f;
     this.shipHeight = 20;
     this.shipWidth = shipHeight * 0.7f;
   }  

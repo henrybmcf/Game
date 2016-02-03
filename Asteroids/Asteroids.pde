@@ -9,6 +9,8 @@ SoundFile thrustSound;
 SoundFile explosionSound;
 SoundFile nukeSound;
 
+PFont hyperspace;
+
 PrintWriter scoring;
 String playerName = "";
 boolean gameEnd = false;
@@ -20,10 +22,15 @@ Table scoreTable;
 
 void setup()
 {
-  //size(700, 600);
-  fullScreen();
+  size(700, 600);
+  //fullScreen();
   smooth(8);
   strokeWeight(1.5);
+  
+  // Create new font called hyperspace and set as font for whole sketch
+  hyperspace = createFont("HyperspaceBold.otf", 32);
+  textFont(hyperspace, 32);
+  
   // Set the number of asteroids per level to be the level number plus 5.
   for (int i = 0; i < levels; i++)
     noAsteroids[i] = i + 1;
@@ -209,18 +216,17 @@ void draw()
       asteroids.get(0).render();
     }
 
-    //if (asteroids.size() > 1)
-    if (asteroids.size() == 1)
+    if (asteroids.size() > 1)
     {
       if (gameEnd == false)
       {
-        //for (int i = 1; i < asteroids.size(); i++)
-        //{
-        //  asteroids.get(i).render();
-        //  // Only update (move) asteroids if the game has started
-        //  if (gameStart && activated[4] == false)
-        //    asteroids.get(i).update();
-        //}
+        for (int i = 1; i < asteroids.size(); i++)
+        {
+         asteroids.get(i).render();
+         // Only update (move) asteroids if the game has started
+         if (gameStart && activated[4] == false)
+           asteroids.get(i).update();
+        }
       }
 
       for (int i = 0; i < lasers.size(); i++)
@@ -648,15 +654,15 @@ void setupAsteroidObject()
   asteroids.add(ship);
 
   // Load correct number of asteorids for the level
-  //for (int i = 0; i < noAsteroids[level - 1]; i++)
-  //{
-  //  AsteroidObject asteroid;
-  //  if (i % 2 == 0)
-  //    asteroid = new Asteroid(random(200), random(height), 1);
-  //  else
-  //    asteroid = new Asteroid(random(width - 200, width), random(height), 1);
-  //  asteroids.add(asteroid);
-  //}
+  for (int i = 0; i < noAsteroids[level - 1]; i++)
+  {
+   AsteroidObject asteroid;
+   if (i % 2 == 0)
+     asteroid = new Asteroid(random(200), random(height), 1);
+   else
+     asteroid = new Asteroid(random(width - 200, width), random(height), 1);
+   asteroids.add(asteroid);
+  }
 }
 
 void mousePressed()

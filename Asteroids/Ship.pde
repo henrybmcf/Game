@@ -1,50 +1,51 @@
 class Ship extends AsteroidObject
 {
+  float moveAngle;
   int move;
   int left;
   int right;
   int fire;
+  int thrustFlicker;
+  boolean resistance;
+  int turnTimer;
+  boolean turned;
+  
   int laserTimer;
   int laserTimeLimit;
-  int thrustFlicker;  
   int explosionTimer;
   int explosionRadius;
-  float expTheta;
-  boolean resistance;
-  float angle;
-
+  float explosionAngle;
+  PVector nukeDetection;
+  float nukeAngle;
   float forcefieldRadius;
   PVector forcefieldPosition;
-
-  PVector nukeDetection;
   
-  float beta;
-  int turnTimer;
-  int turned = 0;
-
   Ship(int move, int left, int right, int fire, float startX, float startY)
   {
     super(startX, startY, 0);
+    moveAngle = 0;
     this.move = move;
     this.left = left;
     this.right = right;
     this.fire = fire;
-    // Divide 60 by number of bullets to shoot per second
-    laserTimeLimit = 60 / 3;
-    laserTimer = 0;
-    thrustFlicker = 2;
-    explosionTimer = 2;
-    expTheta = 0.0f;
     resistance = false;
-    angle = 0;
-
-    forcefieldRadius = 70;
-    forcefieldPosition = new PVector(0, 0);
-
-    nukeDetection = new PVector(0, 0);
-    
-    beta = 0;
+    thrustFlicker = 2;
     turnTimer = 0;
+    turned = false;
+    
+    laserTimer = 0;
+    // Divide 60 by number of bullets to shoot per second
+    laserTimeLimit = 60 / 3;    
+    explosionTimer = 2;
+    explosionRadius = 0;
+    explosionAngle = 0.0f;
+    // Vector to detect if any asteroids are hitting any points on the nuclear blast circle
+    nukeDetection = new PVector(0, 0);
+    nukeAngle = 0;
+    // Size of the forcefield
+    forcefieldRadius = 70;
+    // Vector to detect if any asteroids are hitting any points on the forcefield circle
+    forcefieldPosition = new PVector(0, 0);
   }
 
   // Draw the ship in the correct position and at the correct angle
@@ -61,7 +62,7 @@ class Ship extends AsteroidObject
       ellipse(0, 0, forcefieldRadius * 2.0f, forcefieldRadius * 2.0f);
     }
 
-    rotate(theta);
+    rotate(facingAngle);
     stroke(aqua);
     line(0, -shipHeight, -shipWidth, shipHeight);
     line(0, -shipHeight, shipWidth, shipHeight);
@@ -88,80 +89,56 @@ class Ship extends AsteroidObject
   }
 
   void update()
-  {
-    println(theta, beta);
-    //if (theta < 0)
-    //{
-    //  theta = TWO_PI;
-    //  beta += PI;
-    //} 
-    //else if (theta > TWO_PI)
-    //{
-    //  theta = 0;
-    //  beta -= PI;
-    //}
-    
-    moveShip.x = sin(beta) * speed;
-    moveShip.y = -cos(beta) * speed;
-    //moveShip.mult(speed);
-    
+  { 
+    moveShip.x = sin(moveAngle);
+    moveShip.y = -cos(moveAngle);
+    moveShip.mult(speed);
+
     // Move or rotate ship depending on key pressed
     if (keys[move])
     {
-      if (turned == 0)
+      // On pressing thrust key (move), set moveAngle to be facingAngle, so that ship moves in direction it is facing. Use of turned variable to ensure it only does this once each time it is pressed
+      if (turned == false)
       {
-        beta = theta;
-        turned = 1;
-      }
+        moveAngle = facingAngle;
+        turned = true;
+      }     
+      position.add(moveShip);
       
-      position.x += moveShip.x;
-      position.y += moveShip.y;
+      // Simulate acceleration
       if (speed < 4.0f)
         speed = speed * 1.15f;
       else
         speed = 4.0f;
+      
       resistance = true;
       
+      // Set speed of turning dependent on angle of turn. Time turn to prevent instantaneous turning, simulating original game
       if (turnTimer > 2)
       {
-        if (beta < theta)
-        {
-          beta += map(theta - beta, 0, HALF_PI, 0.05, 0.12);
-          //if (theta - beta > PI * 0.3f)
-          //  beta += 0.2f;
-          //else
-          //  beta += 0.05f;
-        }
-        else if (beta > theta)
-        {
-          beta -= map(beta - theta, 0, HALF_PI, 0.05, 0.12);
-          //if (beta - theta > PI * 0.3f)
-          //  beta -= 0.2f;
-          //else
-          //  beta -= 0.05f;
-        }
+        if (moveAngle < facingAngle)
+          moveAngle += map(facingAngle - moveAngle, 0, HALF_PI, 0.05, 0.12);
+        else if (moveAngle > facingAngle)
+          moveAngle -= map(moveAngle - facingAngle, 0, HALF_PI, 0.05, 0.12);
         turnTimer = 0;
-        //else if (beta > theta)
-        //    beta -= 0.1f;
       }
       turnTimer++;
     }
     
     if (keys[move] != true)
-      turned = 0;
+      turned = false;
     
     if (keys[left])
-      theta -= 0.08f;     
+      facingAngle -= 0.08f;     
     if (keys[right])
-      theta += 0.08f;
+      facingAngle += 0.08f;
 
     if (keys[move] || keys[left] || keys[right])
     {
       thrust = true;
-      //thrustSound.play();
-      //thrustSound.amp(0.08);
       playSound(4);
-    } else
+    }
+    else
     {
       thrust = false;
     }
@@ -170,7 +147,6 @@ class Ship extends AsteroidObject
     // Once not moving (move key not pressed), reduce speed until stop
     if (resistance && keys[move] == false)
     {
-      //println("Resisting");
       speed = speed * 0.99f;
       position.add(moveShip);
       if (speed < 0.02)
@@ -183,38 +159,32 @@ class Ship extends AsteroidObject
     else
       laserTimeLimit = 60 / 3;
 
-    // Shoot lasers if fire key is pressed and over time limit (ship can only shoot certain amount of lasers per second
+    // Shoot laser if fire key is pressed and over time limit (ship can only shoot certain amount of lasers per second)
     if (keys[fire] && laserTimer > laserTimeLimit)
     {
-      //laserSound.play();
       playSound(5);
-
+      
       Laser laser = new Laser();
-      laser.position.x = position.x;
-      laser.position.y = position.y;
-      laser.position.add(PVector.mult(moveShip, 6));
-      laser.theta = theta;
+      laser.position = position.copy();
+      laser.facingAngle = facingAngle;
       lasers.add(laser);
+      
       // Double Shooter
       if (activated[0])
       {
         Laser doubleLaser = new Laser();
-        doubleLaser.position.x = position.x;
-        doubleLaser.position.y = position.y;
-        doubleLaser.position.add(PVector.mult(moveShip, 6));
-        doubleLaser.theta = theta + PI;
+        doubleLaser.position = position.copy();
+        doubleLaser.facingAngle = facingAngle + PI;
         lasers.add(doubleLaser);
-      }
+      }      
       // Quad Shooter
       if (activated[1])
       {
         for (int i = 1; i < 4; i ++)
         {
           Laser quadLaser = new Laser();
-          quadLaser.position.x = position.x;
-          quadLaser.position.y = position.y;
-          quadLaser.position.add(PVector.mult(moveShip, 6));
-          quadLaser.theta = theta + (i * HALF_PI);
+          quadLaser.position = position.copy();
+          quadLaser.facingAngle = facingAngle + (i * HALF_PI);
           lasers.add(quadLaser);
         }
       }
@@ -276,19 +246,19 @@ class Ship extends AsteroidObject
           // Time exlposion graphics of ship explosion
           if (explosionTimer > 1)
           {
-            shipDeath(explosionRadius, expTheta);
-            shipDeath(explosionRadius - 5, expTheta);
-            shipDeath(explosionRadius - 10, expTheta);
-            shipDeath(explosionRadius - 15, expTheta);
+            shipDeath(explosionRadius, explosionAngle);
+            shipDeath(explosionRadius - 5, explosionAngle);
+            shipDeath(explosionRadius - 10, explosionAngle);
+            shipDeath(explosionRadius - 15, explosionAngle);
             if (explosionRadius < 30)
               explosionRadius += 1;
             else
               explosionRadius = 0;
             explosionTimer = 0;
             if (random(1) > 0.5f)
-              expTheta += 2.5f;
+              explosionAngle += 2.5f;
             else
-              expTheta -= 3.5f;
+              explosionAngle -= 3.5f;
           }
           explosionTimer++;
         }
@@ -314,11 +284,11 @@ class Ship extends AsteroidObject
         if (nukeRadius < 200)
         {
           nukeRadius += 4;
-          angle += 0.08f;
-          nukeExplosion(angle);
+          nukeAngle += 0.08f;
+          nukeExplosion(nukeAngle);
           nukeRadius -= 3;
-          angle -= 0.05f;
-          nukeExplosion(angle);
+          nukeAngle -= 0.05f;
+          nukeExplosion(nukeAngle);
           nukeTimer = 0;
         } else
         {
@@ -329,19 +299,8 @@ class Ship extends AsteroidObject
       }
       nukeTimer++;
 
-      // Check to see if any asteroids are withing nuclear blast radius, if they are, remove them from the game
-      //for (int i = 1; i < asteroids.size(); i++)
-      //{
-      //  if (asteroids.get(i).position.x + asteroids.get(i).radius * 0.5f > nukePos.x - nukeRadius && 
-      //    asteroids.get(i).position.x - asteroids.get(i).radius * 0.5f < nukePos.x + nukeRadius &&
-      //    asteroids.get(i).position.y + asteroids.get(i).radius * 0.5f > nukePos.y - nukeRadius &&
-      //    asteroids.get(i).position.y - asteroids.get(i).radius * 0.5f < nukePos.y + nukeRadius)
-      //  {
-      //    nukeSound.play();
-      //    asteroids.remove(i);
-      //  }
-      //}
-
+      // Check to see if any asteroids are withing nuclear blast radius by looping through all angles (in a circle)
+      // and calculating x & y coordinates of each of those points check to see if they are hitting asteroids, if they are, remove them from the game
       for (float alpha = 0; alpha < TWO_PI; alpha += 0.1f)
       {
         nukeDetection.x = nukeRadius * cos(alpha) + nukePos.x;
@@ -355,13 +314,13 @@ class Ship extends AsteroidObject
             nukeDetection.y > asteroids.get(i).position.y - asteroids.get(i).radius * 0.5f &&
             nukeDetection.y < asteroids.get(i).position.y + asteroids.get(i).radius * 0.5f)
           {
-            //nukeSound.play();
             playSound(6);
             asteroids.remove(i);
           }
         }
       }
-    } 
+    }
+    
     // If forcefield powerup is active
     // Loop through all angles (in a circle), calculate x & y coordinates of each of those points check to see if they are hitting asteroids
     else if (activated[3])

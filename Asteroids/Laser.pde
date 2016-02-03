@@ -9,7 +9,7 @@ class Laser extends AsteroidObject
   {
     pushMatrix();
     translate(position.x, position.y);
-    rotate(theta);
+    rotate(facingAngle);
     // Alternate colour of lasers between red and yellow
     if (colourSwap)
       stroke(red);
@@ -20,15 +20,17 @@ class Laser extends AsteroidObject
   }
   
   void update()
-  {
-    moveShip.x = sin(theta);
-    moveShip.y = - cos(theta);  
+  { 
+    moveShip.x = sin(facingAngle);
+    moveShip.y = - cos(facingAngle);  
     moveShip.mult(speed);
     position.add(moveShip);
     
+    // If laser goes out of bounds (off screen), remove from list of lasers
     if (position.x < 0 || position.y < 0 || position.x > width || position.y > height)
       lasers.remove(this);
     
+    // Check to see if any lasers hit any asteroids
     for (int i = 1; i < asteroids.size(); i++)
     {
       if (position.x > asteroids.get(i).position.x - asteroids.get(i).radius * 0.5f &&
