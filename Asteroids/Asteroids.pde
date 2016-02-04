@@ -50,7 +50,7 @@ void setup()
   setupAsteroidObject();
   reset = false;
   resetTimer = 0;
-  lives = 5;
+  lives = 0;
   livesHitCounter = 0;
   shipAlive = true;
   score = 0;
