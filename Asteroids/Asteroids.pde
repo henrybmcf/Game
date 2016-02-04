@@ -4,10 +4,11 @@ import java.io.BufferedWriter;
 
 void setup()
 {
-  size(700, 600);
-  //fullScreen();
+  //size(700, 600);
+  fullScreen();
   smooth(8);
   strokeWeight(1.5);
+  cursor(CROSS);
   
   // Load the intro soundtrack and start playing
   //intro = new SoundFile(this, "introMusic.wav");
@@ -19,18 +20,22 @@ void setup()
   //explosionSound = new SoundFile(this, "expLarge.wav");
   //nukeSound = new SoundFile(this, "nuke.wav");
   
+  instructions = new Instructions();
+  showInstruction = false;
+  
   // Create new font called hyperspace and set as font for whole sketch
   hyperspace = createFont("HyperspaceBold.otf", 32);
   textFont(hyperspace, 32);
   keys = new boolean[512];
   asteroids = new ArrayList<AsteroidObject>();
   lasers = new ArrayList<Laser>();
-  levels = 6;
+  levels = 10;
   level = 1;
   noAsteroids = new int[levels];
   // Set the number of asteroids per level to be the level number plus 5.
   for (int i = 0; i < levels; i++)
-    noAsteroids[i] = i + 1;   
+    noAsteroids[i] = i + 1;
+  overStart = false;
   gameStart = false;
   gameEnd = false;
   pause = false;
@@ -93,6 +98,9 @@ SoundFile thrustSound;
 SoundFile explosionSound;
 SoundFile nukeSound;
 
+// Variables to show instructions screen
+Instructions instructions;
+boolean showInstruction;
 // Custom font
 PFont hyperspace;
 // Boolean array to allow multiple simultaneous key presses and determine which keys they are
@@ -107,6 +115,8 @@ int levels;
 int level;
 // Array to hold number of asteroids per level
 int[] noAsteroids;
+// Boolean to determine if mouse is over start game when pressed
+boolean overStart;
 // Boolean to determine if game has started or not
 boolean gameStart;
 // Boolean to determine if game is over
@@ -188,7 +198,7 @@ color yellow;
 color aqua;
 
 void draw()
-{
+{ 
   background(0);
   stroke(255);
   textAlign(CENTER);
@@ -201,7 +211,24 @@ void draw()
     textSize(45);
     fill(yellow);
     text("Start Game", width * 0.5f, height * 0.75f);
-  } else if (level > 1)
+    
+    if (showInstruction == false)
+    {
+      // If mouse position is over Start Game, change mouse icon to indicate to player they can press
+      float startWidth = textWidth("Start Game") * 0.5f;
+      if (mouseX > width * 0.5f - startWidth && mouseX < width * 0.5f + startWidth && mouseY > height * 0.7f && mouseY < height * 0.75f)
+      {
+        cursor(HAND);
+        overStart = true;
+      }
+      else
+      {
+        cursor(CROSS);
+        overStart = false;
+      }
+    }
+  }
+  else if (level > 1)
   {
     // 3.. 2.. 1.. Countdown to game start
     if (countdown != 0 && gameStart != true)
@@ -222,16 +249,16 @@ void draw()
       shipAlive = true;
       gameStart = true;
     }
-
-    if (gameStart != true)
+    
+    // If instruction screen is showing, stop timer controlling countdown to effectively pause the countdown
+    if (gameStart != true && showInstruction == false)
       countdownTimer++;
 
     // Ship is the first element in list, therefore always render and update
-    asteroids.get(0).update();
+    if (pause == false)
+      asteroids.get(0).update();
     if (gameEnd == false)
-    {
       asteroids.get(0).render();
-    }
 
     if (asteroids.size() > 1)
     {
@@ -352,7 +379,10 @@ void draw()
   // Show play again menu
   if (playAgain)
     playAgain();
-}
+    
+  if (showInstruction)
+    instructions.render();
+} // End Draw
 
 void gameOver(boolean win)
 {
@@ -389,7 +419,7 @@ void gameOver(boolean win)
     }
     typeTimer++;
   }
-}
+} // End Game Over
 
 void calculateHighScores()
 {
@@ -416,7 +446,7 @@ void calculateHighScores()
     }
   }
   playAgain = true;
-}
+} // End Calculate High Scores
 
 void playAgain()
 {
@@ -453,6 +483,7 @@ void playAgain()
   {
     if (mouseX > width * 0.3f - yesWidth && mouseX < width * 0.3f + yesWidth)
     {
+      cursor(HAND);
       yesTextSize = 45;
       // If they select to play again, setup asteroids and reset level
       if (mousePressed)
@@ -464,8 +495,10 @@ void playAgain()
         lives = 5;
         setupAsteroidObject();
       }
-    } else if (mouseX > width * 0.7f - noWidth && mouseX < width * 0.7f + noWidth)
+    }
+    else if (mouseX > width * 0.7f - noWidth && mouseX < width * 0.7f + noWidth)
     {
+      cursor(HAND);
       noTextSize = 45;
       // Otherwise, exit the game
       if (mousePressed)
@@ -476,13 +509,14 @@ void playAgain()
       }
     }
   }
+  cursor(CROSS);
   textSize(yesTextSize);
   fill(0, 255, 0);
   text("Yes", width * 0.3f, height * 0.85f);
   textSize(noTextSize);
   fill(red);
   text("No", width * 0.7f, height * 0.85f);
-}
+} // End Play Again
 
 void keyPressed()
 {
@@ -550,18 +584,7 @@ void keyPressed()
       }
     }
   }
-
-  // Pause/Unpause game when P is pressed
-  if (keyCode == 'P')
-  {
-    // If countdown has stopped (i.e. game has started), set pause and gameStart to be opposite to their current values, hence pausing the game
-    if (countdown == 0)
-    {
-      pause =! pause;
-      gameStart =! gameStart;
-    }
-  }
-
+  
   // Mute/Unmute sounds when M is pressed
   if (keyCode == 'M')
   {
@@ -576,6 +599,34 @@ void keyPressed()
       nukeSound.stop();
     }
   }
+
+  // Pause/Unpause game when P is pressed
+  if (keyCode == 'P')
+  {
+    // If countdown has stopped (i.e. game has started), set pause and gameStart to be opposite to their current values, hence pausing the game
+    if (countdown == 0)
+    {
+      pause =! pause;
+      gameStart =! gameStart;
+    }
+  }
+  
+  if (keyCode == 'I')
+  {
+    showInstruction =! showInstruction;
+   // pause =! pause;
+    if (pause != true)
+      pause = true;
+    else if (pause)
+      pause = true;
+    if (showInstruction)
+      gameStart = false;
+  }
+} // End Key Pressed
+
+void keyReleased()
+{
+  keys[keyCode] = false;
 }
 
 void drawPowerupSymbols(int ID)
@@ -661,7 +712,7 @@ void drawPowerupSymbols(int ID)
     line(-powerupLifeWidth * 0.75f, powerupLifeHeight * 0.7f, powerupLifeWidth * 0.75f, powerupLifeHeight * 0.7f);
     break;
   }
-}
+} // End Draw Powerup Symbols
 
 void setupAsteroidObject()
 {
@@ -680,25 +731,17 @@ void setupAsteroidObject()
       asteroid = new Asteroid(random(width - 200, width), random(height), 1);
     asteroids.add(asteroid);
   }
-}
+} // End Setup Asteroid Objects
 
 void mousePressed()
 {
-  // If mouse position is over Start Game
-  textSize(45);
-  float startWidth = textWidth("Start Game") * 0.5f;
-  if (mouseX > width * 0.5f - startWidth && mouseX < width * 0.5f + startWidth && mouseY > height * 0.7f && mouseY < height * 0.8f)
+  if (overStart)
   {
     level = 2;
     //intro.stop();
     playSound(2);
   }
-}
-
-void keyReleased()
-{
-  keys[keyCode] = false;
-}
+} // End Mouse Pressed
 
 // Draw player lives as ships in top left corner of screen
 void drawShipLives()
@@ -716,7 +759,7 @@ void drawShipLives()
     line(-drawWidth * 0.75f, drawHeight * 0.7f, drawWidth * 0.75f, drawHeight * 0.7f);
     popMatrix();
   }
-}
+} // End Draw Ship Lives
 
 void shipDeath(int radius, float angle)
 {
@@ -759,7 +802,7 @@ void shipDeath(int radius, float angle)
   {
     resetShip();
   }
-}
+} // End Ship Death
 
 void resetShip()
 {
@@ -789,7 +832,7 @@ void resetShip()
       activated[i] = false;
     activeTimer = 0;
   }
-}
+} // End Ship Death
 
 void nukeExplosion(float angle)
 {
@@ -819,7 +862,7 @@ void nukeExplosion(float angle)
     lastY = y;
   }
   popMatrix();
-}
+} // End Nuke Explosion
 
 void splitAsteroid(int number)
 {
@@ -852,7 +895,7 @@ void splitAsteroid(int number)
     score += 15;
   }
   asteroids.remove(number);
-}
+} // End Split Asteroid
 
 void playSound(int ID)
 {
@@ -887,4 +930,4 @@ void playSound(int ID)
       //  break;
     }
   }
-}
+} // End Play Sounds
