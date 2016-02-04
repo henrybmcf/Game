@@ -14,7 +14,7 @@ class AsteroidObject
 
   AsteroidObject()
   {
-    this(width * 0.5f, height  * 0.5f, 0);
+    this(width * 0.5f, height * 0.5f, 0);
   }
 
   AsteroidObject(float x, float y, float size)
