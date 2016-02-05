@@ -1,10 +1,9 @@
 class AlienObjects
 {
-  PVector position;
-  PVector movement;
-  float speed;
+  PVector alienPosition;
+  PVector alienMovement;
+  float alienSpeed;
 
-  float facingAngle;
   float alienShipWidth;
   float alienShipHeight;
   
@@ -12,10 +11,10 @@ class AlienObjects
   
   AlienObjects()
   {
-    position = new PVector(0, 0);
-    movement = new PVector(0, 0);
+    alienPosition = new PVector(0, 0);
+    alienMovement = new PVector(0, 0);
     
-    speed = 1.5f;
+    alienSpeed = 1.5f;
 
     alienShipWidth = 25;
     alienShipHeight = alienShipWidth * 0.5f;

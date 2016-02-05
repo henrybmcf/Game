@@ -2,27 +2,31 @@ class AlienLaser extends AlienObjects
 {  
   AlienLaser(int pointID)
   {
-    speed = random(3, 6);
+    // Set random laser speed for y direction
+    alienSpeed = random(3, 6);
     
+    // Set shooting direction (up or down), dependent on side of entry
+    // Set random shooting x direction
     if (pointID == 1 || pointID == 3)
-       movement = new PVector(random(-3, 3), speed);
+       alienMovement = new PVector(random(-3, 3), alienSpeed);
     else
-       movement = new PVector(random(-3, 3), -speed);
+       alienMovement = new PVector(random(-3, 3), -alienSpeed);
   }
   
   void render()
   {
     pushMatrix();
-    translate(position.x, position.y);
+    translate(alienPosition.x, alienPosition.y);
     ellipse(0, 0, 2, 2);
     popMatrix();    
   }
   
   void update()
   {
-    position.add(movement);
+    alienPosition.add(alienMovement);
     
-    if (position.x < 0 || position.y < 0 || position.x > width || position.y > height)
+    // If alien laser moves off screen, remove from the array
+    if (alienPosition.x < 0 || alienPosition.y < 0 || alienPosition.x > width || alienPosition.y > height)
       alienLasers.remove(this);
   }
 }

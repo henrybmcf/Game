@@ -17,20 +17,20 @@ class AlienSpaceShip extends AlienObjects
     switch (entrypoint)
     {
      case 1:
-       position = new PVector(-width * 0.1f, topEntry);
-       movement = new PVector(speed, 0);
+       alienPosition = new PVector(-width * 0.1f, topEntry);
+       alienMovement = new PVector(alienSpeed, 0);
        break;
      case 2:
-       position = new PVector(-width * 0.1f, bottomEntry);
-       movement = new PVector(speed, 0);
+       alienPosition = new PVector(-width * 0.1f, bottomEntry);
+       alienMovement = new PVector(alienSpeed, 0);
        break;
      case 3:
-       position = new PVector(width * 1.1f, topEntry);
-       movement = new PVector(-speed, 0);
+       alienPosition = new PVector(width * 1.1f, topEntry);
+       alienMovement = new PVector(-alienSpeed, 0);
        break;
      case 4:
-       position = new PVector(width * 1.1f, bottomEntry);
-       movement = new PVector(-speed, 0);
+       alienPosition = new PVector(width * 1.1f, bottomEntry);
+       alienMovement = new PVector(-alienSpeed, 0);
        break;
     }
   }
@@ -38,7 +38,7 @@ class AlienSpaceShip extends AlienObjects
   void render()
   {
     pushMatrix();
-    translate(position.x, position.y);
+    translate(alienPosition.x, alienPosition.y);
     // Top body
     line(-alienShipWidth * 0.3f, -alienShipHeight, alienShipWidth * 0.3f, -alienShipHeight);
     line(-alienShipWidth * 0.3f, -alienShipHeight, -alienShipWidth * 0.45f, -alienShipHeight * 0.35f);
@@ -52,17 +52,22 @@ class AlienSpaceShip extends AlienObjects
     line(-alienShipWidth, alienShipHeight * 0.3f, -alienShipWidth * 0.45f, alienShipHeight);
     line(alienShipWidth, alienShipHeight * 0.3f, alienShipWidth * 0.45f, alienShipHeight);
     line(-alienShipWidth * 0.45f, alienShipHeight, alienShipWidth * 0.45f, alienShipHeight);
+    
+    ellipse(0, 0, 3, 3);
+    ellipse(alienShipWidth, 0, 3, 3);
+    ellipse(-alienShipWidth, 0, 3, 3);
+    
     popMatrix();
   }
 
   void update()
   { 
-    position.add(movement);
+    alienPosition.add(alienMovement);
 
     if (laserTimer > laserTimeLimit)
     {
       AlienLaser laser = new AlienLaser(entryPoint);
-      laser.position = position.copy();
+      laser.alienPosition = alienPosition.copy();
       laser.entryPoint = entryPoint;
       alienLasers.add(laser);
   
@@ -75,7 +80,7 @@ class AlienSpaceShip extends AlienObjects
     // Set the entry boolean to be false and reset the entry timer to begin the timer to the entry of the next ship
     if (entryPoint == 1 || entryPoint == 2)
     {
-      if (position.x + alienShipWidth > width)
+      if (alienPosition.x - alienShipWidth > width)
       {
         aliens.remove(this);
         AlienObjects alienship = new AlienSpaceShip(int(random(1, 5)));
@@ -87,7 +92,7 @@ class AlienSpaceShip extends AlienObjects
     }
     else if (entryPoint == 3 || entryPoint == 4)
     {
-      if (position.x - alienShipWidth < 0)
+      if (alienPosition.x + alienShipWidth < 0)
       {
         aliens.remove(this);
         AlienObjects alienship = new AlienSpaceShip(int(random(1, 5)));
@@ -98,7 +103,7 @@ class AlienSpaceShip extends AlienObjects
     }
     
     // Reset timer while alien ship is on screen to prevent multiple executions
-    if (position.x > 0 && position.x < width)
+    if (alienPosition.x > 0 && alienPosition.x < width)
       alienTimer = 0;
   }
 }

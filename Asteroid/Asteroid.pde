@@ -10,7 +10,7 @@ void setup()
   aliens.add(alienship);
   
   enterAlien = false;
-  alienEntryTime = 180;
+  alienEntryTime = 60;
   alienTimer = 0;
 }
 
@@ -34,7 +34,7 @@ void draw()
   }
   alienTimer++;
   
-  if (enterAlien && aliens.size() > 0)
+  if (enterAlien)// && aliens.size() > 0)
   {
     aliens.get(0).render();
     aliens.get(0).update();

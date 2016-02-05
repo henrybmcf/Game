@@ -206,7 +206,6 @@ void draw()
   {
     asteroids.get(0).render();
     fill(255);
-    textSize(80);
     text("ASTEROIDS", width * 0.5f, height * 0.3f);
     textSize(45);
     fill(yellow);
