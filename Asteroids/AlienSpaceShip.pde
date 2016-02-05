@@ -95,5 +95,19 @@ class AlienSpaceShip extends AlienObjects
          alienTimer = 0;
        }
     }
+    
+    for (int i = 0; i < lasers.size(); i++)
+    {
+      if (lasers.get(i).position.x > alienPosition.x - alienShipWidth &&
+         lasers.get(i).position.x < alienPosition.x + alienShipWidth &&
+         lasers.get(i).position.y > alienPosition.y - alienShipHeight &&
+         lasers.get(i).position.y < alienPosition.y + alienShipHeight)
+      {
+          aliens.set(0, new AlienSpaceShip(int(random(1, 5))));
+          enterAlien = false;
+          alienTimer = 0;
+          score += 100;
+      }
+    }
   }
 }

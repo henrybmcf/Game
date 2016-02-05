@@ -273,57 +273,6 @@ class Ship extends AsteroidObject
         }
       
     }
-    
-    // Check to see if any alien lasers are hitting ship
-    for (int i = 0; i < alienLasers.size(); i++)
-    {
-     if (alienLasers.get(i).alienPosition.x > position.x - shipWidth &&
-         alienLasers.get(i).alienPosition.x  < position.x + shipWidth &&
-         alienLasers.get(i).alienPosition.y > position.y - shipHeight &&
-         alienLasers.get(i).alienPosition.y < position.y + shipHeight)
-      {
-         // Stop the game
-         gameStart = false;
-         // Stop ship from moving
-         resistance = false;
-  
-         // If the player still has lives, deduct a life
-         if (lives > 0)
-         { 
-           // Ensure only one life is dedcuted per crash
-           if (livesHitCounter == 0)
-             lives--;
-           livesHitCounter = 1;
-  
-           // Clear all lasers from the screen so upon restart of game, they won't continue to show
-           alienLasers.clear();
-  
-           // Time exlposion graphics of ship explosion
-           if (explosionTimer > 1)
-           {
-             shipDeath(explosionRadius, explosionAngle);
-             shipDeath(explosionRadius - 5, explosionAngle);
-             shipDeath(explosionRadius - 10, explosionAngle);
-             shipDeath(explosionRadius - 15, explosionAngle);
-             if (explosionRadius < 30)
-               explosionRadius += 1;
-             else
-               explosionRadius = 0;
-             explosionTimer = 0;
-             if (random(1) > 0.5f)
-               explosionAngle += 2.5f;
-             else
-               explosionAngle -= 3.5f;
-           }
-           explosionTimer++;
-         }
-         // If user has no more lives, give them the option to play the game again
-         else if (showHighScores != true)
-         {
-           gameOver(false);
-         }
-      }
-    }
 
     for (int i = 1; i < asteroids.size(); i++)
     {
@@ -425,13 +374,16 @@ class Ship extends AsteroidObject
           }
         }
         
-        //if (nukeDetection.x > aliens.get(0).position.x - alienShipWidth &&
-        //    nukeDetection.x < aliens.get(0).position.x + alienShipWidth &&
-        //    nukeDetection.y > aliens.get(0).position.y - alienShipHeight &&
-        //    nukeDetection.y < aliens.get(0).position.y + alienShipHeight)
-        //{
-        //   alienShipDead = true; 
-        //} 
+        if (nukeDetection.x > aliens.get(0).alienPosition.x - aliens.get(0).alienShipWidth &&
+           nukeDetection.x < aliens.get(0).alienPosition.x + aliens.get(0).alienShipWidth &&
+           nukeDetection.y > aliens.get(0).alienPosition.y - aliens.get(0).alienShipHeight &&
+           nukeDetection.y < aliens.get(0).alienPosition.y + aliens.get(0).alienShipHeight)
+        {
+          aliens.set(0, new AlienSpaceShip(int(random(1, 5))));
+          enterAlien = false;
+          alienTimer = 0;
+          score += 100;
+        } 
       }
     }
     
@@ -456,14 +408,17 @@ class Ship extends AsteroidObject
             splitAsteroid(i);
           }
         }
-        
-        //if (forcefieldPosition.x > aliens.get(0).position.x - alienShipWidth &&
-        //    forcefieldPosition.x < aliens.get(0).position.x + alienShipWidth &&
-        //    forcefieldPosition.y > aliens.get(0).position.y - alienShipHeight &&
-        //    forcefieldPosition.y < aliens.get(0).position.y + alienShipHeight)
-        //{
-        //   alienShipDead = true; 
-        //} 
+ 
+        if (forcefieldPosition.x > aliens.get(0).alienPosition.x - aliens.get(0).alienShipWidth &&
+           forcefieldPosition.x < aliens.get(0).alienPosition.x + aliens.get(0).alienShipWidth &&
+           forcefieldPosition.y > aliens.get(0).alienPosition.y - aliens.get(0).alienShipHeight &&
+           forcefieldPosition.y < aliens.get(0).alienPosition.y + aliens.get(0).alienShipHeight)
+        {
+            aliens.set(0, new AlienSpaceShip(int(random(1, 5))));
+            enterAlien = false;
+            alienTimer = 0;
+            score += 100;
+        }
       }
     }
   }

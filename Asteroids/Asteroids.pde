@@ -34,7 +34,7 @@ void setup()
   noAsteroids = new int[levels];
   // Set the number of asteroids per level to be the level number plus 5.
   for (int i = 0; i < levels; i++)
-    noAsteroids[i] = i + 6;
+    noAsteroids[i] = i + 1;
   overStart = false;
   gameStart = false;
   gameEnd = false;
