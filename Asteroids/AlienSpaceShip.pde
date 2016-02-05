@@ -74,8 +74,8 @@ class AlienSpaceShip extends AlienObjects
     if (alienPosition.x < -width * 0.2f || alienPosition.x > width * 1.2f)
     {
         aliens.set(0, new AlienSpaceShip(int(random(1, 5))));
-       enterAlien = false;
-       alienTimer = 0;
+        enterAlien = false;
+        alienTimer = 0;
     }
 
     // Reset timer while alien ship is on screen to prevent multiple executions
@@ -83,15 +83,17 @@ class AlienSpaceShip extends AlienObjects
       alienTimer = 0;
     
     // Check for alien ship collision with any asteroids
-    //for (int i = 1; i < asteroids.size(); i++)
-    //{
-    //  if (asteroids.get(i).position.x + asteroids.get(i).radius * 0.5f > alienPosition.x - alienShipWidth && 
-    //    asteroids.get(i).position.x - asteroids.get(i).radius * 0.5f < alienPosition.x + alienShipWidth &&
-    //    asteroids.get(i).position.y + asteroids.get(i).radius * 0.5f > alienPosition.y - alienShipHeight &&
-    //    asteroids.get(i).position.y - asteroids.get(i).radius * 0.5f < alienPosition.y + alienShipHeight)
-    //  {
-    //      alienShipDead = true;
-    //  }
-    //}
+    for (int i = 1; i < asteroids.size(); i++)
+    {
+     if (asteroids.get(i).position.x + asteroids.get(i).radius * 0.5f > alienPosition.x - alienShipWidth && 
+         asteroids.get(i).position.x - asteroids.get(i).radius * 0.5f < alienPosition.x + alienShipWidth &&
+         asteroids.get(i).position.y + asteroids.get(i).radius * 0.5f > alienPosition.y - alienShipHeight &&
+         asteroids.get(i).position.y - asteroids.get(i).radius * 0.5f < alienPosition.y + alienShipHeight)
+       {
+         aliens.set(0, new AlienSpaceShip(int(random(1, 5))));
+         enterAlien = false;
+         alienTimer = 0;
+       }
+    }
   }
 }

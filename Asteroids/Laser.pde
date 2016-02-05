@@ -42,5 +42,13 @@ class Laser extends AsteroidObject
         lasers.remove(this);
       }
     }
+    
+    //if (position.x > aliens.get(0).position.x - alienShipWidth &&
+    //    position.x < aliens.get(0).position.x + alienShipWidth &&
+    //    position.y > aliens.get(0).position.y - alienShipHeight &&
+    //    position.y < aliens.get(0).position.y + alienShipHeight)
+    //{
+    //   alienShipDead = true; 
+    //}   
   }
 }

@@ -17,6 +17,7 @@ void setup()
 ArrayList<AlienObjects> aliens;
 ArrayList<AlienLaser> alienLasers;
 
+boolean alienShipDead;
 boolean enterAlien;
 int alienEntryTime;
 int alienTimer;
@@ -34,7 +35,7 @@ void draw()
   }
   alienTimer++;
   
-  if (enterAlien)// && aliens.size() > 0)
+  if (enterAlien && alienShipDead != true)
   {
     aliens.get(0).render();
     aliens.get(0).update();

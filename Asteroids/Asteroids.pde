@@ -34,7 +34,7 @@ void setup()
   noAsteroids = new int[levels];
   // Set the number of asteroids per level to be the level number plus 5.
   for (int i = 0; i < levels; i++)
-    noAsteroids[i] = i + 1;
+    noAsteroids[i] = i + 6;
   overStart = false;
   gameStart = false;
   gameEnd = false;
@@ -88,7 +88,25 @@ void setup()
   red = color(255, 0, 0);
   yellow = color(255, 255, 0);
   aqua = color(0, 206, 209);
+  
+  aliens = new ArrayList<AlienObjects>();
+  alienLasers = new ArrayList<AlienLaser>();
+  
+  AlienObjects alienship = new AlienSpaceShip(int(random(1, 5)));
+  aliens.add(alienship);
+  
+  enterAlien = false;
+  alienEntryTime = 60;
+  alienTimer = 0;
 }
+
+ArrayList<AlienObjects> aliens;
+ArrayList<AlienLaser> alienLasers;
+
+boolean alienShipDead;
+boolean enterAlien;
+int alienEntryTime;
+int alienTimer;
 
 // Various sound effect variables
 SoundFile intro;
@@ -384,6 +402,34 @@ void draw()
     
   if (showInstruction)
     instructions.render();
+    
+    
+  
+  // Alien
+  if (alienTimer > alienEntryTime)
+  {
+    alienTimer = 0;
+    // Set entry boolean to be true to let the alien ship know when to enter
+    enterAlien = true;
+  }
+  
+  if (gameStart)
+    alienTimer++;
+  
+  if (enterAlien && alienShipDead != true)
+  {
+    aliens.get(0).render();
+    aliens.get(0).update();
+  }
+
+  for (int i = 0; i < alienLasers.size(); i++)
+  {
+     alienLasers.get(i).render();
+     alienLasers.get(i).update();
+  }
+  
+  
+  
 } // End Draw
 
 void gameOver(boolean win)
@@ -735,6 +781,7 @@ void setupAsteroidObject()
   }
 } // End Setup Asteroid Objects
 
+
 void mousePressed()
 {
   if (overStart)
@@ -744,6 +791,7 @@ void mousePressed()
     playSound(2);
   }
 } // End Mouse Pressed
+
 
 // Draw player lives as ships in top left corner of screen
 void drawShipLives()
@@ -762,6 +810,7 @@ void drawShipLives()
     popMatrix();
   }
 } // End Draw Ship Lives
+
 
 void shipDeath(int radius, float angle)
 {
@@ -806,6 +855,7 @@ void shipDeath(int radius, float angle)
   }
 } // End Ship Death
 
+
 void resetShip()
 {
   reset = true;
@@ -815,7 +865,7 @@ void resetShip()
   for (int i = 1; i < asteroids.size(); i++)
   {
     if (asteroids.get(i).position.x > width * 0.3f && asteroids.get(i).position.x < width * 0.7f && 
-      asteroids.get(i).position.y > height * 0.3f && asteroids.get(i).position.y < height * 0.7f)
+        asteroids.get(i).position.y > height * 0.3f && asteroids.get(i).position.y < height * 0.7f)
     {
       asteroids.get(i).position.x = random(width);
       asteroids.get(i).position.y = random(200);
@@ -834,6 +884,10 @@ void resetShip()
       activated[i] = false;
     activeTimer = 0;
   }
+  
+  aliens.set(0, new AlienSpaceShip(int(random(1, 5))));
+  enterAlien = false;
+  alienTimer = 0;
 } // End Ship Death
 
 void nukeExplosion(float angle)
