@@ -28,5 +28,19 @@ class AlienLaser extends AlienObjects
     // If alien laser moves off screen, remove from the array
     if (alienPosition.x < 0 || alienPosition.y < 0 || alienPosition.x > width || alienPosition.y > height)
       alienLasers.remove(this);
+    
+    // Check to see if any alien lasers hit any asteroids
+    // Don't destroy the asteroids, just remove the lasers
+    //for (int i = 1; i < asteroids.size(); i++)
+    //{
+    //  if (alienPosition.x > asteroids.get(i).position.x - asteroids.get(i).radius * 0.5f &&
+    //      alienPosition.x < asteroids.get(i).position.x + asteroids.get(i).radius * 0.5f &&
+    //      alienPosition.y > asteroids.get(i).position.y - asteroids.get(i).radius * 0.5f &&
+    //      alienPosition.y < asteroids.get(i).position.y + asteroids.get(i).radius * 0.5f)
+    //  {
+    //    //splitAsteroid(i);
+    //    lasers.remove(this);
+    //  }
+    //}
   }
 }

@@ -3,35 +3,35 @@ class AlienSpaceShip extends AlienObjects
   int fire;
   int laserTimer;
   int laserTimeLimit;
-  
+
   AlienSpaceShip(int entrypoint)
   {
     entryPoint = entrypoint;
-    
+
     laserTimer = 0;
     laserTimeLimit = 90;
-    
+
     float topEntry = random(height * 0.1f, height * 0.3f);
     float bottomEntry = random(height * 0.7f, height * 0.9f);
-    
+
     switch (entrypoint)
     {
-     case 1:
-       alienPosition = new PVector(-width * 0.1f, topEntry);
-       alienMovement = new PVector(alienSpeed, 0);
-       break;
-     case 2:
-       alienPosition = new PVector(-width * 0.1f, bottomEntry);
-       alienMovement = new PVector(alienSpeed, 0);
-       break;
-     case 3:
-       alienPosition = new PVector(width * 1.1f, topEntry);
-       alienMovement = new PVector(-alienSpeed, 0);
-       break;
-     case 4:
-       alienPosition = new PVector(width * 1.1f, bottomEntry);
-       alienMovement = new PVector(-alienSpeed, 0);
-       break;
+      case 1:
+        alienPosition = new PVector(-width * 0.1f, topEntry);
+        alienMovement = new PVector(alienSpeed, 0);
+        break;
+      case 2:
+        alienPosition = new PVector(-width * 0.1f, bottomEntry);
+        alienMovement = new PVector(alienSpeed, 0);
+        break;
+      case 3:
+        alienPosition = new PVector(width * 1.1f, topEntry);
+        alienMovement = new PVector(-alienSpeed, 0);
+        break;
+      case 4:
+        alienPosition = new PVector(width * 1.1f, bottomEntry);
+        alienMovement = new PVector(-alienSpeed, 0);
+        break;
     }
   }
 
@@ -52,11 +52,11 @@ class AlienSpaceShip extends AlienObjects
     line(-alienShipWidth, alienShipHeight * 0.3f, -alienShipWidth * 0.45f, alienShipHeight);
     line(alienShipWidth, alienShipHeight * 0.3f, alienShipWidth * 0.45f, alienShipHeight);
     line(-alienShipWidth * 0.45f, alienShipHeight, alienShipWidth * 0.45f, alienShipHeight);
-    
+
     ellipse(0, 0, 3, 3);
     ellipse(alienShipWidth, 0, 3, 3);
     ellipse(-alienShipWidth, 0, 3, 3);
-    
+
     popMatrix();
   }
 
@@ -70,11 +70,11 @@ class AlienSpaceShip extends AlienObjects
       laser.alienPosition = alienPosition.copy();
       laser.entryPoint = entryPoint;
       alienLasers.add(laser);
-  
+
       laserTimer = 0;
     }
     laserTimer++;
-    
+
     // If alien ship moves off screen, remove from the ship from the arraylist
     // Then create a new alien ship with a new entry point
     // Set the entry boolean to be false and reset the entry timer to begin the timer to the entry of the next ship
@@ -85,7 +85,7 @@ class AlienSpaceShip extends AlienObjects
         aliens.remove(this);
         AlienObjects alienship = new AlienSpaceShip(int(random(1, 5)));
         aliens.add(alienship);
-        
+
         enterAlien = false;
         alienTimer = 0;
       }
@@ -99,11 +99,40 @@ class AlienSpaceShip extends AlienObjects
         aliens.add(alienship);
         enterAlien = false;
         alienTimer = 0;
-      } 
+      }
     }
-    
+
     // Reset timer while alien ship is on screen to prevent multiple executions
     if (alienPosition.x > 0 && alienPosition.x < width)
       alienTimer = 0;
+    
+    // Check for alien ship collision with any asteroids
+    for (int i = 1; i < asteroids.size(); i++)
+    {
+      if (asteroids.get(i).position.x + asteroids.get(i).radius * 0.5f > alienPosition.x - alienShipWidth && 
+        asteroids.get(i).position.x - asteroids.get(i).radius * 0.5f < alienPosition.x + alienShipWidth &&
+        asteroids.get(i).position.y + asteroids.get(i).radius * 0.5f > alienPosition.y - alienShipHeight &&
+        asteroids.get(i).position.y - asteroids.get(i).radius * 0.5f < alienPosition.y + alienShipHeight)
+      {
+          // Time exlposion graphics of ship explosion
+          if (explosionTimer > 1)
+          {
+            shipDeath(explosionRadius, explosionAngle);
+            shipDeath(explosionRadius - 5, explosionAngle);
+            shipDeath(explosionRadius - 10, explosionAngle);
+            shipDeath(explosionRadius - 15, explosionAngle);
+            if (explosionRadius < 30)
+              explosionRadius += 1;
+            else
+              explosionRadius = 0;
+            explosionTimer = 0;
+            if (random(1) > 0.5f)
+              explosionAngle += 2.5f;
+            else
+              explosionAngle -= 3.5f;
+          }
+          explosionTimer++;
+        }
+      }
   }
 }

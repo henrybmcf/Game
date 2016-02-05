@@ -50,7 +50,7 @@ void setup()
   setupAsteroidObject();
   reset = false;
   resetTimer = 0;
-  lives = 0;
+  lives = 5;
   livesHitCounter = 0;
   shipAlive = true;
   score = 0;
@@ -206,6 +206,7 @@ void draw()
   {
     asteroids.get(0).render();
     fill(255);
+    textSize(80);
     text("ASTEROIDS", width * 0.5f, height * 0.3f);
     textSize(45);
     fill(yellow);
@@ -304,7 +305,8 @@ void draw()
           activated[i] = false;
           activeTimer = 0;
         }
-      } else if (showHighScores != true)
+      }
+      else if (showHighScores != true)
       {
         gameOver(true);
       }
@@ -315,7 +317,8 @@ void draw()
   if (gameStart && gameEnd == false)
   {
     // Increment entry timer to know when to enter onto screen
-    entryCountTimer++;    
+    entryCountTimer++;
+    
     // Once timer has reached time to enter, enter powerup onto screen
     if (entryCountTimer == entryTime)
     {
