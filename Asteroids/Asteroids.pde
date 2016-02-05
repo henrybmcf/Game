@@ -591,12 +591,12 @@ void keyPressed()
     mute =! mute;
     if (mute)
     {
-      intro.stop();
-      countdownSound.stop();
-      explosionSound.stop();
-      thrustSound.stop();
-      laserSound.stop();
-      nukeSound.stop();
+      //intro.stop();
+      //countdownSound.stop();
+      //explosionSound.stop();
+      //thrustSound.stop();
+      //laserSound.stop();
+      //nukeSound.stop();
     }
   }
 

@@ -5,8 +5,8 @@ class AlienObjects
   float speed;
 
   float facingAngle;
-  float sw;
-  float sh;
+  float alienShipWidth;
+  float alienShipHeight;
   
   int entryPoint;
   
@@ -17,8 +17,8 @@ class AlienObjects
     
     speed = 1.5f;
 
-    sw = 25;
-    sh = sw * 0.5f;
+    alienShipWidth = 25;
+    alienShipHeight = alienShipWidth * 0.5f;
   }
 
   void render()

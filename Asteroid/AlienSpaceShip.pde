@@ -9,7 +9,7 @@ class AlienSpaceShip extends AlienObjects
     entryPoint = entrypoint;
     
     laserTimer = 0;
-    laserTimeLimit = 80;
+    laserTimeLimit = 90;
     
     float topEntry = random(height * 0.1f, height * 0.3f);
     float bottomEntry = random(height * 0.7f, height * 0.9f);
@@ -40,18 +40,18 @@ class AlienSpaceShip extends AlienObjects
     pushMatrix();
     translate(position.x, position.y);
     // Top body
-    line(-sw * 0.3f, -sh, sw * 0.3f, -sh);
-    line(-sw * 0.3f, -sh, -sw * 0.45f, -sh * 0.35f);
-    line(sw * 0.3f, -sh, sw * 0.45f, -sh * 0.35f);
-    line(-sw * 0.45f, -sh * 0.35f, sw * 0.45f, -sh * 0.35f);  
+    line(-alienShipWidth * 0.3f, -alienShipHeight, alienShipWidth * 0.3f, -alienShipHeight);
+    line(-alienShipWidth * 0.3f, -alienShipHeight, -alienShipWidth * 0.45f, -alienShipHeight * 0.35f);
+    line(alienShipWidth * 0.3f, -alienShipHeight, alienShipWidth * 0.45f, -alienShipHeight * 0.35f);
+    line(-alienShipWidth * 0.45f, -alienShipHeight * 0.35f, alienShipWidth * 0.45f, -alienShipHeight * 0.35f);  
     // Middle Body
-    line(-sw * 0.45f, -sh * 0.35f, -sw, sh * 0.3f);
-    line(sw * 0.45f, -sh * 0.35f, sw, sh * 0.3f);
-    line(-sw, sh * 0.3f, sw, sh * 0.3f);
+    line(-alienShipWidth * 0.45f, -alienShipHeight * 0.35f, -alienShipWidth, alienShipHeight * 0.3f);
+    line(alienShipWidth * 0.45f, -alienShipHeight * 0.35f, alienShipWidth, alienShipHeight * 0.3f);
+    line(-alienShipWidth, alienShipHeight * 0.3f, alienShipWidth, alienShipHeight * 0.3f);
     // Bottom Body
-    line(-sw, sh * 0.3f, -sw * 0.45f, sh);
-    line(sw, sh * 0.3f, sw * 0.45f, sh);
-    line(-sw * 0.45f, sh, sw * 0.45f, sh);
+    line(-alienShipWidth, alienShipHeight * 0.3f, -alienShipWidth * 0.45f, alienShipHeight);
+    line(alienShipWidth, alienShipHeight * 0.3f, alienShipWidth * 0.45f, alienShipHeight);
+    line(-alienShipWidth * 0.45f, alienShipHeight, alienShipWidth * 0.45f, alienShipHeight);
     popMatrix();
   }
 
@@ -61,19 +61,44 @@ class AlienSpaceShip extends AlienObjects
 
     if (laserTimer > laserTimeLimit)
     {
-      //println("Shooting");
       AlienLaser laser = new AlienLaser(entryPoint);
-      laser.position = position.copy(); 
+      laser.position = position.copy();
       laser.entryPoint = entryPoint;
       alienLasers.add(laser);
   
       laserTimer = 0;
     }
     laserTimer++;
-
-    if (position.x < 0)
-      position.x = width;
-    if (position.x > width)
-      position.x = 0;
+    
+    // If alien ship moves off screen, remove from the ship from the arraylist
+    // Then create a new alien ship with a new entry point
+    // Set the entry boolean to be false and reset the entry timer to begin the timer to the entry of the next ship
+    if (entryPoint == 1 || entryPoint == 2)
+    {
+      if (position.x + alienShipWidth > width)
+      {
+        aliens.remove(this);
+        AlienObjects alienship = new AlienSpaceShip(int(random(1, 5)));
+        aliens.add(alienship);
+        
+        enterAlien = false;
+        alienTimer = 0;
+      }
+    }
+    else if (entryPoint == 3 || entryPoint == 4)
+    {
+      if (position.x - alienShipWidth < 0)
+      {
+        aliens.remove(this);
+        AlienObjects alienship = new AlienSpaceShip(int(random(1, 5)));
+        aliens.add(alienship);
+        enterAlien = false;
+        alienTimer = 0;
+      } 
+    }
+    
+    // Reset timer while alien ship is on screen to prevent multiple executions
+    if (position.x > 0 && position.x < width)
+      alienTimer = 0;
   }
 }
