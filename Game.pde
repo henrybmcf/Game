@@ -99,10 +99,24 @@ void setup()
   alienEntryTime = 300;
   alienTimer = 0;
 
+
   for (int i = 0; i < 5; i++)
   {
     debrisLinePositions.add(new PVector(0, 0)); 
     debrisLineMovements.add(new PVector(0, 0));
+  }
+
+  // Random movements for all debris particles
+  debrisMovement.add(new PVector(0, random(-1)));
+  debrisMovement.add(new PVector(random(0.75), random(-1.2)));
+  debrisMovement.add(new PVector(random(1.2), 0));
+  debrisMovement.add(new PVector(0, random(0.8)));
+  debrisMovement.add(new PVector(random(-0.5), 1));
+  debrisMovement.add(new PVector(random(1), random(0.5)));
+  
+  for (int i = 0; i < 6; i++)
+  {
+    //debrisPosition.add(new PVector(0, 0));
   }
 }
 
@@ -433,6 +447,14 @@ void draw()
     if (gameStart)
       alienLasers.get(i).update();
   }
+  
+  
+  
+  if (debris)
+    debris();
+  
+  debrisTimer++;
+  
 } // End Draw
 
 void gameOver(boolean win)
@@ -815,8 +837,6 @@ void drawShipLives()
 } // End Draw Ship Lives
 
 
-
-
 void shipDeath(float angle)
 { 
   // Kill the ship (stop rendering)
@@ -1013,3 +1033,38 @@ void playSound(int ID)
     }
   }
 } // End Play Sounds
+
+ArrayList<PVector> debrisPosition = new ArrayList<PVector>();
+ArrayList<PVector> debrisMovement = new ArrayList<PVector>();
+boolean debris = false;
+int debrisTimer = 0;
+IntList times = new IntList();
+
+void debris()
+{
+  for (int i = 0; i < debrisPosition.size(); i++)
+  {
+    pushMatrix();    
+    translate(debrisPosition.get(i).x, debrisPosition.get(i).y);
+    stroke(200);
+    rotate(TWO_PI * 0.2f * i);
+    line(0, 0, 3, 0);
+    line(3, 0, 5, 1);
+    line(5, 1, 6, 2);
+    line(6, 2, 1, 3);
+    line(1, 3, 0, 0);
+    debrisPosition.get(i).add(debrisMovement.get(i % 6));
+    popMatrix();
+  }
+  
+  for (int j = 0; j < times.size(); j++)
+  {
+    if ((debrisTimer - times.get(j)) % 50 == 0)
+    {
+       for (int i = 5; i > -1; i--)
+          debrisPosition.remove(i);
+          
+       times.remove(j);
+    }
+  }
+}

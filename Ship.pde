@@ -11,7 +11,7 @@ class Ship extends AsteroidObject
   boolean resistance;
   int turnTimer;
   boolean turned;
-  
+
   int laserTimer;
   int laserTimeLimit;
   int explosionTimer;
@@ -21,7 +21,7 @@ class Ship extends AsteroidObject
   float nukeAngle;
   float forcefieldRadius;
   PVector forcefieldPosition;
-  
+
   Ship(int move, int left, int right, int fire, float startX, float startY)
   {
     super(startX, startY, 0);
@@ -35,7 +35,7 @@ class Ship extends AsteroidObject
     thrustFlicker = 2;
     turnTimer = 0;
     turned = false;
-    
+
     laserTimer = 0;
     // Divide 60 by number of bullets to shoot per second
     laserTimeLimit = 60 / 3;    
@@ -56,7 +56,7 @@ class Ship extends AsteroidObject
   {
     pushMatrix();
     translate(position.x, position.y);
-    
+
     // Draw forcefield if activated
     if (activated[3])
     {
@@ -107,15 +107,15 @@ class Ship extends AsteroidObject
         turned = true;
       }     
       position.add(moveShip);
-      
+
       // Simulate acceleration
       if (speed < 4.0f)
         speed = speed * 1.15f;
       else
         speed = 4.0f;
-      
+
       resistance = true;
-      
+
       // Set speed of turning dependent on angle of turn. Time turn to prevent instantaneous turning, simulating original game
       if (turnTimer > 2)
       {
@@ -127,10 +127,10 @@ class Ship extends AsteroidObject
       }
       turnTimer++;
     }
-    
+
     if (keys[move] != true)
       turned = false;
-    
+
     if (keys[left])
       facingAngle -= 0.08f;     
     if (keys[right])
@@ -140,8 +140,7 @@ class Ship extends AsteroidObject
     {
       thrust = true;
       playSound(4);
-    }
-    else
+    } else
     {
       thrust = false;
     }
@@ -166,12 +165,12 @@ class Ship extends AsteroidObject
     if (keys[fire] && laserTimer > laserTimeLimit)
     {
       playSound(5);
-      
+
       Laser laser = new Laser();
       laser.position = position.copy();
       laser.facingAngle = facingAngle;
       lasers.add(laser);
-      
+
       // Double Shooter
       if (activated[0])
       {
@@ -221,23 +220,23 @@ class Ship extends AsteroidObject
       onScreen[powerup] = false;
       entryCountTimer = 0;
     }
-    
+
     // Detect collision with alien ship
     if (aliens.get(0).alienPosition.x + aliens.get(0).alienShipWidth > position.x - shipWidth &&
-        aliens.get(0).alienPosition.x - aliens.get(0).alienShipWidth < position.x + shipWidth &&
-        aliens.get(0).alienPosition.y + aliens.get(0).alienShipHeight > position.y - shipHeight &&
-        aliens.get(0).alienPosition.y - aliens.get(0).alienShipWidth < position.y + shipHeight)
+      aliens.get(0).alienPosition.x - aliens.get(0).alienShipWidth < position.x + shipWidth &&
+      aliens.get(0).alienPosition.y + aliens.get(0).alienShipHeight > position.y - shipHeight &&
+      aliens.get(0).alienPosition.y - aliens.get(0).alienShipWidth < position.y + shipHeight)
     {
-        // Kill alien ship
-        alienShipDead = true;
-        // Kill player ship
-        callShipDeath();
-        
-        if (reset)
-        {
-          score += 100;
-          reset = false;
-        }
+      // Kill alien ship
+      alienShipDead = true;
+      // Kill player ship
+      callShipDeath();
+
+      if (reset)
+      {
+        score += 100;
+        reset = false;
+      }
     }
 
     for (int i = 1; i < asteroids.size(); i++)
@@ -300,20 +299,20 @@ class Ship extends AsteroidObject
             asteroids.remove(i);
           }
         }
-        
+
         if (nukeDetection.x > aliens.get(0).alienPosition.x - aliens.get(0).alienShipWidth &&
-           nukeDetection.x < aliens.get(0).alienPosition.x + aliens.get(0).alienShipWidth &&
-           nukeDetection.y > aliens.get(0).alienPosition.y - aliens.get(0).alienShipHeight &&
-           nukeDetection.y < aliens.get(0).alienPosition.y + aliens.get(0).alienShipHeight)
+          nukeDetection.x < aliens.get(0).alienPosition.x + aliens.get(0).alienShipWidth &&
+          nukeDetection.y > aliens.get(0).alienPosition.y - aliens.get(0).alienShipHeight &&
+          nukeDetection.y < aliens.get(0).alienPosition.y + aliens.get(0).alienShipHeight)
         {
           aliens.set(0, new AlienSpaceShip(int(random(1, 5))));
           enterAlien = false;
           alienTimer = 0;
           score += 100;
-        } 
+        }
       }
     }
-    
+
     // If forcefield powerup is active
     // Loop through all angles (in a circle), calculate x & y coordinates of each of those points check to see if they are hitting asteroids
     else if (activated[3])
@@ -335,64 +334,64 @@ class Ship extends AsteroidObject
             splitAsteroid(i);
           }
         }
- 
+
         if (forcefieldPosition.x > aliens.get(0).alienPosition.x - aliens.get(0).alienShipWidth &&
-           forcefieldPosition.x < aliens.get(0).alienPosition.x + aliens.get(0).alienShipWidth &&
-           forcefieldPosition.y > aliens.get(0).alienPosition.y - aliens.get(0).alienShipHeight &&
-           forcefieldPosition.y < aliens.get(0).alienPosition.y + aliens.get(0).alienShipHeight)
+          forcefieldPosition.x < aliens.get(0).alienPosition.x + aliens.get(0).alienShipWidth &&
+          forcefieldPosition.y > aliens.get(0).alienPosition.y - aliens.get(0).alienShipHeight &&
+          forcefieldPosition.y < aliens.get(0).alienPosition.y + aliens.get(0).alienShipHeight)
         {
-            aliens.set(0, new AlienSpaceShip(int(random(1, 5))));
-            enterAlien = false;
-            alienTimer = 0;
-            score += 100;
+          aliens.set(0, new AlienSpaceShip(int(random(1, 5))));
+          enterAlien = false;
+          alienTimer = 0;
+          score += 100;
         }
       }
     }
   }
-  
+
   void callShipDeath()
   {
     // Stop the game
-        gameStart = false;
-        // Stop ship from moving
-        resistance = false;
-        
-    // If the player still has lives, deduct a life
-        if (lives > 0)
-        { 
-          // Ensures that only one life is deducted per crash
-          if (livesHitCounter == 0)
-            lives--;
-          livesHitCounter = 1;
+    gameStart = false;
+    // Stop ship from moving
+    resistance = false;
 
-          // Clear all lasers from the screen so upon restart of game, they won't continue to show
-          lasers.clear();
-          alienLasers.clear();
-          
-          // Time exlposion graphics of ship explosion
-          if (explosionTimer > 1)
-          {
-            explosionAngle += 0.1f;
-            if (debrisLinePositions.get(0).x == 0)
-            {
-              for (int i = 0; i < 5; i++)
-              {
-                 debrisLinePositions.set(i, position.copy());
-                 if (i < 3)
-                   debrisLineMovements.set(i, new PVector(random(moveShip.x / 2), random(moveShip.y / 2)));
-                 else
-                   debrisLineMovements.set(i, new PVector(random(-moveShip.x / 2), random(moveShip.y / 2)));
-              }
-            }
-            
-            shipDeath(explosionAngle);
-          }
-          explosionTimer++;
-        }
-        // If user has no more lives, give them the option to play the game again
-        else if (showHighScores != true)
+    // If the player still has lives, deduct a life
+    if (lives > 0)
+    { 
+      // Ensures that only one life is deducted per crash
+      if (livesHitCounter == 0)
+        lives--;
+      livesHitCounter = 1;
+
+      // Clear all lasers from the screen so upon restart of game, they won't continue to show
+      lasers.clear();
+      alienLasers.clear();
+
+      // Time exlposion graphics of ship explosion
+      if (explosionTimer > 1)
+      {
+        explosionAngle += 0.1f;
+        if (debrisLinePositions.get(0).x == 0)
         {
-          gameOver(false);
+          for (int i = 0; i < 5; i++)
+          {
+            debrisLinePositions.set(i, position.copy());
+            if (i < 3)
+              debrisLineMovements.set(i, new PVector(random(moveShip.x / 2), random(moveShip.y / 2)));
+            else
+              debrisLineMovements.set(i, new PVector(random(-moveShip.x / 2), random(moveShip.y / 2)));
+          }
         }
-  } 
+
+        shipDeath(explosionAngle);
+      }
+      explosionTimer++;
+    }
+    // If user has no more lives, give them the option to play the game again
+    else if (showHighScores != true)
+    {
+      gameOver(false);
+    }
+  }
 }
