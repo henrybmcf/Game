@@ -367,6 +367,7 @@ class Ship extends AsteroidObject
 
           // Clear all lasers from the screen so upon restart of game, they won't continue to show
           lasers.clear();
+          alienLasers.clear();
           
           // Time exlposion graphics of ship explosion
           if (explosionTimer > 1)

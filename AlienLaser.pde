@@ -17,7 +17,9 @@ class AlienLaser extends AlienObjects
   {
     pushMatrix();
     translate(alienPosition.x, alienPosition.y);
-    ellipse(0, 0, 2, 2);
+    fill(0, 180, 0);
+    stroke(0, 180, 0);
+    ellipse(0, 0, 3, 3);
     popMatrix();    
   }
   

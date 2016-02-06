@@ -55,12 +55,12 @@ class Asteroid extends AsteroidObject
 
     // Loop back around if off screen
     if (position.x + radius < 0)
-      position.x = width + radius;
+      position.x = width + radius/3;
     if (position.x - radius > width)
-      position.x = 0 - radius;
+      position.x = 0 - radius/3;
     if (position.y + radius < 0)
-      position.y = height + radius;
+      position.y = height + radius/3;
     if (position.y - radius > height)
-      position.y = 0 - radius;
+      position.y = 0 - radius/3;
   }
 }

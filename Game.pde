@@ -9,7 +9,7 @@ void setup()
   smooth(8);
   strokeWeight(1.5);
   cursor(CROSS);
-  
+
   // Load the intro soundtrack and start playing
   //intro = new SoundFile(this, "introMusic.wav");
   //intro.rate(0.4);
@@ -19,10 +19,10 @@ void setup()
   //thrustSound = new SoundFile(this, "thrust.wav");
   //explosionSound = new SoundFile(this, "expLarge.wav");
   //nukeSound = new SoundFile(this, "nuke.wav");
-  
+
   instructions = new Instructions();
   showInstruction = false;
-  
+
   // Create new font called hyperspace and set as font for whole sketch
   hyperspace = createFont("HyperspaceBold.otf", 32);
   textFont(hyperspace, 32);
@@ -88,22 +88,22 @@ void setup()
   red = color(255, 0, 0);
   yellow = color(255, 255, 0);
   aqua = color(0, 206, 209);
-  
+
   aliens = new ArrayList<AlienObjects>();
   alienLasers = new ArrayList<AlienLaser>();
-  
+
   AlienObjects alienship = new AlienSpaceShip(int(random(1, 5)));
   aliens.add(alienship);
-  
+
   enterAlien = false;
   alienEntryTime = 300;
   alienTimer = 0;
-  
+
   for (int i = 0; i < 5; i++)
-{
-   debrisLinePositions.add(new PVector(0, 0)); 
-   debrisLineMovements.add(new PVector(0, 0));
-}
+  {
+    debrisLinePositions.add(new PVector(0, 0)); 
+    debrisLineMovements.add(new PVector(0, 0));
+  }
 }
 
 ArrayList<PVector> debrisLinePositions = new ArrayList<PVector>();
@@ -240,7 +240,7 @@ void draw()
     textSize(45);
     fill(yellow);
     text("Start Game", width * 0.5f, height * 0.75f);
-    
+
     if (showInstruction == false)
     {
       // If mouse position is over Start Game, change mouse icon to indicate to player they can press
@@ -249,15 +249,13 @@ void draw()
       {
         cursor(HAND);
         overStart = true;
-      }
-      else
+      } else
       {
         cursor(CROSS);
         overStart = false;
       }
     }
-  }
-  else if (level > 1)
+  } else if (level > 1)
   {
     // 3.. 2.. 1.. Countdown to game start
     if (countdown != 0 && gameStart != true)
@@ -278,7 +276,7 @@ void draw()
       shipAlive = true;
       gameStart = true;
     }
-    
+
     // If instruction screen is showing, stop timer controlling countdown to effectively pause the countdown
     if (gameStart != true && showInstruction == false)
       countdownTimer++;
@@ -304,13 +302,11 @@ void draw()
 
       for (int i = 0; i < lasers.size(); i++)
       {
+        if (i > 0)
+          lasers.get(i).colourSwap =! lasers.get(i - 1).colourSwap; 
+        lasers.get(i).render();
         if (gameStart)
-        {
-          if (i > 0)
-            lasers.get(i).colourSwap =! lasers.get(i - 1).colourSwap; 
-          lasers.get(i).render();
           lasers.get(i).update();
-        }
       }
     } else
     {
@@ -322,7 +318,7 @@ void draw()
       {
         level++;
         // Player gets an extra life for each level they pass after level 2
-        if (level > 2 && lives < 10)
+        if (level > 3 && lives < 5)
           lives++;
         setupAsteroidObject();
         countdown = 3;
@@ -334,8 +330,7 @@ void draw()
           activated[i] = false;
           activeTimer = 0;
         }
-      }
-      else if (showHighScores != true)
+      } else if (showHighScores != true)
       {
         gameOver(true);
       }
@@ -347,7 +342,7 @@ void draw()
   {
     // Increment entry timer to know when to enter onto screen
     entryCountTimer++;
-    
+
     // Once timer has reached time to enter, enter powerup onto screen
     if (entryCountTimer == entryTime)
     {
@@ -410,34 +405,34 @@ void draw()
   // Show play again menu
   if (playAgain)
     playAgain();
-    
+
   if (showInstruction)
     instructions.render();
-    
-    
-  
-  // Alien
+
+  // Alien spaceship
   if (alienTimer > alienEntryTime)
   {
     alienTimer = 0;
     // Set entry boolean to be true to let the alien ship know when to enter
     enterAlien = true;
   }
-  
+
   if (gameStart)
     alienTimer++;
-  
+
   if (enterAlien && alienShipDead != true)
   {
     aliens.get(0).render();
-    aliens.get(0).update();
+    if (pause == false)
+      aliens.get(0).update();
   }
 
   for (int i = 0; i < alienLasers.size(); i++)
   {
-     alienLasers.get(i).render();
-     alienLasers.get(i).update();
-  } 
+    alienLasers.get(i).render();
+    if (gameStart)
+      alienLasers.get(i).update();
+  }
 } // End Draw
 
 void gameOver(boolean win)
@@ -551,8 +546,7 @@ void playAgain()
         lives = 5;
         setupAsteroidObject();
       }
-    }
-    else if (mouseX > width * 0.7f - noWidth && mouseX < width * 0.7f + noWidth)
+    } else if (mouseX > width * 0.7f - noWidth && mouseX < width * 0.7f + noWidth)
     {
       cursor(HAND);
       noTextSize = 45;
@@ -640,7 +634,7 @@ void keyPressed()
       }
     }
   }
-  
+
   // Mute/Unmute sounds when M is pressed
   if (keyCode == 'M')
   {
@@ -666,11 +660,11 @@ void keyPressed()
       gameStart =! gameStart;
     }
   }
-  
+
   if (keyCode == 'I')
   {
     showInstruction =! showInstruction;
-   // pause =! pause;
+    // pause =! pause;
     if (pause != true)
       pause = true;
     else if (pause)
@@ -827,16 +821,16 @@ void shipDeath(float angle)
 { 
   // Kill the ship (stop rendering)
   shipDead = true;
-  
+
   stroke(aqua);
-  
+
   // Show ship explosion until timer has expired, at which point call reset function
   if (resetTimer < 50)
   {
     // Set all keys to false, so player cannot move ship
     for (int i = 0; i < keys.length; i++)
-     keys[i] = false;
-    
+      keys[i] = false;
+
     // Line collapse - destruction of ship
     for (int i = 0; i < debrisLinePositions.size(); i++)
     {
@@ -845,40 +839,39 @@ void shipDeath(float angle)
       translate(lPos.x, lPos.y);     
       switch(i)
       {
-         case 0:
-           rotate(-angle/2);
-           line(0, 0, 20, 20);
-           break;
-         case 1:
-           rotate(angle);
-           line(0, 0, 20, 20);
-           break;
-         case 2:
-           rotate(PI);
-           line(0, 0, 15, 15);
-           break;
-         case 3:
-           line(0, 0, 10, 10);
-           break;
-         case 4:
-           rotate(HALF_PI);
-           line(0, 0, 20, 10);
-           break;
+      case 0:
+        rotate(-angle/2);
+        line(0, 0, 20, 20);
+        break;
+      case 1:
+        rotate(angle);
+        line(0, 0, 20, 20);
+        break;
+      case 2:
+        rotate(PI);
+        line(0, 0, 15, 15);
+        break;
+      case 3:
+        line(0, 0, 10, 10);
+        break;
+      case 4:
+        rotate(HALF_PI);
+        line(0, 0, 20, 10);
+        break;
       }
       popMatrix();  
       debrisLinePositions.get(i).add(debrisLineMovements.get(i));
       // Add a couple of extra lines in for added affect
       if (i > 2)
       {
-         pushMatrix();
-         translate(-lPos.x, -lPos.y);
-         line(0, 0, 15, 10);
-         popMatrix();
+        pushMatrix();
+        translate(-lPos.x, -lPos.y);
+        line(0, 0, 15, 10);
+        popMatrix();
       }
     }
     resetTimer++;
-  }
-  else
+  } else
   {
     resetShip();
   }
@@ -889,16 +882,16 @@ void resetShip()
 {
   // Reset line position, so program knows to copy ship position into all live position vectors 
   debrisLinePositions.set(0, new PVector(0, 0));
-  
+
   reset = true;
   asteroids.set(0, new Ship(UP, LEFT, RIGHT, ' ', width * 0.5f, height * 0.5f));
   shipDead = false;
-  
+
   // Move any asteroids in centre of screen to edges to give player a far chance on respawn
   for (int i = 1; i < asteroids.size(); i++)
   {
     if (asteroids.get(i).position.x > width * 0.3f && asteroids.get(i).position.x < width * 0.7f && 
-        asteroids.get(i).position.y > height * 0.3f && asteroids.get(i).position.y < height * 0.7f)
+      asteroids.get(i).position.y > height * 0.3f && asteroids.get(i).position.y < height * 0.7f)
     {
       asteroids.get(i).position.x = random(width);
       asteroids.get(i).position.y = random(200);
@@ -917,7 +910,7 @@ void resetShip()
       activated[i] = false;
     activeTimer = 0;
   }
-  
+
   aliens.set(0, new AlienSpaceShip(int(random(1, 5))));
   enterAlien = false;
   alienTimer = 0;

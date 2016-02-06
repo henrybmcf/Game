@@ -37,6 +37,7 @@ class AlienSpaceShip extends AlienObjects
 
   void render()
   {
+    stroke(0, 180, 0);
     pushMatrix();
     translate(alienPosition.x, alienPosition.y);
     // Top body
@@ -104,7 +105,7 @@ class AlienSpaceShip extends AlienObjects
          lasers.get(i).position.y > alienPosition.y - alienShipHeight &&
          lasers.get(i).position.y < alienPosition.y + alienShipHeight)
       {
-          lasers.remove(this);
+          lasers.remove(i);
           aliens.set(0, new AlienSpaceShip(int(random(1, 5))));
           enterAlien = false;
           alienTimer = 0;
