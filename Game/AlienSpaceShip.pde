@@ -9,7 +9,7 @@ class AlienSpaceShip extends AlienObjects
     entryPoint = entrypoint;
 
     laserTimer = 0;
-    laserTimeLimit = 90;
+    laserTimeLimit = 60;
 
     float topEntry = random(height * 0.1f, height * 0.3f);
     float bottomEntry = random(height * 0.7f, height * 0.9f);
@@ -96,6 +96,7 @@ class AlienSpaceShip extends AlienObjects
        }
     }
     
+    // Check to see if any player lasers hit the alien ship
     for (int i = 0; i < lasers.size(); i++)
     {
       if (lasers.get(i).position.x > alienPosition.x - alienShipWidth &&
@@ -103,6 +104,7 @@ class AlienSpaceShip extends AlienObjects
          lasers.get(i).position.y > alienPosition.y - alienShipHeight &&
          lasers.get(i).position.y < alienPosition.y + alienShipHeight)
       {
+          lasers.remove(this);
           aliens.set(0, new AlienSpaceShip(int(random(1, 5))));
           enterAlien = false;
           alienTimer = 0;

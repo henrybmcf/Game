@@ -4,8 +4,8 @@ import java.io.BufferedWriter;
 
 void setup()
 {
-  //size(700, 600);
-  fullScreen();
+  size(700, 600);
+  //fullScreen();
   smooth(8);
   strokeWeight(1.5);
   cursor(CROSS);
@@ -50,7 +50,7 @@ void setup()
   setupAsteroidObject();
   reset = false;
   resetTimer = 0;
-  lives = 5;
+  lives = 3;
   livesHitCounter = 0;
   shipAlive = true;
   score = 0;
@@ -96,9 +96,20 @@ void setup()
   aliens.add(alienship);
   
   enterAlien = false;
-  alienEntryTime = 60;
+  alienEntryTime = 300;
   alienTimer = 0;
+  
+  for (int i = 0; i < 5; i++)
+{
+   debrisLinePositions.add(new PVector(0, 0)); 
+   debrisLineMovements.add(new PVector(0, 0));
 }
+}
+
+ArrayList<PVector> debrisLinePositions = new ArrayList<PVector>();
+ArrayList<PVector> debrisLineMovements = new ArrayList<PVector>();
+
+boolean shipDead = false;
 
 ArrayList<AlienObjects> aliens;
 ArrayList<AlienLaser> alienLasers;
@@ -272,11 +283,11 @@ void draw()
     if (gameStart != true && showInstruction == false)
       countdownTimer++;
 
-    // Ship is the first element in list, therefore always render and update
+    // Ship is the first element in list, therefore always render and update, unless game is paused
+    if (gameEnd == false && shipDead == false)
+      asteroids.get(0).render();
     if (pause == false)
       asteroids.get(0).update();
-    if (gameEnd == false)
-      asteroids.get(0).render();
 
     if (asteroids.size() > 1)
     {
@@ -426,10 +437,7 @@ void draw()
   {
      alienLasers.get(i).render();
      alienLasers.get(i).update();
-  }
-  
-  
-  
+  } 
 } // End Draw
 
 void gameOver(boolean win)
@@ -762,6 +770,7 @@ void drawPowerupSymbols(int ID)
   }
 } // End Draw Powerup Symbols
 
+
 void setupAsteroidObject()
 {
   lasers.clear();
@@ -812,44 +821,64 @@ void drawShipLives()
 } // End Draw Ship Lives
 
 
-void shipDeath(int radius, float angle)
-{
-  shipAlive = false;
 
-  // Explosion on ship death
-  int points = 15;
-  if (resetTimer < 300)
+
+void shipDeath(float angle)
+{ 
+  // Kill the ship (stop rendering)
+  shipDead = true;
+  
+  stroke(aqua);
+  
+  // Show ship explosion until timer has expired, at which point call reset function
+  if (resetTimer < 50)
   {
     // Set all keys to false, so player cannot move ship
     for (int i = 0; i < keys.length; i++)
-      keys[i] = false;
-    pushMatrix();
-    translate(asteroids.get(0).position.x, asteroids.get(0).position.y);
-    rotate(angle);
-    float thetaInc = TWO_PI / (points * 2);
-    float lastX = 0;
-    float lastY = -radius;
-    stroke(red);
-    for (int i = 1; i <= (points * 2); i++)
+     keys[i] = false;
+    
+    // Line collapse - destruction of ship
+    for (int i = 0; i < debrisLinePositions.size(); i++)
     {
-      float theta = i * thetaInc;
-      float x, y;
-      if (i % 2 == 1)
+      PVector lPos = debrisLinePositions.get(i).copy();
+      pushMatrix();
+      translate(lPos.x, lPos.y);     
+      switch(i)
       {
-        x = sin(theta) * (radius * 0.8f);
-        y = -cos(theta) * (radius * 0.8f);
-      } else
-      {
-        x = sin(theta) * radius;
-        y = -cos(theta) * radius;
+         case 0:
+           rotate(-angle/2);
+           line(0, 0, 20, 20);
+           break;
+         case 1:
+           rotate(angle);
+           line(0, 0, 20, 20);
+           break;
+         case 2:
+           rotate(PI);
+           line(0, 0, 15, 15);
+           break;
+         case 3:
+           line(0, 0, 10, 10);
+           break;
+         case 4:
+           rotate(HALF_PI);
+           line(0, 0, 20, 10);
+           break;
       }
-      line(lastX, lastY, x, y);
-      lastX = x;
-      lastY = y;
+      popMatrix();  
+      debrisLinePositions.get(i).add(debrisLineMovements.get(i));
+      // Add a couple of extra lines in for added affect
+      if (i > 2)
+      {
+         pushMatrix();
+         translate(-lPos.x, -lPos.y);
+         line(0, 0, 15, 10);
+         popMatrix();
+      }
     }
-    popMatrix();
     resetTimer++;
-  } else
+  }
+  else
   {
     resetShip();
   }
@@ -858,9 +887,13 @@ void shipDeath(int radius, float angle)
 
 void resetShip()
 {
+  // Reset line position, so program knows to copy ship position into all live position vectors 
+  debrisLinePositions.set(0, new PVector(0, 0));
+  
   reset = true;
   asteroids.set(0, new Ship(UP, LEFT, RIGHT, ' ', width * 0.5f, height * 0.5f));
-
+  shipDead = false;
+  
   // Move any asteroids in centre of screen to edges to give player a far chance on respawn
   for (int i = 1; i < asteroids.size(); i++)
   {

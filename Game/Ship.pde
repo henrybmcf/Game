@@ -223,55 +223,21 @@ class Ship extends AsteroidObject
     }
     
     // Detect collision with alien ship
-    if (aliens.get(0).alienPosition.x > position.x - shipWidth &&
-        aliens.get(0).alienPosition.x  < position.x + shipWidth &&
-        aliens.get(0).alienPosition.y > position.y - shipHeight &&
-        aliens.get(0).alienPosition.y < position.y + shipHeight)
+    if (aliens.get(0).alienPosition.x + aliens.get(0).alienShipWidth > position.x - shipWidth &&
+        aliens.get(0).alienPosition.x - aliens.get(0).alienShipWidth < position.x + shipWidth &&
+        aliens.get(0).alienPosition.y + aliens.get(0).alienShipHeight > position.y - shipHeight &&
+        aliens.get(0).alienPosition.y - aliens.get(0).alienShipWidth < position.y + shipHeight)
     {
         // Kill alien ship
         alienShipDead = true;
-
-        // Stop the game
-        gameStart = false;
-        // Stop ship from moving
-        resistance = false;
-
-        // If the player still has lives, deduct a life
-        if (lives > 0)
-        { 
-          // Ensure only one life is dedcuted per crash
-          if (livesHitCounter == 0)
-            lives--;
-          livesHitCounter = 1;
-
-          // Clear all lasers from the screen so upon restart of game, they won't continue to show
-          lasers.clear();
-
-          // Time exlposion graphics of ship explosion
-          if (explosionTimer > 1)
-          {
-            shipDeath(explosionRadius, explosionAngle);
-            shipDeath(explosionRadius - 5, explosionAngle);
-            shipDeath(explosionRadius - 10, explosionAngle);
-            shipDeath(explosionRadius - 15, explosionAngle);
-            if (explosionRadius < 30)
-              explosionRadius += 1;
-            else
-              explosionRadius = 0;
-            explosionTimer = 0;
-            if (random(1) > 0.5f)
-              explosionAngle += 2.5f;
-            else
-              explosionAngle -= 3.5f;
-          }
-          explosionTimer++;
-        }
-        // If user has no more lives, give them the option to play the game again
-        else if (showHighScores != true)
+        // Kill player ship
+        callShipDeath();
+        
+        if (reset)
         {
-          gameOver(false);
+          score += 100;
+          reset = false;
         }
-      
     }
 
     for (int i = 1; i < asteroids.size(); i++)
@@ -282,46 +248,7 @@ class Ship extends AsteroidObject
         asteroids.get(i).position.y + asteroids.get(i).radius * 0.5f > position.y - shipHeight &&
         asteroids.get(i).position.y - asteroids.get(i).radius * 0.5f < position.y + shipHeight)
       {
-        // Stop the game
-        gameStart = false;
-        // Stop ship from moving
-        resistance = false;
-
-        // If the player still has lives, deduct a life
-        if (lives > 0)
-        { 
-          // Ensure only one life is dedcuted per crash
-          if (livesHitCounter == 0)
-            lives--;
-          livesHitCounter = 1;
-
-          // Clear all lasers from the screen so upon restart of game, they won't continue to show
-          lasers.clear();
-
-          // Time exlposion graphics of ship explosion
-          if (explosionTimer > 1)
-          {
-            shipDeath(explosionRadius, explosionAngle);
-            shipDeath(explosionRadius - 5, explosionAngle);
-            shipDeath(explosionRadius - 10, explosionAngle);
-            shipDeath(explosionRadius - 15, explosionAngle);
-            if (explosionRadius < 30)
-              explosionRadius += 1;
-            else
-              explosionRadius = 0;
-            explosionTimer = 0;
-            if (random(1) > 0.5f)
-              explosionAngle += 2.5f;
-            else
-              explosionAngle -= 3.5f;
-          }
-          explosionTimer++;
-        }
-        // If user has no more lives, give them the option to play the game again
-        else if (showHighScores != true)
-        {
-          gameOver(false);
-        }
+        callShipDeath();
 
         if (reset)
         {
@@ -422,4 +349,49 @@ class Ship extends AsteroidObject
       }
     }
   }
+  
+  void callShipDeath()
+  {
+    // Stop the game
+        gameStart = false;
+        // Stop ship from moving
+        resistance = false;
+        
+    // If the player still has lives, deduct a life
+        if (lives > 0)
+        { 
+          // Ensures that only one life is deducted per crash
+          if (livesHitCounter == 0)
+            lives--;
+          livesHitCounter = 1;
+
+          // Clear all lasers from the screen so upon restart of game, they won't continue to show
+          lasers.clear();
+          
+          // Time exlposion graphics of ship explosion
+          if (explosionTimer > 1)
+          {
+            explosionAngle += 0.1f;
+            if (debrisLinePositions.get(0).x == 0)
+            {
+              for (int i = 0; i < 5; i++)
+              {
+                 debrisLinePositions.set(i, position.copy());
+                 if (i < 3)
+                   debrisLineMovements.set(i, new PVector(random(moveShip.x / 2), random(moveShip.y / 2)));
+                 else
+                   debrisLineMovements.set(i, new PVector(random(-moveShip.x / 2), random(moveShip.y / 2)));
+              }
+            }
+            
+            shipDeath(explosionAngle);
+          }
+          explosionTimer++;
+        }
+        // If user has no more lives, give them the option to play the game again
+        else if (showHighScores != true)
+        {
+          gameOver(false);
+        }
+  } 
 }

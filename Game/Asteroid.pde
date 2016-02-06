@@ -1,9 +1,9 @@
 class Asteroid extends AsteroidObject
 { 
   // Image variables for the asteroid images
-PImage larAsteroid;
-PImage medAsteroid;
-PImage smallAsteroid;
+  PImage larAsteroid;
+  PImage medAsteroid;
+  PImage smallAsteroid;
   float astRad;
   int size;
 
@@ -33,18 +33,18 @@ PImage smallAsteroid;
     pushMatrix();
     switch (size)
     {
-    case 1:
-      translate(position.x - (largeAstRad * 0.5f), position.y - (largeAstRad * 0.5f)); 
-      image(larAsteroid, 0, 0);
-      break;
-    case 2:
-      translate(position.x - (medAstRad * 0.5f), position.y - (medAstRad * 0.5f));
-      image(medAsteroid, 0, 0);
-      break;
-    case 3:
-      translate(position.x - (smallAstRad * 0.5f), position.y - (smallAstRad * 0.5f));
-      image(smallAsteroid, 0, 0);
-      break;
+      case 1:
+        translate(position.x - (largeAstRad * 0.5f), position.y - (largeAstRad * 0.5f)); 
+        image(larAsteroid, 0, 0);
+        break;
+      case 2:
+        translate(position.x - (medAstRad * 0.5f), position.y - (medAstRad * 0.5f));
+        image(medAsteroid, 0, 0);
+        break;
+      case 3:
+        translate(position.x - (smallAstRad * 0.5f), position.y - (smallAstRad * 0.5f));
+        image(smallAsteroid, 0, 0);
+        break;
     }
     popMatrix();
   }
@@ -54,13 +54,13 @@ PImage smallAsteroid;
     position.add(asteroidMove);
 
     // Loop back around if off screen
-    if (position.x < 0)
-      position.x = width;
-    if (position.x > width)
-      position.x = 0;
-    if (position.y < 0)
-      position.y = height;
-    if (position.y > height)
-      position.y = 0;
+    if (position.x + radius < 0)
+      position.x = width + radius;
+    if (position.x - radius > width)
+      position.x = 0 - radius;
+    if (position.y + radius < 0)
+      position.y = height + radius;
+    if (position.y - radius > height)
+      position.y = 0 - radius;
   }
 }
