@@ -40,7 +40,7 @@ class AsteroidObject
       asteroidMove = new PVector(random(-size, -size * 1.5), astSpeed);
 
     this.facingAngle = 0.0f;
-    this.shipHeight = 20;
+    this.shipHeight = 18;
     this.shipWidth = shipHeight * 0.7f;
   }  
 

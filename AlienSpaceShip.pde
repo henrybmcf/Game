@@ -16,22 +16,22 @@ class AlienSpaceShip extends AlienObjects
 
     switch (entrypoint)
     {
-      case 1:
-        alienPosition = new PVector(-width * 0.1f, topEntry);
-        alienMovement = new PVector(alienSpeed, 0);
-        break;
-      case 2:
-        alienPosition = new PVector(-width * 0.1f, bottomEntry);
-        alienMovement = new PVector(alienSpeed, 0);
-        break;
-      case 3:
-        alienPosition = new PVector(width * 1.1f, topEntry);
-        alienMovement = new PVector(-alienSpeed, 0);
-        break;
-      case 4:
-        alienPosition = new PVector(width * 1.1f, bottomEntry);
-        alienMovement = new PVector(-alienSpeed, 0);
-        break;
+    case 1:
+      alienPosition = new PVector(-width * 0.1f, topEntry);
+      alienMovement = new PVector(alienSpeed, 0);
+      break;
+    case 2:
+      alienPosition = new PVector(-width * 0.1f, bottomEntry);
+      alienMovement = new PVector(alienSpeed, 0);
+      break;
+    case 3:
+      alienPosition = new PVector(width * 1.1f, topEntry);
+      alienMovement = new PVector(-alienSpeed, 0);
+      break;
+    case 4:
+      alienPosition = new PVector(width * 1.1f, bottomEntry);
+      alienMovement = new PVector(-alienSpeed, 0);
+      break;
     }
   }
 
@@ -74,43 +74,51 @@ class AlienSpaceShip extends AlienObjects
     // Set the entry boolean to be false and reset the entry timer to begin the timer to the entry of the next ship
     if (alienPosition.x < -width * 0.2f || alienPosition.x > width * 1.2f)
     {
-        aliens.set(0, new AlienSpaceShip(int(random(1, 5))));
-        enterAlien = false;
-        alienTimer = 0;
+      aliens.set(0, new AlienSpaceShip(int(random(1, 5))));
+      enterAlien = false;
+      alienTimer = 0;
     }
 
     // Reset timer while alien ship is on screen to prevent multiple executions
     if (alienPosition.x > 0 && alienPosition.x < width)
       alienTimer = 0;
-    
+
     // Check for alien ship collision with any asteroids
     for (int i = 1; i < asteroids.size(); i++)
     {
-     if (asteroids.get(i).position.x + asteroids.get(i).radius * 0.5f > alienPosition.x - alienShipWidth && 
-         asteroids.get(i).position.x - asteroids.get(i).radius * 0.5f < alienPosition.x + alienShipWidth &&
-         asteroids.get(i).position.y + asteroids.get(i).radius * 0.5f > alienPosition.y - alienShipHeight &&
-         asteroids.get(i).position.y - asteroids.get(i).radius * 0.5f < alienPosition.y + alienShipHeight)
-       {
-         aliens.set(0, new AlienSpaceShip(int(random(1, 5))));
-         enterAlien = false;
-         alienTimer = 0;
-       }
+      if (asteroids.get(i).position.x + asteroids.get(i).radius * 0.5f > alienPosition.x - alienShipWidth && 
+        asteroids.get(i).position.x - asteroids.get(i).radius * 0.5f < alienPosition.x + alienShipWidth &&
+        asteroids.get(i).position.y + asteroids.get(i).radius * 0.5f > alienPosition.y - alienShipHeight &&
+        asteroids.get(i).position.y - asteroids.get(i).radius * 0.5f < alienPosition.y + alienShipHeight)
+      {
+        alienDeath();
+      }
     }
-    
+
     // Check to see if any player lasers hit the alien ship
     for (int i = 0; i < lasers.size(); i++)
     {
       if (lasers.get(i).position.x > alienPosition.x - alienShipWidth &&
-         lasers.get(i).position.x < alienPosition.x + alienShipWidth &&
-         lasers.get(i).position.y > alienPosition.y - alienShipHeight &&
-         lasers.get(i).position.y < alienPosition.y + alienShipHeight)
+        lasers.get(i).position.x < alienPosition.x + alienShipWidth &&
+        lasers.get(i).position.y > alienPosition.y - alienShipHeight &&
+        lasers.get(i).position.y < alienPosition.y + alienShipHeight)
       {
-          lasers.remove(i);
-          aliens.set(0, new AlienSpaceShip(int(random(1, 5))));
-          enterAlien = false;
-          alienTimer = 0;
-          score += 100;
+        lasers.remove(i);
+        score += 100;
+        alienDeath();
       }
     }
+  }
+
+  void alienDeath()
+  {
+    aliens.set(0, new AlienSpaceShip(int(random(1, 5))));
+    enterAlien = false;
+    alienTimer = 0;
+    for (int j = 0; j < 6; j++)
+      asteroidDebrisPosition.add(alienPosition.copy());       
+    times.append(debrisTimer);
+    debrisTimer++;
+    debris = true;
   }
 }

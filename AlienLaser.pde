@@ -19,7 +19,7 @@ class AlienLaser extends AlienObjects
     translate(alienPosition.x, alienPosition.y);
     fill(0, 180, 0);
     stroke(0, 180, 0);
-    ellipse(0, 0, 3, 3);
+    ellipse(0, 0, laserSize, laserSize);
     popMatrix();    
   }
   
@@ -43,7 +43,5 @@ class AlienLaser extends AlienObjects
          alienLasers.remove(this);
        }
     }
-    
-    
   }
 }

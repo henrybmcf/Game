@@ -228,15 +228,27 @@ class Ship extends AsteroidObject
       aliens.get(0).alienPosition.y - aliens.get(0).alienShipWidth < position.y + shipHeight)
     {
       // Kill alien ship
-      alienShipDead = true;
+      alienShipDead = true;    
       // Kill player ship
-      callShipDeath();
-
+      callShipDeath(); 
+      
       if (reset)
       {
         score += 100;
         reset = false;
       }
+    }
+    
+    // Check to see if any alien lasers hit the player
+    for (int i = 0; i < alienLasers.size(); i++)
+    {
+        if (alienLasers.get(i).alienPosition.x > position.x - shipWidth &&
+            alienLasers.get(i).alienPosition.x < position.x + shipWidth &&
+            alienLasers.get(i).alienPosition.y > position.y - shipHeight &&
+            alienLasers.get(i).alienPosition.y < position.y + shipHeight)
+        {
+          callShipDeath();
+        }
     }
 
     for (int i = 1; i < asteroids.size(); i++)
@@ -345,6 +357,13 @@ class Ship extends AsteroidObject
           alienTimer = 0;
           score += 100;
         }
+        
+        for (int j = 0; j < alienLasers.size(); j++)
+        {
+          float dist = PVector.dist(position, alienLasers.get(j).alienPosition);
+          if (dist < forcefieldRadius + alienLasers.get(0).laserSize)
+              alienLasers.remove(j);
+        }
       }
     }
   }
@@ -366,27 +385,22 @@ class Ship extends AsteroidObject
 
       // Clear all lasers from the screen so upon restart of game, they won't continue to show
       lasers.clear();
-      alienLasers.clear();
 
-      // Time exlposion graphics of ship explosion
-      if (explosionTimer > 1)
+      // Graphics of ship explosion
+      explosionAngle += 0.1f;
+      if (shipDebrisPositions.get(0).x == 0)
       {
-        explosionAngle += 0.1f;
-        if (debrisLinePositions.get(0).x == 0)
+        for (int i = 0; i < 5; i++)
         {
-          for (int i = 0; i < 5; i++)
-          {
-            debrisLinePositions.set(i, position.copy());
-            if (i < 3)
-              debrisLineMovements.set(i, new PVector(random(moveShip.x / 2), random(moveShip.y / 2)));
-            else
-              debrisLineMovements.set(i, new PVector(random(-moveShip.x / 2), random(moveShip.y / 2)));
-          }
+          shipDebrisPositions.set(i, position.copy());
+          if (i < 3)
+            shipDebrisMovements.set(i, new PVector(random(moveShip.x / 2), random(moveShip.y / 2)));
+          else
+            shipDebrisMovements.set(i, new PVector(random(-moveShip.x / 2), random(moveShip.y / 2)));
         }
-
-        shipDeath(explosionAngle);
       }
-      explosionTimer++;
+
+      shipDeath(explosionAngle);
     }
     // If user has no more lives, give them the option to play the game again
     else if (showHighScores != true)

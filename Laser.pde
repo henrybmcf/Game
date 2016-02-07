@@ -40,15 +40,10 @@ class Laser extends AsteroidObject
       {
         splitAsteroid(i);
         lasers.remove(this);
-        
-        //for (int j = 0; j < debrisPosition.size(); j++)
-          //debrisPosition.set(j, position.copy());
           
         for (int j = 0; j < 6; j++)
-           debrisPosition.add(position.copy());
-        
+           asteroidDebrisPosition.add(position.copy());       
         times.append(debrisTimer);
-
         debrisTimer++;
         debris = true;
       }

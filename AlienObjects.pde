@@ -9,6 +9,8 @@ class AlienObjects
   
   int entryPoint;
   
+  int laserSize; 
+  
   AlienObjects()
   {
     // Position of alien spaceship
@@ -20,6 +22,8 @@ class AlienObjects
     // Size of alien ship
     alienShipWidth = 25;
     alienShipHeight = alienShipWidth * 0.5f;
+    
+    laserSize = 3;
   }
 
   void render()

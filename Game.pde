@@ -22,7 +22,6 @@ void setup()
 
   instructions = new Instructions();
   showInstruction = false;
-
   // Create new font called hyperspace and set as font for whole sketch
   hyperspace = createFont("HyperspaceBold.otf", 32);
   textFont(hyperspace, 32);
@@ -53,6 +52,33 @@ void setup()
   lives = 3;
   livesHitCounter = 0;
   shipAlive = true;
+  aliens = new ArrayList<AlienObjects>();
+  alienLasers = new ArrayList<AlienLaser>();
+  AlienObjects alienship = new AlienSpaceShip(int(random(1, 5)));
+  aliens.add(alienship);
+  enterAlien = false;
+  alienEntryTime = int(random(200, 300));
+  alienTimer = 0;  
+  shipDebrisPositions = new ArrayList<PVector>();
+  shipDebrisMovements = new ArrayList<PVector>();
+  for (int i = 0; i < 5; i++)
+  {
+    shipDebrisPositions.add(new PVector(0, 0)); 
+    shipDebrisMovements.add(new PVector(0, 0));
+  }
+  asteroidDebrisPosition = new ArrayList<PVector>();
+  asteroidDebrisMovement = new ArrayList<PVector>();
+  // Random movements for all debris particles
+  asteroidDebrisMovement.add(new PVector(0, random(-1)));
+  asteroidDebrisMovement.add(new PVector(random(0.75), random(-1.2)));
+  asteroidDebrisMovement.add(new PVector(random(1.2), 0));
+  asteroidDebrisMovement.add(new PVector(0, random(0.8)));
+  asteroidDebrisMovement.add(new PVector(random(-0.5), 1));
+  asteroidDebrisMovement.add(new PVector(random(1), random(0.5)));
+  shipDead = false;
+  debris = false;
+  debrisTimer = 0;
+  times = new IntList();
   score = 0;
   scores = new IntList();
   players = new StringList();
@@ -76,6 +102,7 @@ void setup()
     collected[i] = false;
     activated[i] = false;
   }
+  collected[3] = true;
   activeTimer = 0;
   deactivateTime = 360;
   powerupSymbol = 30;
@@ -88,50 +115,7 @@ void setup()
   red = color(255, 0, 0);
   yellow = color(255, 255, 0);
   aqua = color(0, 206, 209);
-
-  aliens = new ArrayList<AlienObjects>();
-  alienLasers = new ArrayList<AlienLaser>();
-
-  AlienObjects alienship = new AlienSpaceShip(int(random(1, 5)));
-  aliens.add(alienship);
-
-  enterAlien = false;
-  alienEntryTime = 300;
-  alienTimer = 0;
-
-
-  for (int i = 0; i < 5; i++)
-  {
-    debrisLinePositions.add(new PVector(0, 0)); 
-    debrisLineMovements.add(new PVector(0, 0));
-  }
-
-  // Random movements for all debris particles
-  debrisMovement.add(new PVector(0, random(-1)));
-  debrisMovement.add(new PVector(random(0.75), random(-1.2)));
-  debrisMovement.add(new PVector(random(1.2), 0));
-  debrisMovement.add(new PVector(0, random(0.8)));
-  debrisMovement.add(new PVector(random(-0.5), 1));
-  debrisMovement.add(new PVector(random(1), random(0.5)));
-  
-  for (int i = 0; i < 6; i++)
-  {
-    //debrisPosition.add(new PVector(0, 0));
-  }
 }
-
-ArrayList<PVector> debrisLinePositions = new ArrayList<PVector>();
-ArrayList<PVector> debrisLineMovements = new ArrayList<PVector>();
-
-boolean shipDead = false;
-
-ArrayList<AlienObjects> aliens;
-ArrayList<AlienLaser> alienLasers;
-
-boolean alienShipDead;
-boolean enterAlien;
-int alienEntryTime;
-int alienTimer;
 
 // Various sound effect variables
 SoundFile intro;
@@ -181,8 +165,33 @@ int resetTimer;
 // Number of lives
 int lives;
 int livesHitCounter;
-// Boolean to determine if ship is dead or alive
+// Boolean to determine if ship is alive
 boolean shipAlive;
+// Arraylists of alien spaceship and alien lasers
+ArrayList<AlienObjects> aliens;
+ArrayList<AlienLaser> alienLasers;
+// Boolea to determine if alien space ship is alive or dead
+boolean alienShipDead;
+// Boolea to determine if alien spaceship should enter onto screen
+boolean enterAlien;
+// Variables to time entry of alien spaceship on screen
+int alienEntryTime;
+int alienTimer;
+// Vectors to hold position and movements of debris upon ship destruction
+ArrayList<PVector> shipDebrisPositions;
+ArrayList<PVector> shipDebrisMovements;
+// Vectors to hold position and movements of rock debris upon asteroid or alien ship destruction
+ArrayList<PVector> asteroidDebrisPosition;
+ArrayList<PVector> asteroidDebrisMovement;
+// Boolean to determine if ship is dead, to know when to activate ship destruction animation
+boolean shipDead;
+// Boolean to determine to show rock debris animation
+boolean debris;
+// Variable to time rock debris animation
+int debrisTimer;
+// List of times to execute and remove rock debris
+// This allows multiple rock debris animations simultaneously
+IntList times;
 // Variable to hold player's score
 int score;
 // Integer list of previous scores
@@ -242,7 +251,7 @@ color aqua;
 
 void draw()
 { 
-  background(0);
+  background(2);
   stroke(255);
   textAlign(CENTER);
   if (level == 1)
@@ -251,10 +260,11 @@ void draw()
     fill(255);
     textSize(80);
     text("ASTEROIDS", width * 0.5f, height * 0.3f);
+    textSize(25);
+    text("I = Instructions", width * 0.5f, height * 0.9f);
     textSize(45);
     fill(yellow);
-    text("Start Game", width * 0.5f, height * 0.75f);
-
+    text("Start Game", width * 0.5f, height * 0.75f); 
     if (showInstruction == false)
     {
       // If mouse position is over Start Game, change mouse icon to indicate to player they can press
@@ -271,6 +281,7 @@ void draw()
     }
   } else if (level > 1)
   {
+    noCursor();
     // 3.. 2.. 1.. Countdown to game start
     if (countdown != 0 && gameStart != true)
     {
@@ -322,7 +333,8 @@ void draw()
         if (gameStart)
           lasers.get(i).update();
       }
-    } else
+    }
+    else
     {
       gameStart = false;
       // Set all keys to false, so player cannot move ship
@@ -437,7 +449,7 @@ void draw()
   if (enterAlien && alienShipDead != true)
   {
     aliens.get(0).render();
-    if (pause == false)
+    if (pause == false && gameStart)
       aliens.get(0).update();
   }
 
@@ -448,13 +460,10 @@ void draw()
       alienLasers.get(i).update();
   }
   
-  
-  
   if (debris)
     debris();
   
   debrisTimer++;
-  
 } // End Draw
 
 void gameOver(boolean win)
@@ -496,7 +505,7 @@ void gameOver(boolean win)
 
 void calculateHighScores()
 {
-  scoreTable = loadTable("/Users/HenryBallingerMcFarlane/Desktop/Game/Asteroids/scores.csv", "header");
+  scoreTable = loadTable("scores.csv", "header");
   for (TableRow row : scoreTable.rows())
   {
     players.append(row.getString("Name"));
@@ -550,7 +559,7 @@ void playAgain()
   float noWidth = textWidth("No") * 0.5f;
   float yesTextSize = 35;
   float noTextSize = 35;
-
+  cursor(CROSS);
   // Detect which option mouse is over, highlight that option
   if (mouseY > height * 0.7f && mouseY < height * 0.9f)
   {
@@ -561,12 +570,12 @@ void playAgain()
       // If they select to play again, setup asteroids and reset level
       if (mousePressed)
       {
-        playAgain = false;
-        gameEnd = false;
         score = 0;
         level = 1;
-        lives = 5;
+        lives = 3;
         setupAsteroidObject();
+        playAgain = false;
+        gameEnd = false;
       }
     } else if (mouseX > width * 0.7f - noWidth && mouseX < width * 0.7f + noWidth)
     {
@@ -580,8 +589,11 @@ void playAgain()
         exit();
       }
     }
+    else
+    {
+      cursor(CROSS);
+    }
   }
-  cursor(CROSS);
   textSize(yesTextSize);
   fill(0, 255, 0);
   text("Yes", width * 0.3f, height * 0.85f);
@@ -611,7 +623,7 @@ void keyPressed()
       // Allowing you to view highscores from previous sessions
       try
       { 
-        scoring = new PrintWriter(new BufferedWriter(new FileWriter("/Users/HenryBallingerMcFarlane/Desktop/Game/Asteroids/scores.csv", true)));
+        scoring = new PrintWriter(new BufferedWriter(new FileWriter("/Users/HenryBallingerMcFarlane/Desktop/Game/scores.csv", true)));
         scoring.println(playerName + "," + score);
         scoring.flush();
         scoring.close();
@@ -620,7 +632,6 @@ void keyPressed()
       {  
         println(e);
       }
-      //showHighScores = true;
       calculateHighScores();
     }
   }
@@ -658,7 +669,7 @@ void keyPressed()
   }
 
   // Mute/Unmute sounds when M is pressed
-  if (keyCode == 'M')
+  if (keyCode == 'M' && gameEnd == false)
   {
     mute =! mute;
     if (mute)
@@ -673,7 +684,7 @@ void keyPressed()
   }
 
   // Pause/Unpause game when P is pressed
-  if (keyCode == 'P')
+  if (keyCode == 'P' && gameEnd == false)
   {
     // If countdown has stopped (i.e. game has started), set pause and gameStart to be opposite to their current values, hence pausing the game
     if (countdown == 0)
@@ -683,7 +694,7 @@ void keyPressed()
     }
   }
 
-  if (keyCode == 'I')
+  if (keyCode == 'I' && gameEnd == false)
   {
     showInstruction =! showInstruction;
     // pause =! pause;
@@ -852,9 +863,9 @@ void shipDeath(float angle)
       keys[i] = false;
 
     // Line collapse - destruction of ship
-    for (int i = 0; i < debrisLinePositions.size(); i++)
+    for (int i = 0; i < shipDebrisPositions.size(); i++)
     {
-      PVector lPos = debrisLinePositions.get(i).copy();
+      PVector lPos = shipDebrisPositions.get(i).copy();
       pushMatrix();
       translate(lPos.x, lPos.y);     
       switch(i)
@@ -880,7 +891,7 @@ void shipDeath(float angle)
         break;
       }
       popMatrix();  
-      debrisLinePositions.get(i).add(debrisLineMovements.get(i));
+      shipDebrisPositions.get(i).add(shipDebrisMovements.get(i));
       // Add a couple of extra lines in for added affect
       if (i > 2)
       {
@@ -900,9 +911,10 @@ void shipDeath(float angle)
 
 void resetShip()
 {
-  // Reset line position, so program knows to copy ship position into all live position vectors 
-  debrisLinePositions.set(0, new PVector(0, 0));
+  // Reset ship debris position, so program knows to copy ship position into all ship debris position vectors 
+  shipDebrisPositions.set(0, new PVector(0, 0));
 
+  alienLasers.clear();
   reset = true;
   asteroids.set(0, new Ship(UP, LEFT, RIGHT, ' ', width * 0.5f, height * 0.5f));
   shipDead = false;
@@ -923,12 +935,12 @@ void resetShip()
   resetTimer = 0;
   livesHitCounter = 0;
 
-  // Reset any currently activated powerups to be false (deactivated)
+  // Reset any currently collected, on screen or activated powerups to be false
   for (int i = 0; i < noPowerUps; i++)
   {
-    if (activated[i])
-      activated[i] = false;
+    activated[i] = false;
     activeTimer = 0;
+    onScreen[i] = false;
   }
 
   aliens.set(0, new AlienSpaceShip(int(random(1, 5))));
@@ -1034,18 +1046,13 @@ void playSound(int ID)
   }
 } // End Play Sounds
 
-ArrayList<PVector> debrisPosition = new ArrayList<PVector>();
-ArrayList<PVector> debrisMovement = new ArrayList<PVector>();
-boolean debris = false;
-int debrisTimer = 0;
-IntList times = new IntList();
 
 void debris()
 {
-  for (int i = 0; i < debrisPosition.size(); i++)
+  for (int i = 0; i < asteroidDebrisPosition.size(); i++)
   {
     pushMatrix();    
-    translate(debrisPosition.get(i).x, debrisPosition.get(i).y);
+    translate(asteroidDebrisPosition.get(i).x, asteroidDebrisPosition.get(i).y);
     stroke(200);
     rotate(TWO_PI * 0.2f * i);
     line(0, 0, 3, 0);
@@ -1053,18 +1060,22 @@ void debris()
     line(5, 1, 6, 2);
     line(6, 2, 1, 3);
     line(1, 3, 0, 0);
-    debrisPosition.get(i).add(debrisMovement.get(i % 6));
+    asteroidDebrisPosition.get(i).add(asteroidDebrisMovement.get(i % 6));
     popMatrix();
   }
   
+  // For every element of the times list (times the debris animation was initiated)
+  // Check to see if the current timer value - element if evenly divisible by 50
+  // That is, 5/6th of a second have passed since the animation was started
+  // If so, remove those debris rocks from the arraylist of debris, thereby stopping the animation
   for (int j = 0; j < times.size(); j++)
   {
     if ((debrisTimer - times.get(j)) % 50 == 0)
     {
        for (int i = 5; i > -1; i--)
-          debrisPosition.remove(i);
+          asteroidDebrisPosition.remove(i);
           
        times.remove(j);
     }
   }
-}
+} // End Debris
