@@ -218,7 +218,7 @@ class Ship extends AsteroidObject
           lives++;
       }
       onScreen[powerup] = false;
-      entryCountTimer = 0;
+      pUpEntryTimer = 0;
     }
 
     // Detect collision with alien ship

@@ -33,7 +33,7 @@ class PowerUp
     if (pos.y > height)
     {
       onScreen[ID] = false;
-      entryCountTimer = 0;
+      pUpEntryTimer = 0;
       power = new PowerUp(random(width), -20);
     }
   }

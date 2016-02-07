@@ -90,8 +90,8 @@ void setup()
   power = new PowerUp(random(width), -20);
   noPowerUps = 7;
   // Enter powerup onto screen after random time between 5 & 7 seconds.
-  entryTime = int(random(300, 420));
-  entryCountTimer = 0; 
+  pUpEntryTimeLimit = int(random(300, 420));
+  pUpEntryTimer = 0; 
   onScreen = new boolean[noPowerUps];
   collected = new boolean[noPowerUps];
   activated = new boolean[noPowerUps];
@@ -102,7 +102,6 @@ void setup()
     collected[i] = false;
     activated[i] = false;
   }
-  collected[3] = true;
   activeTimer = 0;
   deactivateTime = 360;
   powerupSymbol = 30;
@@ -124,7 +123,6 @@ SoundFile laserSound;
 SoundFile thrustSound;
 SoundFile explosionSound;
 SoundFile nukeSound;
-
 // Variables to show instructions screen
 Instructions instructions;
 boolean showInstruction;
@@ -218,10 +216,10 @@ PowerUp power;
 int powerup;
 // 1(0) = Double Shooter, 2(1) = Quad Shooter, 3(2) = Nuke, 4(3) = Forcefield, 5(4) = Freeze, 6(5) = Extra Life, 7(6) = Rapid Fire
 int noPowerUps;
-// Time to enter onto screen
-int entryTime;
-// Timer to time entry onto screen
-int entryCountTimer;
+// Time for powerup to enter onto screen
+int pUpEntryTimeLimit;
+// Timer to time powerup entry onto screen
+int pUpEntryTimer;
 // Boolean array for if powerup is on screen or not. True = on screen.
 boolean[] onScreen;
 // Boolean array for if powerup has been collected by ship
@@ -254,6 +252,8 @@ void draw()
   background(2);
   stroke(255);
   textAlign(CENTER);
+
+  // Start game screen
   if (level == 1)
   {
     asteroids.get(0).render();
@@ -273,13 +273,15 @@ void draw()
       {
         cursor(HAND);
         overStart = true;
-      } else
+      }
+      else
       {
         cursor(CROSS);
         overStart = false;
       }
     }
-  } else if (level > 1)
+  }
+  else if (level > 1)
   {
     noCursor();
     // 3.. 2.. 1.. Countdown to game start
@@ -302,29 +304,32 @@ void draw()
       gameStart = true;
     }
 
-    // If instruction screen is showing, stop timer controlling countdown to effectively pause the countdown
+    // If instruction screen is showing, stop timer that controls countdown to effectively pause the countdown
     if (gameStart != true && showInstruction == false)
       countdownTimer++;
 
-    // Ship is the first element in list, therefore always render and update, unless game is paused
+    // Ship is the first element in list, therefore always render and update, unless game is paused or ship is dead
     if (gameEnd == false && shipDead == false)
       asteroids.get(0).render();
     if (pause == false)
       asteroids.get(0).update();
 
+    // Check to see if there are still asteroids on screen to be destroyed
     if (asteroids.size() > 1)
     {
       if (gameEnd == false)
       {
+        // Show and move asteroids
         for (int i = 1; i < asteroids.size(); i++)
         {
           asteroids.get(i).render();
-          // Only update (move) asteroids if the game has started
+          // Only update (move) asteroids if the game has started and freeze powerup is not active
           if (gameStart && activated[4] == false)
             asteroids.get(i).update();
         }
       }
-
+      
+      // Show, move and control colour of player's lasers
       for (int i = 0; i < lasers.size(); i++)
       {
         if (i > 0)
@@ -333,6 +338,32 @@ void draw()
         if (gameStart)
           lasers.get(i).update();
       }
+      
+      // Timing entry of alien spaceship 
+      if (alienTimer > alienEntryTime)
+      {
+        alienTimer = 0;
+        // Set entry boolean to be true to let the alien ship know when to enter
+        enterAlien = true;
+      }
+      if (gameStart)
+        alienTimer++;
+    
+      // Drawing and moving alien ship
+      if (enterAlien && alienShipDead != true)
+      {
+        aliens.get(0).render();
+        if (pause == false && gameStart)
+          aliens.get(0).update();
+      }
+      
+      // Drawing and moving alien lasers
+      for (int i = 0; i < alienLasers.size(); i++)
+      {
+        alienLasers.get(i).render();
+        if (gameStart)
+          alienLasers.get(i).update();
+      }
     }
     else
     {
@@ -340,12 +371,14 @@ void draw()
       // Set all keys to false, so player cannot move ship
       for (int i = 0; i < keys.length; i++)
         keys[i] = false;
+      // If maximum level has not been reached (if game has not been completed)
       if (level < levels)
       {
         level++;
         // Player gets an extra life for each level they pass after level 2
         if (level > 3 && lives < 5)
           lives++;
+        // Setup asteroids for next level and reset countdown
         setupAsteroidObject();
         countdown = 3;
         countdownTimer = 0;
@@ -356,21 +389,42 @@ void draw()
           activated[i] = false;
           activeTimer = 0;
         }
-      } else if (showHighScores != true)
+      }
+      else if (showHighScores != true)
       {
         gameOver(true);
       }
     }
   }
+  
+  // Show the user how many lives they have
+  drawShipLives();
+
+  // Show user the current level
+  fill(255);
+  textSize(25);
+  if (level > 1 && gameEnd == false)
+    text("Level " + (level - 1), width * 0.5f, height * 0.065f);
+
+  // Show user their current score
+  text(score, width * 0.95f, height * 0.95f);
+
+  // Show play again menu
+  if (playAgain)
+    playAgain();
+  
+  // Show instruction screen
+  if (showInstruction)
+    instructions.render();
 
   // Powerup timing, collection and activations
   if (gameStart && gameEnd == false)
   {
     // Increment entry timer to know when to enter onto screen
-    entryCountTimer++;
+    pUpEntryTimer++;
 
     // Once timer has reached time to enter, enter powerup onto screen
-    if (entryCountTimer == entryTime)
+    if (pUpEntryTimer == pUpEntryTimeLimit)
     {
       // Select a random powerup
       powerup = int(random(noPowerUps));
@@ -395,18 +449,19 @@ void draw()
     }
   }
 
-  // Draw the collected powerup symbols in the top right corner
+  // Check which powerups are on screen (to be collected) and have been collected
   for (int i = 0; i < noPowerUps; i++)
   {
+    // Call class to show powerup and move across screen (if game is running)
     if (onScreen[i])
     {
-      // Call class to show powerup and move across screen (if game is running)
       if (gameEnd != true)
         power.render(powerup);
       if (gameStart)
         power.update();
     }
-
+    
+    // Draw the collected powerup symbols in the top right corner
     if (collected[i])
     {
       pushMatrix();
@@ -416,194 +471,38 @@ void draw()
     }
   }
 
-  // Show the user how many lives they have
-  drawShipLives();
-
-  // Show user the current level
-  fill(255);
-  textSize(25);
-  if (level > 1 && gameEnd == false)
-    text("Level " + (level - 1), width * 0.5f, height * 0.065f);
-
-  // Show user their current score
-  text(score, width * 0.95f, height * 0.95f);
-
-  // Show play again menu
-  if (playAgain)
-    playAgain();
-
-  if (showInstruction)
-    instructions.render();
-
-  // Alien spaceship
-  if (alienTimer > alienEntryTime)
-  {
-    alienTimer = 0;
-    // Set entry boolean to be true to let the alien ship know when to enter
-    enterAlien = true;
-  }
-
-  if (gameStart)
-    alienTimer++;
-
-  if (enterAlien && alienShipDead != true)
-  {
-    aliens.get(0).render();
-    if (pause == false && gameStart)
-      aliens.get(0).update();
-  }
-
-  for (int i = 0; i < alienLasers.size(); i++)
-  {
-    alienLasers.get(i).render();
-    if (gameStart)
-      alienLasers.get(i).update();
-  }
-  
+  // Draw rock debris
   if (debris)
     debris();
-  
   debrisTimer++;
 } // End Draw
 
-void gameOver(boolean win)
+
+void setupAsteroidObject()
 {
-  if (playAgain != true)
-  {
-    gameEnd = true;
-    gameStart = false;
-    // Add 25 points to score per life, set lives to be zero to prevent infinite multiplying
-    score += lives * 25;
-    lives = 0;
-    textSize(40);
-    // Display relevant win/lose message
-    if (win)
-    {
-      fill(0, 255, 0);
-      text("YOU WIN", width * 0.5f, height * 0.15f);
-    } else
-    {
-      fill(red);
-      text("GAME OVER", width * 0.5f, height * 0.15f);
-    }
-    fill(255);
-    textSize(35);
-    text("Your Score: " + score, width * 0.5f, height * 0.3f);
-    textSize(30);
-    text("Name: " + playerName, width * 0.5f, height * 0.45f);
-    // Flashing typing line like in most word programs
-    float tw = textWidth("Name: " + playerName) * 0.53f;
-    if (typeTimer > 40)
-    {
-      line(width * 0.5f + tw, height * 0.42f, width * 0.5f + tw, height * 0.45f);
-      if (typeTimer > 80)
-        typeTimer = 0;
-    }
-    typeTimer++;
-  }
-} // End Game Over
+  // Clear all lasers and asteroids from the screen
+  lasers.clear();
+  asteroids.clear();
+  // Reset the ship to be in the center of the screen for the next level
+  AsteroidObject ship = new Ship(UP, LEFT, RIGHT, ' ', width * 0.5f, height * 0.5f);
+  asteroids.add(ship);
 
-void calculateHighScores()
-{
-  scoreTable = loadTable("scores.csv", "header");
-  for (TableRow row : scoreTable.rows())
+  // Load correct number of asteorids for the level
+  for (int i = 0; i < noAsteroids[level - 1]; i++)
   {
-    players.append(row.getString("Name"));
-    scores.append(row.getInt("Score"));
-  }
-
-  int[] scoresArray = scores.array();
-  scores.sortReverse();
-
-  // Go through top 5 elements of sorted scores list, finding them in the unsorted array of scores in order to find player names
-  int display = scores.size();
-  if (scores.size() > 5)
-    display = 5;
-  for (int s = 0; s < display; s++)
-  {
-    for (int a = 0; a < scoresArray.length; a++)
-    {
-      if (scores.get(s) == scoresArray[a])
-        playerArray[s] = players.get(a);
-    }
-  }
-  playAgain = true;
-} // End Calculate High Scores
-
-void playAgain()
-{
-  // Display list of 5 highest scores
-  textSize(40);
-  text("HighScores", width * 0.5f, height * 0.1f);
-  textSize(25);
-  int display = scores.size();
-  if (scores.size() > 5)
-    display = playerArray.length;
-  for (int i = 0; i < display; i++)
-  {
-    text(playerArray[i], width * 0.3f, height * 0.3f + (i * height * 0.06f));
-    text(scores.get(i), width * 0.7f, height * 0.3f + (i * height * 0.06f));
-  }
-  textSize(35);
-  fill(aqua);
-  stroke(aqua);
-  text("Player", width * 0.3f, height * 0.2f);
-  text("Score", width * 0.7f, height * 0.2f);
-  line(width * 0.2f, height * 0.22f, width * 0.4f, height * 0.22f);
-  line(width * 0.6f, height * 0.22f, width * 0.8f, height * 0.22f);
-  textSize(40);
-  fill(255);
-  text("Play Again?", width * 0.5f, height * 0.7f);
-
-  float yesWidth = textWidth("Yes") * 0.5f;
-  float noWidth = textWidth("No") * 0.5f;
-  float yesTextSize = 35;
-  float noTextSize = 35;
-  cursor(CROSS);
-  // Detect which option mouse is over, highlight that option
-  if (mouseY > height * 0.7f && mouseY < height * 0.9f)
-  {
-    if (mouseX > width * 0.3f - yesWidth && mouseX < width * 0.3f + yesWidth)
-    {
-      cursor(HAND);
-      yesTextSize = 45;
-      // If they select to play again, setup asteroids and reset level
-      if (mousePressed)
-      {
-        score = 0;
-        level = 1;
-        lives = 3;
-        setupAsteroidObject();
-        playAgain = false;
-        gameEnd = false;
-      }
-    } else if (mouseX > width * 0.7f - noWidth && mouseX < width * 0.7f + noWidth)
-    {
-      cursor(HAND);
-      noTextSize = 45;
-      // Otherwise, exit the game
-      if (mousePressed)
-      {
-        scoring.flush();
-        scoring.close();
-        exit();
-      }
-    }
+    AsteroidObject asteroid;
+    if (i % 2 == 0)
+      asteroid = new Asteroid(random(200), random(height), 1);
     else
-    {
-      cursor(CROSS);
-    }
+      asteroid = new Asteroid(random(width - 200, width), random(height), 1);
+    asteroids.add(asteroid);
   }
-  textSize(yesTextSize);
-  fill(0, 255, 0);
-  text("Yes", width * 0.3f, height * 0.85f);
-  textSize(noTextSize);
-  fill(red);
-  text("No", width * 0.7f, height * 0.85f);
-} // End Play Again
+} // End Setup Asteroid Objects
+
 
 void keyPressed()
 {
+  // If game has ended, any keys pressed will be for entering name for highscore
   if (gameEnd)
   {
     // Delete last typed letter of name if backspace hit and length is greater than zero
@@ -622,7 +521,8 @@ void keyPressed()
       // Write player's name and score to file, using this method allows appending to previously created file
       // Allowing you to view highscores from previous sessions
       try
-      { 
+      {
+        // Path to scores.csv must be full path, meaning you must change this on each computer in order to run, write and load scores correctly 
         scoring = new PrintWriter(new BufferedWriter(new FileWriter("/Users/HenryBallingerMcFarlane/Desktop/Game/scores.csv", true)));
         scoring.println(playerName + "," + score);
         scoring.flush();
@@ -632,6 +532,7 @@ void keyPressed()
       {  
         println(e);
       }
+      // Call function to calculate the top 5 highest scores of all time
       calculateHighScores();
     }
   }
@@ -694,6 +595,7 @@ void keyPressed()
     }
   }
 
+  // Show/Hide instruction screen
   if (keyCode == 'I' && gameEnd == false)
   {
     showInstruction =! showInstruction;
@@ -707,115 +609,11 @@ void keyPressed()
   }
 } // End Key Pressed
 
+
 void keyReleased()
 {
   keys[keyCode] = false;
-}
-
-void drawPowerupSymbols(int ID)
-{
-  fill(0);
-  stroke(aqua);
-  ellipse(0, 0, powerupSymbol, powerupSymbol);
-
-  switch(ID)
-  {
-    // Double Shooter
-  case 0:
-    fill(red);
-    stroke(red);
-    ellipse(5, 0, 3, 3);
-    fill(yellow);
-    stroke(yellow);
-    ellipse(-5, 0, 3, 3);
-    break;
-    // Quad Shooter
-  case 1:
-    fill(red);
-    stroke(red);
-    ellipse(-5, -5, 2, 2);
-    ellipse(5, 5, 2, 2);
-    fill(yellow);
-    stroke(yellow);
-    ellipse(5, -5, 2, 2);
-    ellipse(-5, 5, 2, 2);
-    break;
-    // Nuke
-  case 2:
-    float beta = TWO_PI / 6;
-    stroke(yellow);
-    fill(yellow);
-    arc(0, 0, nukeSymbol, nukeSymbol, beta, beta * 2.0f);
-    arc(0, 0, nukeSymbol, nukeSymbol, PI, PI + beta);
-    arc(0, 0, nukeSymbol, nukeSymbol, TWO_PI - beta, TWO_PI);
-    stroke(0);
-    ellipse(0, 0, powerupSymbol * 0.15f, powerupSymbol * 0.15f);
-    break;
-    // Forcefield
-  case 3:
-    stroke(yellow);
-    ellipse(0, 0, powerupSymbol * 0.8f, powerupSymbol * 0.8f);
-    ellipse(0, 0, powerupSymbol * 0.6f, powerupSymbol * 0.6f);
-    ellipse(0, 0, powerupSymbol * 0.4f, powerupSymbol * 0.4f);
-    break;
-    // Freeze
-  case 4:
-    stroke(255);
-    pushMatrix();
-    for (int i = 0; i < 6; i++)
-    {     
-      line(0, 0, 0, powerupSymbol * 0.4f);
-      pushMatrix();
-      translate(0, powerupSymbol * 0.2f);
-      rotate(PI * 0.2f);
-      line(0, 0, 0, powerupSymbol * 0.2f);
-      rotate(-PI * 0.4f);
-      line(0, 0, 0, powerupSymbol * 0.2f);
-      popMatrix();
-      rotate(PI / 3);
-    }
-    popMatrix();
-    break;
-    // Rapid Fire
-  case 5:
-    fill(red);
-    stroke(red);
-    ellipse(0, -3, 3, 3);
-    ellipse(0, 9, 3, 3);
-    fill(yellow);
-    stroke(yellow);
-    ellipse(0, 3, 3, 3);
-    ellipse(0, -9, 3, 3);
-    break;
-    // Extra Life
-  case 6:
-    stroke(aqua);
-    line(0, -powerupLifeHeight, -powerupLifeWidth, powerupLifeHeight);
-    line(0, -powerupLifeHeight, powerupLifeWidth, powerupLifeHeight);
-    line(-powerupLifeWidth * 0.75f, powerupLifeHeight * 0.7f, powerupLifeWidth * 0.75f, powerupLifeHeight * 0.7f);
-    break;
-  }
-} // End Draw Powerup Symbols
-
-
-void setupAsteroidObject()
-{
-  lasers.clear();
-  asteroids.clear();
-  AsteroidObject ship = new Ship(UP, LEFT, RIGHT, ' ', width * 0.5f, height * 0.5f);
-  asteroids.add(ship);
-
-  // Load correct number of asteorids for the level
-  for (int i = 0; i < noAsteroids[level - 1]; i++)
-  {
-    AsteroidObject asteroid;
-    if (i % 2 == 0)
-      asteroid = new Asteroid(random(200), random(height), 1);
-    else
-      asteroid = new Asteroid(random(width - 200, width), random(height), 1);
-    asteroids.add(asteroid);
-  }
-} // End Setup Asteroid Objects
+} // End Key Released
 
 
 void mousePressed()
@@ -827,6 +625,43 @@ void mousePressed()
     playSound(2);
   }
 } // End Mouse Pressed
+
+
+// Play the relevent sound depending on the ID passed to the function
+void playSound(int soundID)
+{
+  if (mute != true)
+  {
+    switch (soundID)
+    {
+      // Intro
+      //case 1:
+      //  intro.play();
+      //  break;
+      //  // Countdown
+      //case 2:
+      //  countdownSound.play();
+      //  break;
+      //  // Explosion
+      //case 3:
+      //  explosionSound.play();
+      //  break;
+      //  // Thrust
+      //case 4:
+      //  thrustSound.play();
+      //  thrustSound.amp(0.08);
+      //  break;
+      //  // Laser
+      //case 5:
+      //  laserSound.play();
+      //  break;
+      //  // Nuke
+      //case 6:
+      //  nukeSound.play();
+      //  break;
+    }
+  }
+} // End Play Sound
 
 
 // Draw player lives as ships in top left corner of screen
@@ -848,6 +683,197 @@ void drawShipLives()
 } // End Draw Ship Lives
 
 
+void drawPowerupSymbols(int ID)
+{
+  fill(0);
+  stroke(aqua);
+  ellipse(0, 0, powerupSymbol, powerupSymbol);
+
+  switch(ID)
+  {
+    // Double Shooter
+    case 0:
+      fill(red);
+      stroke(red);
+      ellipse(5, 0, 3, 3);
+      fill(yellow);
+      stroke(yellow);
+      ellipse(-5, 0, 3, 3);
+      break;
+    // Quad Shooter
+    case 1:
+      fill(red);
+      stroke(red);
+      ellipse(-5, -5, 2, 2);
+      ellipse(5, 5, 2, 2);
+      fill(yellow);
+      stroke(yellow);
+      ellipse(5, -5, 2, 2);
+      ellipse(-5, 5, 2, 2);
+      break;
+    // Nuke
+    case 2:
+      float beta = TWO_PI / 6;
+      stroke(yellow);
+      fill(yellow);
+      arc(0, 0, nukeSymbol, nukeSymbol, beta, beta * 2.0f);
+      arc(0, 0, nukeSymbol, nukeSymbol, PI, PI + beta);
+      arc(0, 0, nukeSymbol, nukeSymbol, TWO_PI - beta, TWO_PI);
+      stroke(0);
+      ellipse(0, 0, powerupSymbol * 0.15f, powerupSymbol * 0.15f);
+      break;
+    // Forcefield
+    case 3:
+      stroke(yellow);
+      ellipse(0, 0, powerupSymbol * 0.8f, powerupSymbol * 0.8f);
+      ellipse(0, 0, powerupSymbol * 0.6f, powerupSymbol * 0.6f);
+      ellipse(0, 0, powerupSymbol * 0.4f, powerupSymbol * 0.4f);
+      break;
+    // Freeze
+    case 4:
+      stroke(255);
+      pushMatrix();
+      for (int i = 0; i < 6; i++)
+      {     
+        line(0, 0, 0, powerupSymbol * 0.4f);
+        pushMatrix();
+        translate(0, powerupSymbol * 0.2f);
+        rotate(PI * 0.2f);
+        line(0, 0, 0, powerupSymbol * 0.2f);
+        rotate(-PI * 0.4f);
+        line(0, 0, 0, powerupSymbol * 0.2f);
+        popMatrix();
+        rotate(PI / 3);
+      }
+      popMatrix();
+      break;
+    // Rapid Fire
+    case 5:
+      fill(red);
+      stroke(red);
+      ellipse(0, -3, 3, 3);
+      ellipse(0, 9, 3, 3);
+      fill(yellow);
+      stroke(yellow);
+      ellipse(0, 3, 3, 3);
+      ellipse(0, -9, 3, 3);
+      break;
+    // Extra Life
+    case 6:
+      stroke(aqua);
+      line(0, -powerupLifeHeight, -powerupLifeWidth, powerupLifeHeight);
+      line(0, -powerupLifeHeight, powerupLifeWidth, powerupLifeHeight);
+      line(-powerupLifeWidth * 0.75f, powerupLifeHeight * 0.7f, powerupLifeWidth * 0.75f, powerupLifeHeight * 0.7f);
+      break;
+  }
+} // End Draw Powerup Symbols
+
+
+// Split asteroids into two smaller asteroids if big or medium, otherwise, if small, simply remove
+// Only split asteroid into two if current number of asteroids on screen is less than 26 (simulating original game)
+void splitAsteroid(int number)
+{
+  // Play asteoid destruction sound
+  playSound(3);
+
+  if (asteroids.get(number).radius == 90)
+  {
+    score += 5;
+    for (int i = 0; i < 2; i++)
+    {
+      if (asteroids.size() < 27)
+      {
+        AsteroidObject asteroid = new Asteroid(asteroids.get(number).position.x, asteroids.get(number).position.y, 2);
+        asteroids.add(asteroid);
+      }
+    }
+  }
+  else if (asteroids.get(number).radius == 60)
+  {
+    score += 10;
+    for (int i = 0; i < 2; i++)
+    {
+      if (asteroids.size() < 27)
+      {
+        AsteroidObject asteroid = new Asteroid(asteroids.get(number).position.x, asteroids.get(number).position.y, 3);
+        asteroids.add(asteroid);
+      }
+    }
+  }
+  else if (asteroids.get(number).radius == 30)
+  {
+    score += 15;
+  }
+  asteroids.remove(number);
+} // End Split Asteroid
+
+// Animation for rock debris upon destruction of asteroid or alien ship
+void debris()
+{
+  for (int i = 0; i < asteroidDebrisPosition.size(); i++)
+  {
+    pushMatrix();    
+    translate(asteroidDebrisPosition.get(i).x, asteroidDebrisPosition.get(i).y);
+    stroke(200);
+    rotate(TWO_PI * 0.2f * i);
+    line(0, 0, 3, 0);
+    line(3, 0, 5, 1);
+    line(5, 1, 6, 2);
+    line(6, 2, 1, 3);
+    line(1, 3, 0, 0);
+    asteroidDebrisPosition.get(i).add(asteroidDebrisMovement.get(i % 6));
+    popMatrix();
+  }
+
+  // For every element of the times list (times the debris animation was initiated)
+  // Check to see if the current timer value - element if evenly divisible by 50
+  // That is, 5/6th of a second have passed since the animation was started
+  // If so, remove those debris rocks from the arraylist of debris, thereby stopping the animation
+  for (int j = 0; j < times.size(); j++)
+  {
+    if ((debrisTimer - times.get(j)) % 50 == 0)
+    {
+      for (int i = 5; i > -1; i--)
+        asteroidDebrisPosition.remove(i);
+      times.remove(j);
+    }
+  }
+} // End Debris
+
+
+// Nuclear explosion animation
+void nukeExplosion(float angle)
+{
+  int points = 15;
+  pushMatrix();
+  translate(nukePos.x, nukePos.y);
+  rotate(angle);
+  float thetaInc = TWO_PI / (points * 2);
+  float lastX = 0;
+  float lastY = -nukeRadius;
+  stroke(red);
+  for (int i = 1; i <= (points * 2); i++)
+  {
+    float theta = i * thetaInc;
+    float x, y;
+    if (i % 2 == 1)
+    {
+      x = sin(theta) * (nukeRadius * 0.95f);
+      y = -cos(theta) * (nukeRadius * 0.95f);
+    } else
+    {
+      x = sin(theta) * nukeRadius;
+      y = -cos(theta) * nukeRadius;
+    }
+    line(lastX, lastY, x, y);
+    lastX = x;
+    lastY = y;
+  }
+  popMatrix();
+} // End Nuke Explosion
+
+
+// Player ship death animation
 void shipDeath(float angle)
 { 
   // Kill the ship (stop rendering)
@@ -902,7 +928,8 @@ void shipDeath(float angle)
       }
     }
     resetTimer++;
-  } else
+  }
+  else
   {
     resetShip();
   }
@@ -916,6 +943,7 @@ void resetShip()
 
   alienLasers.clear();
   reset = true;
+  // Reset ship to be in center of screen
   asteroids.set(0, new Ship(UP, LEFT, RIGHT, ' ', width * 0.5f, height * 0.5f));
   shipDead = false;
 
@@ -942,140 +970,163 @@ void resetShip()
     activeTimer = 0;
     onScreen[i] = false;
   }
-
+  
+  // Reset alien spaceship to be offscreen and awaiting entry time
   aliens.set(0, new AlienSpaceShip(int(random(1, 5))));
   enterAlien = false;
   alienTimer = 0;
-} // End Ship Death
+} // End Reset Ship
 
-void nukeExplosion(float angle)
+
+void gameOver(boolean win)
 {
-  int points = 15;
-  pushMatrix();
-  translate(nukePos.x, nukePos.y);
-  rotate(angle);
-  float thetaInc = TWO_PI / (points * 2);
-  float lastX = 0;
-  float lastY = -nukeRadius;
-  stroke(red);
-  for (int i = 1; i <= (points * 2); i++)
+  if (playAgain != true)
   {
-    float theta = i * thetaInc;
-    float x, y;
-    if (i % 2 == 1)
+    gameEnd = true;
+    gameStart = false;
+    // Add 25 points to score per life, set lives to be zero to prevent infinite multiplying
+    score += lives * 25;
+    lives = 0;
+    textSize(40);
+    // Display relevant win/lose message
+    if (win)
     {
-      x = sin(theta) * (nukeRadius * 0.95f);
-      y = -cos(theta) * (nukeRadius * 0.95f);
+      fill(0, 255, 0);
+      text("YOU WIN", width * 0.5f, height * 0.15f);
     } else
     {
-      x = sin(theta) * nukeRadius;
-      y = -cos(theta) * nukeRadius;
+      fill(red);
+      text("GAME OVER", width * 0.5f, height * 0.15f);
     }
-    line(lastX, lastY, x, y);
-    lastX = x;
-    lastY = y;
-  }
-  popMatrix();
-} // End Nuke Explosion
-
-void splitAsteroid(int number)
-{
-  playSound(3);
-
-  if (asteroids.get(number).radius == 90)
-  {
-    score += 5;
-    for (int i = 0; i < 2; i++)
+    fill(255);
+    textSize(35);
+    text("Your Score: " + score, width * 0.5f, height * 0.3f);
+    textSize(30);
+    // Get user to enter name, updating display on screen as they type
+    text("Name: " + playerName, width * 0.5f, height * 0.45f);
+    // Flashing typing line like in most word programs
+    float tw = textWidth("Name: " + playerName) * 0.53f;
+    if (typeTimer > 40)
     {
-      if (asteroids.size() < 27)
-      {
-        AsteroidObject asteroid = new Asteroid(asteroids.get(number).position.x, asteroids.get(number).position.y, 2);
-        asteroids.add(asteroid);
-      }
+      line(width * 0.5f + tw, height * 0.42f, width * 0.5f + tw, height * 0.45f);
+      if (typeTimer > 80)
+        typeTimer = 0;
     }
-  } else if (asteroids.get(number).radius == 60)
-  {
-    score += 10;
-    for (int i = 0; i < 2; i++)
-    {
-      if (asteroids.size() < 27)
-      {
-        AsteroidObject asteroid = new Asteroid(asteroids.get(number).position.x, asteroids.get(number).position.y, 3);
-        asteroids.add(asteroid);
-      }
-    }
-  } else if (asteroids.get(number).radius == 30)
-  {
-    score += 15;
+    typeTimer++;
   }
-  asteroids.remove(number);
-} // End Split Asteroid
+} // End Game Over
 
-void playSound(int ID)
+
+
+void calculateHighScores()
 {
-  if (mute != true)
+  // Load table of all highscores from csv file
+  scoreTable = loadTable("scores.csv", "header");
+  for (TableRow row : scoreTable.rows())
   {
-    switch (ID)
-    {
-      // Intro
-      //case 1:
-      //  intro.play();
-      //  break;
-      //  // Countdown
-      //case 2:
-      //  countdownSound.play();
-      //  break;
-      //  // Explosion
-      //case 3:
-      //  explosionSound.play();
-      //  break;
-      //  // Thrust
-      //case 4:
-      //  thrustSound.play();
-      //  thrustSound.amp(0.08);
-      //  break;
-      //  // Laser
-      //case 5:
-      //  laserSound.play();
-      //  break;
-      //  // Nuke
-      //case 6:
-      //  nukeSound.play();
-      //  break;
-    }
-  }
-} // End Play Sounds
-
-
-void debris()
-{
-  for (int i = 0; i < asteroidDebrisPosition.size(); i++)
-  {
-    pushMatrix();    
-    translate(asteroidDebrisPosition.get(i).x, asteroidDebrisPosition.get(i).y);
-    stroke(200);
-    rotate(TWO_PI * 0.2f * i);
-    line(0, 0, 3, 0);
-    line(3, 0, 5, 1);
-    line(5, 1, 6, 2);
-    line(6, 2, 1, 3);
-    line(1, 3, 0, 0);
-    asteroidDebrisPosition.get(i).add(asteroidDebrisMovement.get(i % 6));
-    popMatrix();
+    players.append(row.getString("Name"));
+    scores.append(row.getInt("Score"));
   }
   
-  // For every element of the times list (times the debris animation was initiated)
-  // Check to see if the current timer value - element if evenly divisible by 50
-  // That is, 5/6th of a second have passed since the animation was started
-  // If so, remove those debris rocks from the arraylist of debris, thereby stopping the animation
-  for (int j = 0; j < times.size(); j++)
+  int[] scoresArray = scores.array();
+  scores.sortReverse();
+
+  // Go through top 5 elements of sorted scores list, finding them in the unsorted array of scores in order to find player names
+  int display = scores.size();
+  if (scores.size() > 5)
+    display = 5;
+  for (int s = 0; s < display; s++)
   {
-    if ((debrisTimer - times.get(j)) % 50 == 0)
+    for (int a = 0; a < scoresArray.length; a++)
     {
-       for (int i = 5; i > -1; i--)
-          asteroidDebrisPosition.remove(i);
-          
-       times.remove(j);
+      if (scores.get(s) == scoresArray[a])
+        playerArray[s] = players.get(a);
     }
   }
-} // End Debris
+  playAgain = true;
+} // End Calculate High Scores
+
+
+// Show list of 5 highest scores and give player option to start the game again
+// If selected, everything is reset and game goes back to Start Game screen. If not, game exits.
+void playAgain()
+{
+  textSize(40);
+  text("HighScores", width * 0.5f, height * 0.1f);
+  textSize(25);
+  int display = scores.size();
+  if (scores.size() > 5)
+    display = playerArray.length;
+  for (int i = 0; i < display; i++)
+  {
+    text(playerArray[i], width * 0.3f, height * 0.3f + (i * height * 0.06f));
+    text(scores.get(i), width * 0.7f, height * 0.3f + (i * height * 0.06f));
+  }
+  textSize(35);
+  fill(aqua);
+  stroke(aqua);
+  text("Player", width * 0.3f, height * 0.2f);
+  text("Score", width * 0.7f, height * 0.2f);
+  line(width * 0.2f, height * 0.22f, width * 0.4f, height * 0.22f);
+  line(width * 0.6f, height * 0.22f, width * 0.8f, height * 0.22f);
+  textSize(40);
+  fill(255);
+  text("Play Again?", width * 0.5f, height * 0.7f);
+
+  float yesWidth = textWidth("Yes") * 0.5f;
+  float noWidth = textWidth("No") * 0.5f;
+  float yesTextSize = 35;
+  float noTextSize = 35;
+  cursor(CROSS);
+  // Detect which option mouse is over, highlight that option
+  if (mouseY > height * 0.7f && mouseY < height * 0.9f)
+  {
+    if (mouseX > width * 0.3f - yesWidth && mouseX < width * 0.3f + yesWidth)
+    {
+      cursor(HAND);
+      yesTextSize = 45;
+      // If they select to play again, setup asteroids and reset level
+      if (mousePressed)
+      {
+        score = 0;
+        level = 1;
+        lives = 3;
+        setupAsteroidObject();
+        playAgain = false;
+        gameEnd = false;
+        gameStart = false;
+        shipAlive = true;
+        shipDead = false;
+        countdown = 3;
+        countdownTimer = 0;
+        for (int i = 0; i < noPowerUps; i++)
+        {
+          activated[i] = false;
+          activeTimer = 0;
+          collected[i] = false;
+          onScreen[i] = false;
+        }
+      }
+    } else if (mouseX > width * 0.7f - noWidth && mouseX < width * 0.7f + noWidth)
+    {
+      cursor(HAND);
+      noTextSize = 45;
+      // Otherwise, exit the game
+      if (mousePressed)
+      {
+        scoring.flush();
+        scoring.close();
+        exit();
+      }
+    } else
+    {
+      cursor(CROSS);
+    }
+  }
+  textSize(yesTextSize);
+  fill(0, 255, 0);
+  text("Yes", width * 0.3f, height * 0.85f);
+  textSize(noTextSize);
+  fill(red);
+  text("No", width * 0.7f, height * 0.85f);
+} // End Play Again
