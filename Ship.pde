@@ -205,15 +205,18 @@ class Ship extends AsteroidObject
       position.y = 0;
 
     // If ship hits (collects) a power up, hide powerup (set onScreen to be false) and set powerup entry timer to zero (i.e. start timing for next powerup to enter)
-    if (position.x > power.pos.x - 30 && position.x < power.pos.x + 30 && position.y > power.pos.y - 30 && position.y < power.pos.y + 30)
+    if (position.x > power.pos.x - powerupSymbol && position.x < power.pos.x + powerupSymbol && position.y > power.pos.y - powerupSymbol && position.y < power.pos.y + powerupSymbol)
     {
+      playSound(8);
       power = new PowerUp(random(width), -20);
       // If powerup isn't extra life
       if (powerup != 6)
       {
         collected[powerup] = true;
-      } else
+      }
+      else
       {
+        playSound(9);
         if (lives < 10)
           lives++;
       }
@@ -307,7 +310,7 @@ class Ship extends AsteroidObject
             nukeDetection.y > asteroids.get(i).position.y - asteroids.get(i).radius * 0.5f &&
             nukeDetection.y < asteroids.get(i).position.y + asteroids.get(i).radius * 0.5f)
           {
-            playSound(6);
+            playSound(10);
             asteroids.remove(i);
           }
         }
@@ -327,8 +330,9 @@ class Ship extends AsteroidObject
 
     // If forcefield powerup is active
     // Loop through all angles (in a circle), calculate x & y coordinates of each of those points check to see if they are hitting asteroids
-    else if (activated[3])
+    if (activated[3])
     {
+      playSound(11);
       // Forcefield asteroid hit detection
       for (float alpha = 0; alpha < TWO_PI; alpha += 0.1f)
       {
@@ -370,6 +374,7 @@ class Ship extends AsteroidObject
 
   void callShipDeath()
   {
+    playSound(6);
     // Stop the game
     gameStart = false;
     // Stop ship from moving

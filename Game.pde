@@ -11,14 +11,22 @@ void setup()
   cursor(CROSS);
 
   // Load the intro soundtrack and start playing
-  //intro = new SoundFile(this, "introMusic.wav");
-  //intro.rate(0.4);
+  //introSound = new SoundFile(this, "introMusic.wav");
+  //introSound.rate(0.4);
   playSound(1);
   //countdownSound = new SoundFile(this, "countdown.mp3");
   //laserSound = new SoundFile(this, "shoot.wav");
   //thrustSound = new SoundFile(this, "thrust.wav");
   //explosionSound = new SoundFile(this, "expLarge.wav");
-  //nukeSound = new SoundFile(this, "nuke.wav");
+  shipDestructionSound = new SoundFile(this, ".wav");
+  alienDestructionSound = new SoundFile(this, ".wav");
+  powerupCollectionSound = new SoundFile(this, ".wav");
+  powerupActivationSound = new SoundFile(this, ".wav");
+  nukeSoundSound = new SoundFile(this, "nuke.wav");
+  forcefieldPowerupSound = new SoundFile(this, ".wav");
+  freezePowerupSound = new SoundFile(this, ".wav");
+  gameWinSoundSound = new SoundFile(this, ".wav");
+  gameOverSoundSound = new SoundFile(this, ".wav");
 
   instructions = new Instructions();
   showInstruction = false;
@@ -117,12 +125,20 @@ void setup()
 }
 
 // Various sound effect variables
-SoundFile intro;
+SoundFile introSound;
 SoundFile countdownSound;
 SoundFile laserSound;
 SoundFile thrustSound;
 SoundFile explosionSound;
-SoundFile nukeSound;
+SoundFile shipDestructionSound;
+SoundFile alienDestructionSound;
+SoundFile powerupCollectionSound;
+SoundFile powerupActivationSound;
+SoundFile nukeSoundSound;
+SoundFile forcefieldPowerupSound;
+SoundFile freezePowerupSound;
+SoundFile gameWinSoundSound;
+SoundFile gameOverSoundSound;
 // Variables to show instructions screen
 Instructions instructions;
 boolean showInstruction;
@@ -470,6 +486,9 @@ void draw()
       popMatrix();
     }
   }
+  
+  if (activated[4])
+    playSound(12);
 
   // Draw rock debris
   if (debris)
@@ -502,41 +521,6 @@ void setupAsteroidObject()
 
 void keyPressed()
 {
-  // If game has ended, any keys pressed will be for entering name for highscore
-  if (gameEnd)
-  {
-    // Delete last typed letter of name if backspace hit and length is greater than zero
-    if (keyCode == BACKSPACE && playerName.length() > 0)
-    {
-      playerName = playerName.substring(0, playerName.length()-1);
-    }
-    // As long as the key is not a commonly used 'extra' key and the length is less than characters, add the typed key ot the player name
-    else if (keyCode != SHIFT && keyCode != CONTROL && keyCode != ALT && keyCode != ENTER && keyCode != RETURN && playerName.length() < 10)
-    {
-      playerName = playerName + key;
-    }
-    // Upon enter key being pressed and the name containing some characters, pass to the file
-    else if (keyCode == ENTER && playerName.length() > 0)
-    {
-      // Write player's name and score to file, using this method allows appending to previously created file
-      // Allowing you to view highscores from previous sessions
-      try
-      {
-        // Path to scores.csv must be full path, meaning you must change this on each computer in order to run, write and load scores correctly 
-        scoring = new PrintWriter(new BufferedWriter(new FileWriter("/Users/HenryBallingerMcFarlane/Desktop/Game/scores.csv", true)));
-        scoring.println(playerName + "," + score);
-        scoring.flush();
-        scoring.close();
-      }
-      catch (IOException e)
-      {  
-        println(e);
-      }
-      // Call function to calculate the top 5 highest scores of all time
-      calculateHighScores();
-    }
-  }
-
   // Press space bar to start game on intro screen
   if (keyCode == ' ' && level == 1)
   {
@@ -607,6 +591,41 @@ void keyPressed()
     if (showInstruction)
       gameStart = false;
   }
+  
+  // If game has ended, any keys pressed will be for entering name for highscore
+  if (gameEnd)
+  {
+    // Delete last typed letter of name if backspace hit and length is greater than zero
+    if (keyCode == BACKSPACE && playerName.length() > 0)
+    {
+      playerName = playerName.substring(0, playerName.length()-1);
+    }
+    // As long as the key is not a commonly used 'extra' key and the length is less than characters, add the typed key ot the player name
+    else if (keyCode != SHIFT && keyCode != CONTROL && keyCode != ALT && keyCode != ENTER && keyCode != RETURN && playerName.length() < 10)
+    {
+      playerName = playerName + key;
+    }
+    // Upon enter key being pressed and the name containing some characters, pass to the file
+    else if (keyCode == ENTER && playerName.length() > 0)
+    {
+      // Write player's name and score to file, using this method allows appending to previously created file
+      // Allowing you to view highscores from previous sessions
+      try
+      {
+        // Path to scores.csv must be full path, meaning you must change this on each computer in order to run, write and load scores correctly 
+        scoring = new PrintWriter(new BufferedWriter(new FileWriter("/Users/HenryBallingerMcFarlane/Desktop/Game/scores.csv", true)));
+        scoring.println(playerName + "," + score);
+        scoring.flush();
+        scoring.close();
+      }
+      catch (IOException e)
+      {  
+        println(e);
+      }
+      // Call function to calculate the top 5 highest scores of all time
+      calculateHighScores();
+    }
+  }
 } // End Key Pressed
 
 
@@ -635,30 +654,54 @@ void playSound(int soundID)
     switch (soundID)
     {
       // Intro
-      //case 1:
-      //  intro.play();
-      //  break;
-      //  // Countdown
-      //case 2:
-      //  countdownSound.play();
-      //  break;
-      //  // Explosion
-      //case 3:
-      //  explosionSound.play();
-      //  break;
-      //  // Thrust
-      //case 4:
-      //  thrustSound.play();
-      //  thrustSound.amp(0.08);
-      //  break;
-      //  // Laser
-      //case 5:
-      //  laserSound.play();
-      //  break;
-      //  // Nuke
-      //case 6:
-      //  nukeSound.play();
-      //  break;
+      case 1:
+       intro.play();
+       break;
+      // Countdown
+      case 2:
+       countdownSound.play();
+       break;
+      // Explosion
+      case 3:
+       explosionSound.play();
+       break;
+      // Thrust
+      case 4:
+       thrustSound.play();
+       thrustSound.amp(0.08);
+       break;
+      // Laser
+      case 5:
+       laserSound.play();
+       break;
+      // Ship Destruction
+      case 6:
+        break;
+      // Alien Ship Destruction
+      case 7:
+        break;
+      // Powerup Collection
+      case 8:
+        break;
+      // Powerup Activation
+      case 9:
+        break;
+      // Nuke Powerup
+      case 10:
+       nukeSound.play();
+       break;
+      // Forcefield Powerup
+      case 11:
+        break;
+      // Freeze Powerup
+      case 12:
+        break;
+      // Game Win
+      case 13:
+        break;
+      // Game Over
+       case 14:
+        break;
     }
   }
 } // End Play Sound
@@ -991,10 +1034,13 @@ void gameOver(boolean win)
     // Display relevant win/lose message
     if (win)
     {
+      playSound(13);
       fill(0, 255, 0);
       text("YOU WIN", width * 0.5f, height * 0.15f);
-    } else
+    }
+    else
     {
+      playSound(14);
       fill(red);
       text("GAME OVER", width * 0.5f, height * 0.15f);
     }

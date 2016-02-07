@@ -112,6 +112,7 @@ class AlienSpaceShip extends AlienObjects
 
   void alienDeath()
   {
+    playSound(7);
     aliens.set(0, new AlienSpaceShip(int(random(1, 5))));
     enterAlien = false;
     alienTimer = 0;

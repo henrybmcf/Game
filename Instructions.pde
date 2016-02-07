@@ -23,5 +23,4 @@ class Instructions
           "P = Pause      M = Mute      I = Instructions (Show/Hide)",
           width * 0.05f, height * 0.2f, width * 0.9f, height * 0.7f);
   }
-  //"After level 2, you receive an extra life for each level passed.\n10 levels in total\n" + " \n" +
 }
