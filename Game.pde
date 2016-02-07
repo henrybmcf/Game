@@ -21,13 +21,19 @@ void setup()
   shipDestructionSound = new SoundFile(this, "shipDestruction.mp3");
   alienDestructionSound = new SoundFile(this, "alienDestruction.mp3");
   powerupCollectionSound = new SoundFile(this, "powerupCollect.mp3");
+  powerupCollectionSound.rate(1.3);
+  powerupCollectionSound.amp(0.5);
   powerupActivationSound = new SoundFile(this, "powerupActivate.mp3");
-  //nukeSound = new SoundFile(this, "nuke.wav");
-  //forcefieldPowerupSound = new SoundFile(this, ".wav");
-  //freezePowerupSound = new SoundFile(this, ".wav");
-  //gameWinSound = new SoundFile(this, ".wav");
-  //gameOverSound = new SoundFile(this, ".wav");
-
+  powerupActivationSound.amp(0.8);
+  nukeSound = new SoundFile(this, "nuke.wav");
+  forcefieldPowerupSound = new SoundFile(this, "forcefield.mp3");
+  forcefieldPowerupSound.rate(0.85);
+  freezePowerupSound = new SoundFile(this, "freeze.mp3");
+  freezePowerupSound.rate(0.8);
+  freezePowerupSound.amp(1.1);
+  gameWinSound = new SoundFile(this, "win.mp3");
+  gameOverSound = new SoundFile(this, "lose.mp3");
+  endSound = true;
   instructions = new Instructions();
   showInstruction = false;
   // Create new font called hyperspace and set as font for whole sketch
@@ -36,7 +42,7 @@ void setup()
   keys = new boolean[512];
   asteroids = new ArrayList<AsteroidObject>();
   lasers = new ArrayList<Laser>();
-  levels = 10;
+  levels = 2;
   level = 1;
   noAsteroids = new int[levels];
   // Set the number of asteroids per level to be the level number plus 5.
@@ -139,6 +145,9 @@ SoundFile forcefieldPowerupSound;
 SoundFile freezePowerupSound;
 SoundFile gameWinSound;
 SoundFile gameOverSound;
+// Boolean to ensure game win/over sound only plays once
+// And doesn't try to play every 60th of a second
+boolean endSound;
 // Variables to show instructions screen
 Instructions instructions;
 boolean showInstruction;
@@ -486,9 +495,6 @@ void draw()
       popMatrix();
     }
   }
-  
-  if (activated[4])
-    playSound(12);
 
   // Draw rock debris
   if (debris)
@@ -540,18 +546,27 @@ void keyPressed()
       if (collected[key - '0' - 1] && activated[key - '0' - 1] == false)
       {
         // Play powerup activation sound
-        playSound(9);
+        if (key - '0' != 3 && key - '0' != 5)
+          playSound(9);
         
         // Set powerup to be activated and remove from collection
         activated[key - '0' - 1] = true;
         collected[key - '0' - 1] = false;
-
+        
         // If nuke power up selected, set current ship position to be nuke drop location
         if (key - '0' == 3)
         {
+          playSound(10);
           nukePos = asteroids.get(0).position.copy();
           nukeRadius = 30;
         }
+        
+        // Forcefield Powerup
+        if (key - '0' == 4)
+          playSound(11);
+        // Freeze Powerup
+        if (key - '0' == 5)
+          playSound(12);
       }
     }
   }
@@ -992,11 +1007,12 @@ void shipDeath(float angle)
 
 void resetShip()
 {
+  // Set boolean to be true, so that program knows game has been reset
+  reset = true;
   // Reset ship debris position, so program knows to copy ship position into all ship debris position vectors 
   shipDebrisPositions.set(0, new PVector(0, 0));
-
+  // Clear all alien lasers from the screen
   alienLasers.clear();
-  reset = true;
   // Reset ship to be in center of screen
   asteroids.set(0, new Ship(UP, LEFT, RIGHT, ' ', width * 0.5f, height * 0.5f));
   shipDead = false;
@@ -1017,13 +1033,16 @@ void resetShip()
   resetTimer = 0;
   livesHitCounter = 0;
 
-  // Reset any currently collected, on screen or activated powerups to be false
+  // Reset any on screen or activated powerups to be false
   for (int i = 0; i < noPowerUps; i++)
   {
     activated[i] = false;
-    activeTimer = 0;
     onScreen[i] = false;
   }
+  // Reset all powerup timers and reinitialise the power variable to be offscreen
+  activeTimer = 0;
+  pUpEntryTimer = 0;
+  power = new PowerUp(random(width), -20);
   
   // Reset alien spaceship to be offscreen and awaiting entry time
   aliens.set(0, new AlienSpaceShip(int(random(1, 5))));
@@ -1041,38 +1060,42 @@ void gameOver(boolean win)
     // Add 25 points to score per life, set lives to be zero to prevent infinite multiplying
     score += lives * 25;
     lives = 0;
-    textSize(40);
+    textSize(65);
     // Display relevant win/lose message
     if (win)
     {
-      playSound(13);
+      // Only play sound once, otherwise, tries to play every 60th of a second
+      if (endSound)
+        playSound(13);
+      endSound = false;
       fill(0, 255, 0);
-      text("YOU WIN", width * 0.5f, height * 0.15f);
+      text("YOU WIN", width * 0.5f, height * 0.25f);
     }
     else
     {
-      playSound(14);
+      if (endSound)
+        playSound(14);
+      endSound = false;
       fill(red);
-      text("GAME OVER", width * 0.5f, height * 0.15f);
+      text("GAME OVER", width * 0.5f, height * 0.25f);
     }
     fill(255);
+    textSize(45);
+    text("Your Score: " + score, width * 0.5f, height * 0.45f);
     textSize(35);
-    text("Your Score: " + score, width * 0.5f, height * 0.3f);
-    textSize(30);
     // Get user to enter name, updating display on screen as they type
-    text("Name: " + playerName, width * 0.5f, height * 0.45f);
+    text("Name: " + playerName, width * 0.5f, height * 0.65f);
     // Flashing typing line like in most word programs
     float tw = textWidth("Name: " + playerName) * 0.53f;
     if (typeTimer > 40)
     {
-      line(width * 0.5f + tw, height * 0.42f, width * 0.5f + tw, height * 0.45f);
+      line(width * 0.5f + tw, height * 0.6f, width * 0.5f + tw, height * 0.65f);
       if (typeTimer > 80)
         typeTimer = 0;
     }
     typeTimer++;
   }
 } // End Game Over
-
 
 
 void calculateHighScores()
@@ -1163,6 +1186,7 @@ void playAgain()
           collected[i] = false;
           onScreen[i] = false;
         }
+        endSound = true;
       }
     } else if (mouseX > width * 0.7f - noWidth && mouseX < width * 0.7f + noWidth)
     {

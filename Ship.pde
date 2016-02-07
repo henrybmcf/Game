@@ -216,7 +216,6 @@ class Ship extends AsteroidObject
       }
       else
       {
-        playSound(9);
         if (lives < 10)
           lives++;
       }
@@ -310,7 +309,6 @@ class Ship extends AsteroidObject
             nukeDetection.y > asteroids.get(i).position.y - asteroids.get(i).radius * 0.5f &&
             nukeDetection.y < asteroids.get(i).position.y + asteroids.get(i).radius * 0.5f)
           {
-            playSound(10);
             asteroids.remove(i);
           }
         }
@@ -331,8 +329,7 @@ class Ship extends AsteroidObject
     // If forcefield powerup is active
     // Loop through all angles (in a circle), calculate x & y coordinates of each of those points check to see if they are hitting asteroids
     if (activated[3])
-    {
-      playSound(11);
+    {      
       // Forcefield asteroid hit detection
       for (float alpha = 0; alpha < TWO_PI; alpha += 0.1f)
       {
