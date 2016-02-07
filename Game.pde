@@ -11,22 +11,22 @@ void setup()
   cursor(CROSS);
 
   // Load the intro soundtrack and start playing
-  //introSound = new SoundFile(this, "introMusic.wav");
-  //introSound.rate(0.4);
+  introSound = new SoundFile(this, "introMusic.wav");
+  introSound.rate(0.4);
   playSound(1);
-  //countdownSound = new SoundFile(this, "countdown.mp3");
-  //laserSound = new SoundFile(this, "shoot.wav");
-  //thrustSound = new SoundFile(this, "thrust.wav");
-  //explosionSound = new SoundFile(this, "expLarge.wav");
-  shipDestructionSound = new SoundFile(this, ".wav");
-  alienDestructionSound = new SoundFile(this, ".wav");
-  powerupCollectionSound = new SoundFile(this, ".wav");
-  powerupActivationSound = new SoundFile(this, ".wav");
-  nukeSoundSound = new SoundFile(this, "nuke.wav");
-  forcefieldPowerupSound = new SoundFile(this, ".wav");
-  freezePowerupSound = new SoundFile(this, ".wav");
-  gameWinSoundSound = new SoundFile(this, ".wav");
-  gameOverSoundSound = new SoundFile(this, ".wav");
+  countdownSound = new SoundFile(this, "countdown.mp3");
+  laserSound = new SoundFile(this, "shoot.wav");
+  thrustSound = new SoundFile(this, "thrust.wav");
+  explosionSound = new SoundFile(this, "explosion.wav");
+  shipDestructionSound = new SoundFile(this, "shipDestruction.mp3");
+  alienDestructionSound = new SoundFile(this, "alienDestruction.mp3");
+  powerupCollectionSound = new SoundFile(this, "powerupCollect.mp3");
+  powerupActivationSound = new SoundFile(this, "powerupActivate.mp3");
+  //nukeSound = new SoundFile(this, "nuke.wav");
+  //forcefieldPowerupSound = new SoundFile(this, ".wav");
+  //freezePowerupSound = new SoundFile(this, ".wav");
+  //gameWinSound = new SoundFile(this, ".wav");
+  //gameOverSound = new SoundFile(this, ".wav");
 
   instructions = new Instructions();
   showInstruction = false;
@@ -134,11 +134,11 @@ SoundFile shipDestructionSound;
 SoundFile alienDestructionSound;
 SoundFile powerupCollectionSound;
 SoundFile powerupActivationSound;
-SoundFile nukeSoundSound;
+SoundFile nukeSound;
 SoundFile forcefieldPowerupSound;
 SoundFile freezePowerupSound;
-SoundFile gameWinSoundSound;
-SoundFile gameOverSoundSound;
+SoundFile gameWinSound;
+SoundFile gameOverSound;
 // Variables to show instructions screen
 Instructions instructions;
 boolean showInstruction;
@@ -315,7 +315,7 @@ void draw()
     // Only start game if pause is not active
     else if (pause == false)
     {
-      //countdownSound.stop();
+      countdownSound.stop();
       shipAlive = true;
       gameStart = true;
     }
@@ -525,7 +525,7 @@ void keyPressed()
   if (keyCode == ' ' && level == 1)
   {
     level = 2;
-    //intro.stop();
+    introSound.stop();
     playSound(2);
   }
 
@@ -539,6 +539,9 @@ void keyPressed()
     {
       if (collected[key - '0' - 1] && activated[key - '0' - 1] == false)
       {
+        // Play powerup activation sound
+        playSound(9);
+        
         // Set powerup to be activated and remove from collection
         activated[key - '0' - 1] = true;
         collected[key - '0' - 1] = false;
@@ -559,12 +562,12 @@ void keyPressed()
     mute =! mute;
     if (mute)
     {
-      //intro.stop();
-      //countdownSound.stop();
-      //explosionSound.stop();
-      //thrustSound.stop();
-      //laserSound.stop();
-      //nukeSound.stop();
+      introSound.stop();
+      countdownSound.stop();
+      explosionSound.stop();
+      thrustSound.stop();
+      laserSound.stop();
+      nukeSound.stop();
     }
   }
 
@@ -640,7 +643,7 @@ void mousePressed()
   if (overStart)
   {
     level = 2;
-    //intro.stop();
+    introSound.stop();
     playSound(2);
   }
 } // End Mouse Pressed
@@ -655,7 +658,7 @@ void playSound(int soundID)
     {
       // Intro
       case 1:
-       intro.play();
+       introSound.play();
        break;
       // Countdown
       case 2:
@@ -676,31 +679,39 @@ void playSound(int soundID)
        break;
       // Ship Destruction
       case 6:
+        shipDestructionSound.play();
         break;
       // Alien Ship Destruction
       case 7:
+        alienDestructionSound.play();
         break;
       // Powerup Collection
       case 8:
+        powerupCollectionSound.play();
         break;
       // Powerup Activation
       case 9:
+        powerupActivationSound.play();
         break;
       // Nuke Powerup
       case 10:
-       nukeSound.play();
-       break;
+        nukeSound.play();
+        break;
       // Forcefield Powerup
       case 11:
+        forcefieldPowerupSound.play();
         break;
       // Freeze Powerup
       case 12:
+        freezePowerupSound.play();
         break;
       // Game Win
       case 13:
+        gameWinSound.play();
         break;
       // Game Over
-       case 14:
+      case 14:
+        gameOverSound.play();
         break;
     }
   }

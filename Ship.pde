@@ -374,7 +374,6 @@ class Ship extends AsteroidObject
 
   void callShipDeath()
   {
-    playSound(6);
     // Stop the game
     gameStart = false;
     // Stop ship from moving
@@ -384,8 +383,12 @@ class Ship extends AsteroidObject
     if (lives > 0)
     { 
       // Ensures that only one life is deducted per crash
+      // Use the execute-only-once ability to play the ship destruction sound
       if (livesHitCounter == 0)
+      {
         lives--;
+        playSound(6);
+      }
       livesHitCounter = 1;
 
       // Clear all lasers from the screen so upon restart of game, they won't continue to show
