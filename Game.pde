@@ -4,8 +4,8 @@ import java.io.BufferedWriter;
 
 void setup()
 {
-  size(700, 600);
-  //fullScreen();
+  //size(700, 600);
+  fullScreen();
   smooth(8);
   strokeWeight(1.5);
   cursor(CROSS);
@@ -42,12 +42,12 @@ void setup()
   keys = new boolean[512];
   asteroids = new ArrayList<AsteroidObject>();
   lasers = new ArrayList<Laser>();
-  levels = 2;
+  levels = 10;
   level = 1;
   noAsteroids = new int[levels];
   // Set the number of asteroids per level to be the level number plus 5.
   for (int i = 0; i < levels; i++)
-    noAsteroids[i] = i + 1;
+    noAsteroids[i] = i + 5;
   overStart = false;
   gameStart = false;
   gameEnd = false;
@@ -947,9 +947,7 @@ void shipDeath(float angle)
 { 
   // Kill the ship (stop rendering)
   shipDead = true;
-
   stroke(aqua);
-
   // Show ship explosion until timer has expired, at which point call reset function
   if (resetTimer < 50)
   {
@@ -965,25 +963,25 @@ void shipDeath(float angle)
       translate(lPos.x, lPos.y);     
       switch(i)
       {
-      case 0:
-        rotate(-angle/2);
-        line(0, 0, 20, 20);
-        break;
-      case 1:
-        rotate(angle);
-        line(0, 0, 20, 20);
-        break;
-      case 2:
-        rotate(PI);
-        line(0, 0, 15, 15);
-        break;
-      case 3:
-        line(0, 0, 10, 10);
-        break;
-      case 4:
-        rotate(HALF_PI);
-        line(0, 0, 20, 10);
-        break;
+        case 0:
+          rotate(-angle/2);
+          line(0, 0, 20, 20);
+          break;
+        case 1:
+          rotate(angle);
+          line(0, 0, 20, 20);
+          break;
+        case 2:
+          rotate(PI);
+          line(0, 0, 15, 15);
+          break;
+        case 3:
+          line(0, 0, 10, 10);
+          break;
+        case 4:
+          rotate(HALF_PI);
+          line(0, 0, 20, 10);
+          break;
       }
       popMatrix();  
       shipDebrisPositions.get(i).add(shipDebrisMovements.get(i));
