@@ -1,5 +1,6 @@
 class AlienSpaceShip extends AlienObjects
 {
+  // Variables to time when alien ship shoots lasers
   int laserTimer;
   int laserTimeLimit;
 
@@ -7,31 +8,32 @@ class AlienSpaceShip extends AlienObjects
   {
     alienShipDead = false;
     entryPoint = entrypoint;
-
     laserTimer = 0;
     laserTimeLimit = 60;
 
+    // Set heights of entry to be random to prevent user from guessing
     float topEntry = random(height * 0.1f, height * 0.3f);
     float bottomEntry = random(height * 0.7f, height * 0.9f);
-
+    
+    // Set alien position to be just off screen, then move in
     switch (entrypoint)
     {
-    case 1:
-      alienPosition = new PVector(-width * 0.1f, topEntry);
-      alienMovement = new PVector(alienSpeed, 0);
-      break;
-    case 2:
-      alienPosition = new PVector(-width * 0.1f, bottomEntry);
-      alienMovement = new PVector(alienSpeed, 0);
-      break;
-    case 3:
-      alienPosition = new PVector(width * 1.1f, topEntry);
-      alienMovement = new PVector(-alienSpeed, 0);
-      break;
-    case 4:
-      alienPosition = new PVector(width * 1.1f, bottomEntry);
-      alienMovement = new PVector(-alienSpeed, 0);
-      break;
+      case 1:
+        alienPosition = new PVector(-width * 0.1f, topEntry);
+        alienMovement = new PVector(alienSpeed, 0);
+        break;
+      case 2:
+        alienPosition = new PVector(-width * 0.1f, bottomEntry);
+        alienMovement = new PVector(alienSpeed, 0);
+        break;
+      case 3:
+        alienPosition = new PVector(width * 1.1f, topEntry);
+        alienMovement = new PVector(-alienSpeed, 0);
+        break;
+      case 4:
+        alienPosition = new PVector(width * 1.1f, bottomEntry);
+        alienMovement = new PVector(-alienSpeed, 0);
+        break;
     }
   }
 
@@ -59,7 +61,8 @@ class AlienSpaceShip extends AlienObjects
   void update()
   { 
     alienPosition.add(alienMovement);
-
+    
+    // Shoot laser every second
     if (laserTimer > laserTimeLimit)
     {
       AlienLaser laser = new AlienLaser(entryPoint);

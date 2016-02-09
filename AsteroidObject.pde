@@ -1,15 +1,23 @@
 class AsteroidObject
 {
+  // Vectors for position of ship and asteroids
   PVector position;
+  // Vector for movement of ship
   PVector moveShip;
-  float speed = 4.0f;
+  float speed;
+  // Vector ror movement of asteroid
   PVector asteroidMove;
-  float astSpeed = 0.25f;
+  float astSpeed;
+  // Direction ship is facing
   float facingAngle;
+  // Size of ship
   float shipHeight;
   float shipWidth;
+  // Size of asteroid
   float radius;
+  // Controls swapping of every other laser
   boolean colourSwap;
+  // Controls swapping of thrust colour to simulate flame
   boolean thrustColour;
 
   AsteroidObject()
@@ -21,7 +29,8 @@ class AsteroidObject
   {
     position = new PVector(x, y);
     moveShip = new PVector(0, -1);
-    // Set astSpeed dependant on size
+    speed = 4.0f;
+    // Set asteroid speed dependant on size
     if (size == 1)
       astSpeed = 0.25f;
     else if (size == 2)

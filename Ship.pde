@@ -1,6 +1,8 @@
 class Ship extends AsteroidObject
 {
+  // Direction ship is moving in
   float moveAngle;
+  // Controls
   int move;
   int left;
   int right;
@@ -8,15 +10,17 @@ class Ship extends AsteroidObject
   // Boolean to determine if ship thrust is on or not
   boolean thrust;
   int thrustFlicker;
+  // Boolean to determine if ship should feel resistance when stoppe thrusting
   boolean resistance;
+  // Variables to control mechanics of turning ship (To match move angle with facing angle)
   int turnTimer;
   boolean turned;
-
+  // Timing how often lasers can be shot
   int laserTimer;
   int laserTimeLimit;
-  int explosionTimer;
-  int explosionRadius;
+  // Variable for ship destruciton animation, controls angle of line debris
   float explosionAngle;
+  // Vector to determine is nuke blast is in contact with any asteroids or alien ships
   PVector nukeDetection;
   float nukeAngle;
   float forcefieldRadius;
@@ -38,9 +42,7 @@ class Ship extends AsteroidObject
 
     laserTimer = 0;
     // Divide 60 by number of bullets to shoot per second
-    laserTimeLimit = 60 / 3;    
-    explosionTimer = 2;
-    explosionRadius = 0;
+    laserTimeLimit = 60 / 3;
     explosionAngle = 0.0f;
     // Vector to detect if any asteroids are hitting any points on the nuclear blast circle
     nukeDetection = new PVector(0, 0);

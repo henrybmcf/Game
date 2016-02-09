@@ -1,28 +1,25 @@
 class AlienObjects
 {
+  // Vectors for position and movement of alien spaceship
   PVector alienPosition;
   PVector alienMovement;
+  // Speed that the alien ship moves across screen
   float alienSpeed;
-
+  // Size of alien ship
   float alienShipWidth;
   float alienShipHeight;
-  
+  // Entry point determines the height and side that the alien ship enters from
   int entryPoint;
-  
+  // Size of alien laser
   int laserSize; 
   
   AlienObjects()
   {
-    // Position of alien spaceship
     alienPosition = new PVector(0, 0);
-    // Vector to control movement of alien ship
     alienMovement = new PVector(0, 0);
-    // Speed of alien ship
     alienSpeed = 1.5f;
-    // Size of alien ship
     alienShipWidth = 25;
     alienShipHeight = alienShipWidth * 0.5f;
-    
     laserSize = 3;
   }
 

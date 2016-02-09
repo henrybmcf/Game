@@ -9,8 +9,6 @@ class Asteroid extends AsteroidObject
 
   // Three different image variables. One for each size
   // Resize each one dependent incoming size variable
-  // Depending on that size variable, show that image
-
   Asteroid(float x, float y, int size)
   {
     super(x, y, size);
@@ -27,7 +25,8 @@ class Asteroid extends AsteroidObject
       radius = largeAstRad / size;
     this.size = size;
   }
-
+  
+  // Depending on size variable, show that image
   void render()
   {
     pushMatrix();
