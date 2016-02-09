@@ -42,7 +42,7 @@ void setup()
   keys = new boolean[512];
   asteroids = new ArrayList<AsteroidObject>();
   lasers = new ArrayList<Laser>();
-  levels = 10;
+  levels = 6;
   level = 1;
   noAsteroids = new int[levels];
   // Set the number of asteroids per level to be the level number plus 5.
@@ -71,7 +71,7 @@ void setup()
   AlienObjects alienship = new AlienSpaceShip(int(random(1, 5)));
   aliens.add(alienship);
   enterAlien = false;
-  alienEntryTime = int(random(200, 300));
+  alienEntryTime = int(random(400, 500));
   alienTimer = 0;  
   shipDebrisPositions = new ArrayList<PVector>();
   shipDebrisMovements = new ArrayList<PVector>();
@@ -193,9 +193,9 @@ boolean shipAlive;
 // Arraylists of alien spaceship and alien lasers
 ArrayList<AlienObjects> aliens;
 ArrayList<AlienLaser> alienLasers;
-// Boolea to determine if alien space ship is alive or dead
+// Boolean to determine if alien space ship is alive or dead
 boolean alienShipDead;
-// Boolea to determine if alien spaceship should enter onto screen
+// Boolean to determine if alien spaceship should enter onto screen
 boolean enterAlien;
 // Variables to time entry of alien spaceship on screen
 int alienEntryTime;
@@ -575,6 +575,7 @@ void keyPressed()
   if (keyCode == 'M' && gameEnd == false)
   {
     mute =! mute;
+    println(mute);
     if (mute)
     {
       introSound.stop();
@@ -582,7 +583,15 @@ void keyPressed()
       explosionSound.stop();
       thrustSound.stop();
       laserSound.stop();
+      shipDestructionSound.stop();
+      alienDestructionSound.stop();
+      powerupCollectionSound.stop();
+      powerupActivationSound.stop();
       nukeSound.stop();
+      forcefieldPowerupSound.stop();
+      freezePowerupSound.stop();
+      gameWinSound.stop();
+      gameOverSound.stop();
     }
   }
 

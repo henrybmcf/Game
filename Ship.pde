@@ -140,7 +140,8 @@ class Ship extends AsteroidObject
     {
       thrust = true;
       playSound(4);
-    } else
+    }
+    else
     {
       thrust = false;
     }
@@ -216,7 +217,7 @@ class Ship extends AsteroidObject
       }
       else
       {
-        if (lives < 10)
+        if (lives < 5)
           lives++;
       }
       onScreen[powerup] = false;
