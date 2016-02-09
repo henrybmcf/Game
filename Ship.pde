@@ -22,8 +22,11 @@ class Ship extends AsteroidObject
   float explosionAngle;
   // Vector to determine is nuke blast is in contact with any asteroids or alien ships
   PVector nukeDetection;
+  // Variable to allow alternating angle to give 'blast' effect
   float nukeAngle;
+  // Radius of forcefield around ship
   float forcefieldRadius;
+  // Vector to determine is forcefield is in contact with any asteroids or alien ships
   PVector forcefieldPosition;
 
   Ship(int move, int left, int right, int fire, float startX, float startY)
@@ -44,12 +47,9 @@ class Ship extends AsteroidObject
     // Divide 60 by number of bullets to shoot per second
     laserTimeLimit = 60 / 3;
     explosionAngle = 0.0f;
-    // Vector to detect if any asteroids are hitting any points on the nuclear blast circle
     nukeDetection = new PVector(0, 0);
     nukeAngle = 0;
-    // Size of the forcefield
     forcefieldRadius = 70;
-    // Vector to detect if any asteroids are hitting any points on the forcefield circle
     forcefieldPosition = new PVector(0, 0);
   }
 
@@ -132,7 +132,8 @@ class Ship extends AsteroidObject
 
     if (keys[move] != true)
       turned = false;
-
+    
+    // Turn ship
     if (keys[left])
       facingAngle -= 0.08f;     
     if (keys[right])
@@ -255,10 +256,11 @@ class Ship extends AsteroidObject
           callShipDeath();
         }
     }
+    
+          // For each asteroid check to see if ship is touching
 
     for (int i = 1; i < asteroids.size(); i++)
     {
-      // For each asteroid check to see if ship is touching
       if (asteroids.get(i).position.x + asteroids.get(i).radius * 0.5f > position.x - shipWidth && 
         asteroids.get(i).position.x - asteroids.get(i).radius * 0.5f < position.x + shipWidth &&
         asteroids.get(i).position.y + asteroids.get(i).radius * 0.5f > position.y - shipHeight &&
@@ -273,7 +275,8 @@ class Ship extends AsteroidObject
         }
       }
     }
-
+    
+    // Nuke Powerup
     if (activated[2])
     {
       // Time exlposion graphics of ship explosion
@@ -371,7 +374,7 @@ class Ship extends AsteroidObject
       }
     }
   }
-
+  
   void callShipDeath()
   {
     // Stop the game
@@ -394,7 +397,7 @@ class Ship extends AsteroidObject
       // Clear all lasers from the screen so upon restart of game, they won't continue to show
       lasers.clear();
 
-      // Graphics of ship explosion
+      // Graphics animation of ship explosion
       explosionAngle += 0.1f;
       if (shipDebrisPositions.get(0).x == 0)
       {

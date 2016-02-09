@@ -259,7 +259,7 @@ int activeTimer;
 int deactivateTime;
 // Size of powerup symbol
 int powerupSymbol;
-// Radius of and nuclear blast and timer to control expansion rate
+// Radius of nuclear blast and timer to control expansion rate
 float nukeRadius;
 int nukeTimer;
 // Size of nuclear symbol within powerup symbol
