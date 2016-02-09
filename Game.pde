@@ -4,8 +4,9 @@ import java.io.BufferedWriter;
 
 void setup()
 {
-  //size(700, 600);
   fullScreen();
+  // Timing variables depend on framerate being 60
+  frameRate(60);
   smooth(8);
   strokeWeight(1.5);
   cursor(CROSS);
@@ -129,6 +130,7 @@ void setup()
   yellow = color(255, 255, 0);
   aqua = color(0, 206, 209);
 }
+
 
 // Various sound effect variables
 SoundFile introSound;
@@ -272,6 +274,7 @@ color red;
 color yellow;
 color aqua;
 
+
 void draw()
 { 
   background(2);
@@ -281,6 +284,7 @@ void draw()
   // Start game screen
   if (level == 1)
   {
+    // Render ship in center of screen
     asteroids.get(0).render();
     fill(255);
     textSize(80);
@@ -289,7 +293,8 @@ void draw()
     text("I = Instructions", width * 0.5f, height * 0.9f);
     textSize(45);
     fill(yellow);
-    text("Start Game", width * 0.5f, height * 0.75f); 
+    text("Start Game", width * 0.5f, height * 0.75f);
+    // If instruction screen isn't showing
     if (showInstruction == false)
     {
       // If mouse position is over Start Game, change mouse icon to indicate to player they can press
@@ -342,6 +347,7 @@ void draw()
     // Check to see if there are still asteroids on screen to be destroyed
     if (asteroids.size() > 1)
     {
+      // If game is still running
       if (gameEnd == false)
       {
         // Show and move asteroids
@@ -354,12 +360,14 @@ void draw()
         }
       }
       
-      // Show, move and control colour of player's lasers
+      // Show and move player's lasers
       for (int i = 0; i < lasers.size(); i++)
       {
+       // Swap colour of every other laser
         if (i > 0)
           lasers.get(i).colourSwap =! lasers.get(i - 1).colourSwap; 
         lasers.get(i).render();
+        // Only move lasers if game is running
         if (gameStart)
           lasers.get(i).update();
       }
@@ -378,6 +386,7 @@ void draw()
       if (enterAlien && alienShipDead != true)
       {
         aliens.get(0).render();
+        // Only move alien ship if game is running
         if (pause == false && gameStart)
           aliens.get(0).update();
       }
@@ -390,6 +399,7 @@ void draw()
           alienLasers.get(i).update();
       }
     }
+    // If no more asteroids left to be destroyed
     else
     {
       gameStart = false;
@@ -399,12 +409,14 @@ void draw()
       // If maximum level has not been reached (if game has not been completed)
       if (level < levels)
       {
+        // Go to next level
         level++;
         // Player gets an extra life for each level they pass after level 2
         if (level > 3 && lives < 5)
           lives++;
         // Setup asteroids for next level and reset countdown
         setupAsteroidObject();
+        // Reset countdown variables to allow countdown to next level
         countdown = 3;
         countdownTimer = 0;
 
@@ -415,6 +427,7 @@ void draw()
           activeTimer = 0;
         }
       }
+      // Call game over function if max level has been reached
       else if (showHighScores != true)
       {
         gameOver(true);
@@ -561,10 +574,10 @@ void keyPressed()
           nukeRadius = 30;
         }
         
-        // Forcefield Powerup
+        // Forcefield Powerup sound
         if (key - '0' == 4)
           playSound(11);
-        // Freeze Powerup
+        // Freeze Powerup sound
         if (key - '0' == 5)
           playSound(12);
       }
@@ -575,7 +588,7 @@ void keyPressed()
   if (keyCode == 'M' && gameEnd == false)
   {
     mute =! mute;
-    println(mute);
+    // If mute is activated, stop all sounds from playing
     if (mute)
     {
       introSound.stop();
@@ -610,7 +623,7 @@ void keyPressed()
   if (keyCode == 'I' && gameEnd == false)
   {
     showInstruction =! showInstruction;
-    // pause =! pause;
+    // Activate pause upon showing instruction screen to pause game
     if (pause != true)
       pause = true;
     else if (pause)
@@ -627,7 +640,7 @@ void keyPressed()
     {
       playerName = playerName.substring(0, playerName.length()-1);
     }
-    // As long as the key is not a commonly used 'extra' key and the length is less than characters, add the typed key ot the player name
+    // As long as the key is not a commonly used 'extra' key and the length is less than 10 characters, add the typed key to the player name
     else if (keyCode != SHIFT && keyCode != CONTROL && keyCode != ALT && keyCode != ENTER && keyCode != RETURN && playerName.length() < 10)
     {
       playerName = playerName + key;
@@ -664,6 +677,7 @@ void keyReleased()
 
 void mousePressed()
 {
+  // If mouse pressed when over "Start Game", start game
   if (overStart)
   {
     level = 2;
@@ -742,7 +756,7 @@ void playSound(int soundID)
 } // End Play Sound
 
 
-// Draw player lives as ships in top left corner of screen
+// Draw player lives as ships in the top left corner of the window
 void drawShipLives()
 {
   float drawHeight = 13;
@@ -761,6 +775,7 @@ void drawShipLives()
 } // End Draw Ship Lives
 
 
+// Draw collected powerup symbols in the top right corner
 void drawPowerupSymbols(int ID)
 {
   fill(0);
@@ -853,8 +868,9 @@ void splitAsteroid(int number)
 {
   // Play asteoid destruction sound
   playSound(3);
-
-  if (asteroids.get(number).radius == 90)
+  
+  // Big asteroid hit
+  if (asteroids.get(number).radius == largeAstRad)
   {
     score += 5;
     for (int i = 0; i < 2; i++)
@@ -866,7 +882,8 @@ void splitAsteroid(int number)
       }
     }
   }
-  else if (asteroids.get(number).radius == 60)
+  // Medium asteroid hit
+  else if (asteroids.get(number).radius == medAstRad)
   {
     score += 10;
     for (int i = 0; i < 2; i++)
@@ -878,12 +895,15 @@ void splitAsteroid(int number)
       }
     }
   }
-  else if (asteroids.get(number).radius == 30)
+  // Small asteroid hit
+  else if (asteroids.get(number).radius == smallAstRad)
   {
     score += 15;
   }
+  // Remove destroyed asteroid from arraylist
   asteroids.remove(number);
 } // End Split Asteroid
+
 
 // Animation for rock debris upon destruction of asteroid or alien ship
 void debris()
@@ -920,6 +940,7 @@ void debris()
 
 
 // Nuclear explosion animation
+// Increasing radius with alternating angle to give 'blast' effect
 void nukeExplosion(float angle)
 {
   int points = 15;
@@ -969,7 +990,8 @@ void shipDeath(float angle)
     {
       PVector lPos = shipDebrisPositions.get(i).copy();
       pushMatrix();
-      translate(lPos.x, lPos.y);     
+      translate(lPos.x, lPos.y);    
+      // Switch case for each line of debris
       switch(i)
       {
         case 0:
@@ -1005,6 +1027,7 @@ void shipDeath(float angle)
     }
     resetTimer++;
   }
+  // If timer is up, call reset function
   else
   {
     resetShip();
@@ -1040,12 +1063,9 @@ void resetShip()
   resetTimer = 0;
   livesHitCounter = 0;
 
-  // Reset any on screen or activated powerups to be false
+  // Set any activated powerups to be false (deactivated)
   for (int i = 0; i < noPowerUps; i++)
-  {
     activated[i] = false;
-    onScreen[i] = false;
-  }
   // Reset all powerup timers and reinitialise the power variable to be offscreen
   activeTimer = 0;
   pUpEntryTimer = 0;
@@ -1088,6 +1108,7 @@ void gameOver(boolean win)
     }
     fill(255);
     textSize(45);
+    // Display user's score
     text("Your Score: " + score, width * 0.5f, height * 0.45f);
     textSize(35);
     // Get user to enter name, updating display on screen as they type
@@ -1162,6 +1183,7 @@ void playAgain()
 
   float yesWidth = textWidth("Yes") * 0.5f;
   float noWidth = textWidth("No") * 0.5f;
+  // Have variables for size of Yes & No text, so they can be increased when mouse is over to show user they can select
   float yesTextSize = 35;
   float noTextSize = 35;
   cursor(CROSS);

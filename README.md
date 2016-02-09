@@ -2,15 +2,14 @@
 ##Object Orientated Programming Christmas Assignment - Game
 
 
-####!! Note: In order to correctly write your name and score to the scores file, you must edit the path of the scores file to the full file path.
-Please edit line 643 of the code appropriately to suit your computer. !!
+####!! Note: In order to correctly write your name and score to the scores file, you must edit the path of the scores file to the full file path. Please edit line 643 of the code appropriately to suit your computer. !!
 
 Having chosen this game, I decided to replicate it to the best of my abilities, that being the mechanics of the game, the gameplay, etc., while still adding my own flair with a few upgrades.
 
-The general aim of playing asteroids, to destroy the asteroids and alien spaceships and avoid crashing into them, remains the same in my version.
+The general aim of playing asteroids, to destroy the asteroids & alien spaceships, avoid crashing and reach as high a score as possible, remains the same in my version.
 One of the main differences of my version of the game are the powerups. There are 7 power-ups in total.
 
-###Power-ups
+###Power-ups:
 1. Double shooter, this is a simple power-up. When normally shooting lasers, they come from the front of the ship and move in the direction the ship is facing when they are fired. With this powerup, an additional laser is fired from the rear of the ship, moving in the opposite direction to the normal laser.
 2. Quad shooter, this extends the idea of the double shooter, in that in addition to the two lasers from the front and rear, an additional two lasers are fired from the sides of the ship, one in either direction, perpendicular to the direction of those fired by the double shooter.
 3. Nuke. This is simple, when activated a nuclear bomb is dropped, with the radius increasing up to a certain point, any asteroids or alien ships within the blast radius are instantly vaporised.
@@ -40,7 +39,7 @@ The ship is controlled by the arrow keys.
 - Alien spaceship = 100 points
 - Upon game end, every remaining life = 25 points
 
-###Game Completion
+###Game Completion:
 - Upon loss of all lives or passing of all levels, a "You Win" or "Game Over" screen is displayed.
 - Also displayed is your score and an entry field to enter your name. Upon hitting enter, your name and score is saved in the scores file.
 - The next screen will display the top 5 highest scores of all time and an option to play again. If you select yes, the game resets and goes back to the start game screen, else the game exits.
