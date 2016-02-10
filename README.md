@@ -22,9 +22,8 @@ One of the main differences of my version of the game are the powerups. There ar
 
 ###Controls:
 The ship is controlled by the arrow keys.
-- Up arrow controls forward motion
+- Up arrow controls forward motion.
 - Left/right arrows control the direction the ship is facing.
-
 - Start game by clicking 'Start Game' or by pressing Space Key.
 - The game can be paused/un-paused by pressing the 'P' key at any point.
 - Mute can be activated/deactivated with the 'M' key.
